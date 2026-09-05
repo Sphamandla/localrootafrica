@@ -1,0 +1,8 @@
+<form id="payfast-form" method="POST" action="{{ actionUrl }}">
+    {% for key, value in fields %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+    {% endfor %}
+    <p>You will be redirected to PayFast to complete your payment.</p>
+    <button type="submit" class="btn">Continue to PayFast</button>
+</form>
+<script>document.getElementById('payfast-form').submit();</script>

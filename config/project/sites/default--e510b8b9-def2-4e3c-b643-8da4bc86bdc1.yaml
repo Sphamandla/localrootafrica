@@ -1,0 +1,9 @@
+baseUrl: $PRIMARY_SITE_URL
+enabled: true
+handle: default
+hasUrls: true
+language: en
+name: 'Local Roots Africa'
+primary: true
+siteGroup: f4a17b21-afdd-4e79-b839-10ae6eaac4bb # Local Roots Africa
+sortOrder: 1

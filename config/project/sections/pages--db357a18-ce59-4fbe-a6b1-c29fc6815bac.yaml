@@ -1,0 +1,24 @@
+defaultPlacement: end
+enableVersioning: true
+entryTypes:
+  -
+    uid: e6be6d5d-170c-47f6-8df9-909f1a8a9aff # Pages
+handle: pages
+maxAuthors: 1
+minAuthors: 1
+name: Pages
+previewTargets:
+  -
+    label: 'Primary entry page'
+    urlFormat: '{url}'
+propagationMethod: all
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: true
+    template: _pages/_entry
+    uriFormat: '{slug}'
+structure:
+  maxLevels: null
+  uid: a0f200e1-5374-460b-98a6-d3d211987c3c
+type: structure

@@ -1,0 +1,168 @@
+defaultPlacement: end
+descriptionFormat: '{product.title} - {title}'
+enableVersioning: false
+handle: default
+hasDimensions: false
+hasProductTitleField: true
+hasVariantTitleField: true
+isStructure: false
+maxLevels: null
+maxVariants: null
+name: Default
+previewTargets:
+  -
+    __assoc__:
+      -
+        - label
+        - 'Primary product page'
+      -
+        - urlFormat
+        - '{url}'
+productFieldLayouts:
+  46382bb1-39a4-42bd-9809-bdb0e7c57486:
+    cardThumbAlignment: end
+    cardView:
+      - defaultSku
+      - defaultPrice
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 2b4bdf13-c848-4441-8cc7-b9b5addbac4c # Product Images
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 0314aa74-1c41-4a84-a1ad-b40e794f648b
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: b7bef018-a476-49bc-a40c-5f672778e4ea # Short Description
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: a305f589-f185-4d22-9fb1-10e99860e5a3
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 6fb8bd1f-38e9-4db1-a9ab-7c27e3078b6d # Categories
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 1a910152-1e0b-4e17-b78b-50516a982469
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: ded14fae-412e-48ff-9e5a-e3b785c8ad9f # Tags
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 16711a40-cc84-4de6-a8f6-d70f06cd926a
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: ab291bd6-8e36-41d8-aecc-bf6ff45c20d1 # Featured
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 19b93302-099b-4662-8827-b1661eb67f37
+            userCondition: null
+            warning: null
+            width: 100
+        name: Product
+        uid: 5ff70bbc-d91f-49d8-abde-eea6fdd0dde1
+        userCondition: null
+      -
+        elementCondition: null
+        elements:
+          -
+            attribute: variants
+            dateAdded: null
+            elementCondition: null
+            id: null
+            instructions: null
+            label: null
+            mandatory: true
+            orientation: null
+            requirable: false
+            required: false
+            tip: null
+            translatable: false
+            type: craft\commerce\fieldlayoutelements\VariantsField
+            uid: 5f6b492d-fa66-4cf5-942e-cbf3ddd264c4
+            userCondition: null
+            warning: null
+        name: Variants
+        uid: cf76d8e6-92fa-4cc7-b337-51a9d1df7b35
+        userCondition: null
+    thumbFieldKey: null
+productTitleFormat: ''
+productTitleTranslationKeyFormat: null
+productTitleTranslationMethod: site
+productUiLabelFormat: '{title}'
+propagationMethod: all
+showSlugField: true
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: true
+    template: _pages/products/_entry
+    uriFormat: 'products/{slug}'
+skuFormat: null
+slugTranslationKeyFormat: null
+slugTranslationMethod: site
+variantFieldLayouts:
+  024d6943-c3f7-45bc-a771-4075cf02f43e:
+    cardThumbAlignment: end
+    cardView:
+      - sku
+      - priceView
+    thumbFieldKey: null
+variantTitleFormat: '{product.title}'
+variantTitleTranslationKeyFormat: null
+variantTitleTranslationMethod: site
+variantUiLabelFormat: '{title}'

@@ -1,0 +1,41 @@
+fieldLayouts:
+  85cb29b8-02de-4aa3-bed1-013d83d19c55:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            autocapitalize: true
+            autocomplete: false
+            autocorrect: true
+            class: null
+            dateAdded: null
+            disabled: false
+            elementCondition: null
+            id: null
+            inputType: null
+            instructions: null
+            label: null
+            max: null
+            min: null
+            name: null
+            orientation: null
+            placeholder: null
+            readonly: false
+            requirable: false
+            size: null
+            step: null
+            tip: null
+            title: null
+            type: craft\fieldlayoutelements\TitleField
+            uid: 6cf720e7-7c17-47c4-85b8-8c4e82b266f8
+            userCondition: null
+            warning: null
+            width: 100
+        name: Content
+        uid: e3607c75-81e7-4830-9056-2ce295955d3e
+        userCondition: null
+    thumbFieldKey: null
+handle: productTags
+name: 'Product Tags'

@@ -1,0 +1,139 @@
+allowLineBreaksInTitles: false
+color: null
+description: null
+fieldLayouts:
+  0f916a0d-47d2-4714-9967-9eef0a8ee9d5:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            autocapitalize: true
+            autocomplete: false
+            autocorrect: true
+            class: null
+            dateAdded: null
+            disabled: false
+            elementCondition: null
+            id: null
+            inputType: null
+            instructions: null
+            label: null
+            max: null
+            min: null
+            name: null
+            orientation: null
+            placeholder: null
+            readonly: false
+            requirable: false
+            size: null
+            step: null
+            tip: null
+            title: null
+            type: craft\fieldlayoutelements\TitleField
+            uid: c365c2a6-d996-4429-b821-cdbc7fcdc4e8
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 8ad9482c-8b91-421f-986b-77924340147b # Promo Title
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 7a9d7dac-4264-46dc-8380-e50d2bd8f911
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 18e9718e-2fa1-4a5a-bd8c-71196c597976 # Promo Subtitle
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 6fe70e65-668f-4140-a18c-0a75859a02df
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: d9595865-606c-4fca-8bcb-3ce065b53183 # Promo Image
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 6126f2d9-7a8e-4f68-b81b-b0eccdc17012
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: deb53530-739d-4fa8-817d-9b170d536d15 # Promo Link
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: b9902767-92be-4b81-86b1-e2bb8356c7f8
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: d7b5ffcb-3e16-4905-851d-cd0012b09014 # Button Text
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: e17c0eb1-7ad5-4218-82ec-96193e3e109a
+            userCondition: null
+            warning: null
+            width: 100
+        name: Content
+        uid: d610c93c-62bf-49a6-94a1-9b5c213923ac
+        userCondition: null
+    thumbFieldKey: null
+handle: promotions
+hasTitleField: true
+icon: null
+name: Promotions
+showSlugField: true
+showStatusField: true
+slugTranslationKeyFormat: null
+slugTranslationMethod: site
+titleFormat: null
+titleTranslationKeyFormat: null
+titleTranslationMethod: site
+uiLabelFormat: '{title}'

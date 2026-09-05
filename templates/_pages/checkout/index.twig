@@ -1,0 +1,114 @@
+{% extends '_layouts/main' %}
+{% set cart = craft.commerce.carts.cart %}
+{% set gateways = craft.app.plugins.getPlugin('commerce').getGateways().getAllGateways()|filter(g => g.isFrontendEnabled) %}
+
+{% block content %}
+<div class="container checkout-grid">
+    <div>
+        <h1 class="section-title">Checkout</h1>
+
+        {% if not currentUser %}
+        <div style="background: var(--color-light-gray); padding: 24px; margin-bottom: 32px;">
+            <h3 style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin: 0 0 16px;">Create an account (optional)</h3>
+            <form method="post" accept-charset="UTF-8">
+                {{ csrfInput() }}
+                {{ actionInput('users/save-user') }}
+                {{ redirectInput('checkout') }}
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" name="password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-outline">Register & Continue</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <form method="post">
+            {{ csrfInput() }}
+            {{ actionInput('commerce/cart/update-cart') }}
+            {{ redirectInput('checkout') }}
+
+            <h3 style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px;">Billing Details</h3>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" name="billingAddress[firstName]" value="{{ cart.billingAddress ? cart.billingAddress.firstName : (currentUser.firstName ?? '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" name="billingAddress[lastName]" value="{{ cart.billingAddress ? cart.billingAddress.lastName : (currentUser.lastName ?? '') }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ cart.email ?? currentUser.email ?? '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="billingAddress[phone]" value="{{ cart.billingAddress ? cart.billingAddress.phone : '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="address1">Address</label>
+                <input type="text" id="address1" name="billingAddress[address1]" value="{{ cart.billingAddress ? cart.billingAddress.address1 : '' }}" required>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" name="billingAddress[city]" value="{{ cart.billingAddress ? cart.billingAddress.city : '' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="zipCode">Postal Code</label>
+                    <input type="text" id="zipCode" name="billingAddress[zipCode]" value="{{ cart.billingAddress ? cart.billingAddress.zipCode : '' }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="countryCode">Country</label>
+                <select id="countryCode" name="billingAddress[countryCode]" required>
+                    <option value="ZA" selected>South Africa</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn">Update Details</button>
+        </form>
+
+        {% if cart.email and cart.billingAddress %}
+        <div style="margin-top: 48px;">
+            <h3 style="font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px;">Payment</h3>
+            {% for gateway in gateways %}
+            <form method="post" style="margin-bottom: 16px;">
+                {{ csrfInput() }}
+                {{ actionInput('commerce/payments/pay') }}
+                {{ hiddenInput('gatewayId', gateway.id) }}
+                {{ redirectInput('account') }}
+                <button type="submit" class="btn" style="width: 100%;">Pay with {{ gateway.name }}</button>
+            </form>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="order-summary">
+        <h3>Order Summary</h3>
+        {% for item in cart.lineItems %}
+        <div class="summary-row">
+            <span>{{ item.description }} × {{ item.qty }}</span>
+            <span>R{{ item.total|commerceCurrency('ZAR') }}</span>
+        </div>
+        {% endfor %}
+        <div class="summary-row summary-total">
+            <span>Total</span>
+            <span>R{{ cart.totalPrice|commerceCurrency('ZAR') }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

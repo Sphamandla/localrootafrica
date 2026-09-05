@@ -1,0 +1,19 @@
+{% extends '_layouts/main' %}
+
+{% block content %}
+<div class="container section">
+    {% if entry.pageHeroImage|length %}
+    <div class="hero" style="height: 40vh; min-height: 300px; margin-bottom: 40px; background-image: linear-gradient(to top, rgba(0,0,0,0.4), transparent), url('{{ entry.pageHeroImage.one().url }}');">
+        <div class="hero-content">
+            <h1>{{ entry.title }}</h1>
+        </div>
+    </div>
+    {% else %}
+    <h1 class="section-title">{{ entry.title }}</h1>
+    {% endif %}
+
+    <div style="max-width: 800px; line-height: 1.8; color: var(--color-gray);">
+        {{ entry.pageBody|nl2br }}
+    </div>
+</div>
+{% endblock %}

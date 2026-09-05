@@ -1,0 +1,62 @@
+{% extends '_layouts/main' %}
+
+{% set categorySlug = craft.app.request.getParam('category') %}
+{% set sort = craft.app.request.getParam('sort', 'date') %}
+{% set query = craft.products.type('default') %}
+
+{% if categorySlug %}
+    {% set category = craft.categories.group('productCategories').slug(categorySlug).one() %}
+    {% if category %}
+        {% set query = query.relatedTo(category) %}
+    {% endif %}
+{% endif %}
+
+{% switch sort %}
+    {% case 'price' %}{% set query = query.orderBy('defaultPrice asc') %}
+    {% case 'price-desc' %}{% set query = query.orderBy('defaultPrice desc') %}
+    {% case 'title' %}{% set query = query.orderBy('title asc') %}
+    {% default %}{% set query = query.orderBy('dateCreated desc') %}
+{% endswitch %}
+
+{% paginate query.limit(12) as pageInfo, products %}
+
+{% block content %}
+<div class="container">
+    <div class="shop-header">
+        <h1 class="section-title">{% if categorySlug %}{{ categorySlug|capitalize }}{% else %}Shop{% endif %}</h1>
+        <div class="filters">
+            <form method="get">
+                {% if categorySlug %}<input type="hidden" name="category" value="{{ categorySlug }}">{% endif %}
+                <select name="sort" onchange="this.form.submit()">
+                    <option value="date" {% if sort == 'date' %}selected{% endif %}>Newest</option>
+                    <option value="price" {% if sort == 'price' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="price-desc" {% if sort == 'price-desc' %}selected{% endif %}>Price: High to Low</option>
+                    <option value="title" {% if sort == 'title' %}selected{% endif %}>Name</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <div class="product-grid">
+        {% for product in products %}
+            {% include '_includes/product-card' with { product: product } %}
+        {% else %}
+            <p>No products found.</p>
+        {% endfor %}
+    </div>
+
+    {% if pageInfo.totalPages > 1 %}
+    <nav class="pagination" aria-label="Pagination">
+        {% if pageInfo.prevUrl %}<a href="{{ pageInfo.prevUrl }}">← Prev</a>{% endif %}
+        {% for page in 1..pageInfo.totalPages %}
+            {% if page == pageInfo.currentPage %}
+                <span class="current">{{ page }}</span>
+            {% else %}
+                <a href="{{ pageInfo.getPageUrl(page) }}">{{ page }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if pageInfo.nextUrl %}<a href="{{ pageInfo.nextUrl }}">Next →</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

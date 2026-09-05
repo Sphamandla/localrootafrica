@@ -1,0 +1,48 @@
+fieldLayouts:
+  7e3a4357-104c-4935-81aa-1514877de35b:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: c4fe28e1-cb96-4682-8230-0c16ab5a4fad # Default SEO Title
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 1bcd3bdf-d273-4938-815c-61e0644a2e51
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: b5193905-1004-4487-b59a-23a45146ee6b # Default SEO Description
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 47c1001f-3b2b-4997-98ef-a2599036febb
+            userCondition: null
+            warning: null
+            width: 100
+        name: Content
+        uid: 085fed1c-dfc3-4d64-b081-0c7e8d2e226c
+        userCondition: null
+    thumbFieldKey: null
+handle: seoSettings
+name: 'SEO Settings'
+sortOrder: 3

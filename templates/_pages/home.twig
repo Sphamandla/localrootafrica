@@ -1,0 +1,77 @@
+{% extends '_layouts/main' %}
+
+{% set featuredProducts = craft.products.type('default').limit(8).all() %}
+{% set promotions = craft.entries.section('promotions').limit(3).all() %}
+{% set heroImage = '/assets/wp-content/uploads/2024/02/pexels-mart-production-8801091.jpg' %}
+
+{% block content %}
+<section class="hero" style="background-image: linear-gradient(to top, rgba(0,0,0,0.4), transparent), url('{{ heroImage }}');">
+    <div class="hero-content">
+        <h1>Default Shop</h1>
+        <p>Discover our curated collection of premium fashion and lifestyle products.</p>
+        <a href="/shop" class="btn btn-white">Shop Now</a>
+    </div>
+</section>
+
+{% if promotions|length %}
+<section class="section">
+    <div class="promo-grid">
+        {% for promo in promotions %}
+        <div class="promo-banner" style="background-image: linear-gradient(to top, rgba(0,0,0,0.5), transparent), url('{% if promo.promoImage|length %}{{ promo.promoImage.one().url }}{% else %}/assets/wp-content/uploads/2024/01/pexels-cottonbro-studio-7870749.jpg{% endif %}');">
+            <div class="promo-banner-content">
+                <h3>{{ promo.promoTitle }}</h3>
+                <p>{{ promo.promoSubtitle }}</p>
+                {% if promo.promoLink %}
+                <a href="{{ promo.promoLink }}" class="btn btn-white">{{ promo.promoButtonText ?? 'Shop Now' }}</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Featured Products</h2>
+            <a href="/shop">View All →</a>
+        </div>
+        <div class="product-grid">
+            {% for product in featuredProducts %}
+                {% include '_includes/product-card' with { product: product } %}
+            {% else %}
+                <p>No products yet. Run <code>php craft import/from-html</code> to seed content.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background: var(--color-light-gray);">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Women</h2>
+            <a href="/shop?category=women">Shop Women →</a>
+        </div>
+        <div class="product-grid">
+            {% for product in craft.products.type('default').relatedTo({ targetElement: craft.categories.group('productCategories').slug('women') }).limit(4).all() %}
+                {% include '_includes/product-card' with { product: product } %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">Men</h2>
+            <a href="/shop?category=men">Shop Men →</a>
+        </div>
+        <div class="product-grid">
+            {% for product in craft.products.type('default').relatedTo({ targetElement: craft.categories.group('productCategories').slug('men') }).limit(4).all() %}
+                {% include '_includes/product-card' with { product: product } %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,367 @@
+<?php
+
+namespace modules\localroots\console\controllers;
+
+use Craft;
+use craft\commerce\Plugin as Commerce;
+use craft\commerce\models\ProductType;
+use craft\elements\GlobalSet;
+use craft\fieldlayoutelements\CustomField;
+use craft\fieldlayoutelements\TitleField;
+use craft\fields\Assets;
+use craft\fields\Categories;
+use craft\fields\Lightswitch;
+use craft\fields\Matrix;
+use craft\fields\Number;
+use craft\fields\PlainText;
+use craft\fields\Tags;
+use craft\models\CategoryGroup;
+use craft\models\FieldLayout;
+use craft\models\FieldLayoutTab;
+use craft\models\Section;
+use craft\models\Section_SiteSettings;
+use craft\models\TagGroup;
+use craft\models\Volume;
+use craft\models\VolumeFolder;
+use modules\localroots\gateways\OzowGateway;
+use modules\localroots\gateways\PayfastGateway;
+use modules\localroots\gateways\YocoGateway;
+use yii\console\Controller;
+use yii\console\ExitCode;
+use yii\helpers\Console;
+
+class SetupController extends Controller
+{
+    public function actionIndex(): int
+    {
+        $this->stdout("Setting up Local Roots Africa...\n", Console::FG_GREEN);
+
+        $this->_createVolumes();
+        $this->_createFields();
+        $this->_createCategoryAndTagGroups();
+        $this->_createGlobals();
+        $this->_createSections();
+        $this->_setupCommerce();
+        $this->_configureUsers();
+
+        Craft::$app->getProjectConfig()->rebuild();
+        $this->stdout("Setup complete!\n", Console::FG_GREEN);
+        return ExitCode::OK;
+    }
+
+    private function _createVolumes(): void
+    {
+        $fsService = Craft::$app->getFs();
+        if (!$fsService->getFilesystemByHandle('local')) {
+            $fs = $fsService->createFilesystem([
+                'type' => \craft\fs\Local::class,
+                'name' => 'Local',
+                'handle' => 'local',
+                'hasUrls' => true,
+                'url' => '@web/uploads',
+                'path' => '@webroot/uploads',
+            ]);
+            $fsService->saveFilesystem($fs);
+            $this->stdout("  Created filesystem: local\n");
+        }
+
+        $volumes = Craft::$app->getVolumes();
+
+        foreach ([
+            ['handle' => 'products', 'name' => 'Products', 'subpath' => 'products'],
+            ['handle' => 'content', 'name' => 'Content', 'subpath' => 'content'],
+        ] as $config) {
+            if ($volumes->getVolumeByHandle($config['handle'])) {
+                continue;
+            }
+            $volume = new Volume([
+                'name' => $config['name'],
+                'handle' => $config['handle'],
+                'fs' => 'local',
+                'subpath' => $config['subpath'],
+            ]);
+            $volumes->saveVolume($volume);
+            $this->stdout("  Created volume: {$config['handle']}\n");
+        }
+    }
+
+    private function _createFields(): void
+    {
+        $fieldsService = Craft::$app->getFields();
+        $productsVolume = Craft::$app->getVolumes()->getVolumeByHandle('products');
+        $contentVolume = Craft::$app->getVolumes()->getVolumeByHandle('content');
+
+        $fieldDefs = [
+            ['handle' => 'siteName', 'name' => 'Site Name', 'type' => PlainText::class, 'settings' => ['multiline' => false]],
+            ['handle' => 'siteLogo', 'name' => 'Site Logo', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image'], 'maxRelations' => 1, 'viewMode' => 'large']],
+            ['handle' => 'siteFavicon', 'name' => 'Favicon', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image'], 'maxRelations' => 1]],
+            ['handle' => 'copyrightText', 'name' => 'Copyright Text', 'type' => PlainText::class, 'settings' => ['multiline' => true]],
+            ['handle' => 'socialFacebook', 'name' => 'Facebook URL', 'type' => PlainText::class],
+            ['handle' => 'socialInstagram', 'name' => 'Instagram URL', 'type' => PlainText::class],
+            ['handle' => 'socialTwitter', 'name' => 'Twitter URL', 'type' => PlainText::class],
+            ['handle' => 'socialPinterest', 'name' => 'Pinterest URL', 'type' => PlainText::class],
+            ['handle' => 'defaultSeoTitle', 'name' => 'Default SEO Title', 'type' => PlainText::class],
+            ['handle' => 'defaultSeoDescription', 'name' => 'Default SEO Description', 'type' => PlainText::class, 'settings' => ['multiline' => true]],
+            ['handle' => 'pageHeroImage', 'name' => 'Hero Image', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image']]],
+            ['handle' => 'pageBody', 'name' => 'Body', 'type' => PlainText::class, 'settings' => ['multiline' => true, 'initialRows' => 8]],
+            ['handle' => 'promoTitle', 'name' => 'Promo Title', 'type' => PlainText::class],
+            ['handle' => 'promoSubtitle', 'name' => 'Promo Subtitle', 'type' => PlainText::class],
+            ['handle' => 'promoImage', 'name' => 'Promo Image', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image']]],
+            ['handle' => 'promoLink', 'name' => 'Promo Link', 'type' => PlainText::class],
+            ['handle' => 'promoButtonText', 'name' => 'Button Text', 'type' => PlainText::class],
+            ['handle' => 'productImages', 'name' => 'Product Images', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image'], 'viewMode' => 'large']],
+            ['handle' => 'productCategories', 'name' => 'Categories', 'type' => Categories::class, 'settings' => ['source' => 'group:productCategories']],
+            ['handle' => 'productTags', 'name' => 'Tags', 'type' => Tags::class, 'settings' => ['source' => 'group:productTags']],
+            ['handle' => 'productShortDescription', 'name' => 'Short Description', 'type' => PlainText::class, 'settings' => ['multiline' => true]],
+            ['handle' => 'orderNumber', 'name' => 'Order Number', 'type' => PlainText::class],
+            ['handle' => 'customerInfo', 'name' => 'Customer Info', 'type' => PlainText::class, 'settings' => ['multiline' => true]],
+            ['handle' => 'lineItems', 'name' => 'Line Items', 'type' => PlainText::class, 'settings' => ['multiline' => true]],
+            ['handle' => 'totalPrice', 'name' => 'Total Price', 'type' => Number::class],
+            ['handle' => 'paymentStatus', 'name' => 'Payment Status', 'type' => PlainText::class],
+            ['handle' => 'orderStatus', 'name' => 'Order Status', 'type' => PlainText::class],
+            ['handle' => 'featuredProduct', 'name' => 'Featured', 'type' => Lightswitch::class],
+        ];
+
+        foreach ($fieldDefs as $def) {
+            if ($fieldsService->getFieldByHandle($def['handle'])) {
+                continue;
+            }
+            $settings = $def['settings'] ?? [];
+            if (str_contains($def['handle'], 'Image') || str_contains($def['handle'], 'Logo') || str_contains($def['handle'], 'Favicon')) {
+                $settings['sources'] = ['volume:' . ($productsVolume?->uid ?? '')];
+                if (str_contains($def['handle'], 'page') || str_contains($def['handle'], 'promo')) {
+                    $settings['sources'] = ['volume:' . ($contentVolume?->uid ?? '')];
+                }
+            }
+            if ($def['handle'] === 'productImages') {
+                $settings['sources'] = ['volume:' . ($productsVolume?->uid ?? '')];
+            }
+
+            $field = Craft::$app->getFields()->createField([
+                'type' => $def['type'],
+                'name' => $def['name'],
+                'handle' => $def['handle'],
+                'settings' => $settings,
+            ]);
+            Craft::$app->getFields()->saveField($field);
+            $this->stdout("  Created field: {$def['handle']}\n");
+        }
+    }
+
+    private function _createCategoryAndTagGroups(): void
+    {
+        $groups = Craft::$app->getCategories();
+        if (!$groups->getGroupByHandle('productCategories')) {
+            $group = new CategoryGroup(['name' => 'Product Categories', 'handle' => 'productCategories']);
+            $groups->saveGroup($group);
+            $this->stdout("  Created category group: productCategories\n");
+        }
+
+        $tagGroups = Craft::$app->getTags();
+        if (!$tagGroups->getTagGroupByHandle('productTags')) {
+            $group = new TagGroup(['name' => 'Product Tags', 'handle' => 'productTags']);
+            $tagGroups->saveTagGroup($group);
+            $this->stdout("  Created tag group: productTags\n");
+        }
+    }
+
+    private function _createGlobals(): void
+    {
+        $globalsService = Craft::$app->getGlobals();
+        $fieldsService = Craft::$app->getFields();
+
+        $globalSets = [
+            'siteSettings' => ['Site Settings', ['siteName', 'siteLogo', 'siteFavicon']],
+            'footerSettings' => ['Footer Settings', ['copyrightText', 'socialFacebook', 'socialInstagram', 'socialTwitter', 'socialPinterest']],
+            'seoSettings' => ['SEO Settings', ['defaultSeoTitle', 'defaultSeoDescription']],
+        ];
+
+        foreach ($globalSets as $handle => [$name, $fieldHandles]) {
+            if ($globalsService->getSetByHandle($handle)) {
+                continue;
+            }
+            $layout = new FieldLayout(['type' => GlobalSet::class]);
+            $tab = new FieldLayoutTab(['name' => 'Content', 'layout' => $layout]);
+            $elements = [];
+            foreach ($fieldHandles as $fh) {
+                $field = $fieldsService->getFieldByHandle($fh);
+                if ($field) {
+                    $elements[] = Craft::$app->getFields()->createLayoutElement([
+                        'type' => CustomField::class,
+                        'fieldUid' => $field->uid,
+                    ]);
+                }
+            }
+            $tab->setElements($elements);
+            $layout->setTabs([$tab]);
+
+            $set = new GlobalSet(['name' => $name, 'handle' => $handle]);
+            $set->setFieldLayout($layout);
+            $globalsService->saveSet($set);
+            $this->stdout("  Created global set: {$handle}\n");
+        }
+    }
+
+    private function _createSections(): void
+    {
+        $sectionsService = Craft::$app->entries;
+        $fieldsService = Craft::$app->getFields();
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+
+        $sections = [
+            'pages' => [
+                'name' => 'Pages',
+                'type' => Section::TYPE_STRUCTURE,
+                'uriFormat' => '{slug}',
+                'template' => '_pages/_entry',
+                'fields' => ['pageHeroImage', 'pageBody'],
+            ],
+            'promotions' => [
+                'name' => 'Promotions',
+                'type' => Section::TYPE_CHANNEL,
+                'uriFormat' => null,
+                'template' => null,
+                'fields' => ['promoTitle', 'promoSubtitle', 'promoImage', 'promoLink', 'promoButtonText'],
+            ],
+            'orders' => [
+                'name' => 'Orders',
+                'type' => Section::TYPE_CHANNEL,
+                'uriFormat' => null,
+                'template' => null,
+                'fields' => ['orderNumber', 'customerInfo', 'lineItems', 'totalPrice', 'paymentStatus', 'orderStatus'],
+            ],
+        ];
+
+        foreach ($sections as $handle => $config) {
+            if ($sectionsService->getSectionByHandle($handle)) {
+                continue;
+            }
+
+            $layout = new FieldLayout(['type' => \craft\elements\Entry::class]);
+            $tab = new FieldLayoutTab(['name' => 'Content', 'layout' => $layout]);
+            $elements = [Craft::$app->getFields()->createLayoutElement(['type' => TitleField::class])];
+            foreach ($config['fields'] as $fh) {
+                $field = $fieldsService->getFieldByHandle($fh);
+                if ($field) {
+                    $elements[] = Craft::$app->getFields()->createLayoutElement([
+                        'type' => CustomField::class,
+                        'fieldUid' => $field->uid,
+                    ]);
+                }
+            }
+            $tab->setElements($elements);
+            $layout->setTabs([$tab]);
+
+            $entryType = new \craft\models\EntryType([
+                'name' => $config['name'],
+                'handle' => $handle,
+                'hasTitleField' => true,
+            ]);
+            $entryType->setFieldLayout($layout);
+            $sectionsService->saveEntryType($entryType);
+
+            $section = new Section([
+                'name' => $config['name'],
+                'handle' => $handle,
+                'type' => $config['type'],
+                'enableVersioning' => true,
+            ]);
+
+            $siteSettings = new Section_SiteSettings([
+                'siteId' => $primarySite->id,
+                'enabledByDefault' => true,
+                'hasUrls' => $config['uriFormat'] !== null,
+                'uriFormat' => $config['uriFormat'],
+                'template' => $config['template'],
+            ]);
+            $section->setSiteSettings([$primarySite->id => $siteSettings]);
+            $section->setEntryTypes([$entryType]);
+
+            $sectionsService->saveSection($section);
+            $this->stdout("  Created section: {$handle}\n");
+        }
+    }
+
+    private function _setupCommerce(): void
+    {
+        if (!Craft::$app->plugins->isPluginInstalled('commerce')) {
+            $this->stdout("  Commerce not installed, skipping...\n", Console::FG_YELLOW);
+            return;
+        }
+
+        $commerce = Commerce::getInstance();
+        $productTypes = $commerce->getProductTypes();
+        $fieldsService = Craft::$app->getFields();
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+
+        if (!$productTypes->getProductTypeByHandle('default')) {
+            $layout = new FieldLayout(['type' => \craft\commerce\elements\Product::class]);
+            $tab = new FieldLayoutTab(['name' => 'Product', 'layout' => $layout]);
+            $elements = [];
+            foreach (['productImages', 'productShortDescription', 'productCategories', 'productTags', 'featuredProduct'] as $fh) {
+                $field = $fieldsService->getFieldByHandle($fh);
+                if ($field) {
+                    $elements[] = Craft::$app->getFields()->createLayoutElement([
+                        'type' => CustomField::class,
+                        'fieldUid' => $field->uid,
+                    ]);
+                }
+            }
+            $tab->setElements($elements);
+            $layout->setTabs([$tab]);
+
+            $productType = new ProductType([
+                'name' => 'Default',
+                'handle' => 'default',
+            ]);
+            $productType->setFieldLayout($layout);
+
+            $siteSettings = new \craft\commerce\models\ProductTypeSite([
+                'siteId' => $primarySite->id,
+                'hasUrls' => true,
+                'uriFormat' => 'products/{slug}',
+                'template' => '_pages/products/_entry',
+            ]);
+            $productType->setSiteSettings([$primarySite->id => $siteSettings]);
+
+            $productTypes->saveProductType($productType);
+            $this->stdout("  Created product type: default\n");
+        }
+
+        $gateways = $commerce->getGateways();
+        foreach ([
+            ['name' => 'PayFast', 'handle' => 'payfast', 'class' => PayfastGateway::class],
+            ['name' => 'Ozow', 'handle' => 'ozow', 'class' => OzowGateway::class],
+            ['name' => 'Yoco', 'handle' => 'yoco', 'class' => YocoGateway::class],
+        ] as $gw) {
+            if ($gateways->getGatewayByHandle($gw['handle'])) {
+                continue;
+            }
+            $gateway = $gateways->createGateway([
+                'name' => $gw['name'],
+                'handle' => $gw['handle'],
+                'type' => $gw['class'],
+                'paymentType' => 'purchase',
+                'isFrontendEnabled' => true,
+            ]);
+            $gateways->saveGateway($gateway);
+            $this->stdout("  Created gateway: {$gw['handle']}\n");
+        }
+
+        $store = $commerce->getStores()->getPrimaryStore();
+        if ($store) {
+            $store->currency = 'ZAR';
+            $commerce->getStores()->saveStore($store);
+        }
+    }
+
+    private function _configureUsers(): void
+    {
+        $settings = Craft::$app->getProjectConfig()->get('users') ?? [];
+        $settings['allowPublicRegistration'] = true;
+        $settings['validateOnPublicRegistration'] = true;
+        $settings['defaultGroup'] = null;
+        Craft::$app->getProjectConfig()->set('users', $settings);
+        $this->stdout("  Enabled public registration\n");
+    }
+}

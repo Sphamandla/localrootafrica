@@ -1,0 +1,99 @@
+fieldLayouts:
+  39962de3-7ca1-4978-a970-088cccf37705:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: c3149d0e-5554-441f-9d95-c4200e34c451 # Copyright Text
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 953848e5-d99f-47f7-85b5-f12f732de3ee
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 7d0ebec0-7962-437a-9f95-ea9ff801ea3d # Facebook URL
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 401f01bf-d997-4f3d-9189-96f9b2fd42b5
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 12673b94-3667-4415-9321-7c537ba9a185 # Instagram URL
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 8f02265b-d9fd-47fe-8c37-c8e12fd02974
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: ed76d2b1-5c15-4156-902c-f859980f0e22 # Twitter URL
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 0acf11f7-8b52-4c5c-835f-3fc680abad6c
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: fce2e58c-af0f-4dd1-bc98-79434a3eb8de # Pinterest URL
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: b38c3e9b-9022-4c6f-a015-20a0f58c53ab
+            userCondition: null
+            warning: null
+            width: 100
+        name: Content
+        uid: 7398e731-7db9-4744-bb44-fb384bcda19a
+        userCondition: null
+    thumbFieldKey: null
+handle: footerSettings
+name: 'Footer Settings'
+sortOrder: 2

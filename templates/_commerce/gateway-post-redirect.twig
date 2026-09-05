@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head><title>Redirecting…</title></head>
+<body>
+<form id="redirect-form" method="POST" action="{{ actionUrl ?? '' }}">
+    {{ inputs|raw }}
+</form>
+<script>document.getElementById('redirect-form').submit();</script>
+</body>
+</html>

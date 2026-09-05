@@ -1,0 +1,31 @@
+{% set cart = craft.commerce.carts.cart %}
+<header class="site-header">
+    <div class="header-inner">
+        <a href="/" class="site-logo">
+            {% if siteSettings.siteLogo|length %}
+                <img src="{{ siteSettings.siteLogo.one().url }}" alt="{{ siteSettings.siteName ?? 'Local Roots Africa' }}" width="162" height="19">
+            {% else %}
+                <img src="/assets/wp-content/uploads/2023/12/Logo.svg" alt="Local Roots Africa" width="162" height="19">
+            {% endif %}
+        </a>
+
+        <nav class="main-nav" aria-label="Main">
+            <ul>
+                <li><a href="/shop">Shop</a></li>
+                <li><a href="/shop?category=women">Women</a></li>
+                <li><a href="/shop?category=men">Men</a></li>
+                <li><a href="/about">About</a></li>
+                <li><a href="/contact">Contact</a></li>
+            </ul>
+        </nav>
+
+        <div class="header-actions">
+            {% if currentUser %}
+                <a href="/account">Account</a>
+            {% else %}
+                <a href="/login">Login</a>
+            {% endif %}
+            <a href="/cart">Bag{% if cart.totalQty %}<span class="cart-count">{{ cart.totalQty }}</span>{% endif %}</a>
+        </div>
+    </div>
+</header>

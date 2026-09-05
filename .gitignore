@@ -1,4 +1,13 @@
-# Craft 2 Storage (https://craftcms.com/support/craft-storage-gitignore)
-# not necessary for Craft 3 (https://github.com/craftcms/craft/issues/26)
-/craft/storage/*
-!/craft/storage/rebrand
+/.env
+/vendor/
+/node_modules/
+/web/cpresources/
+/storage/runtime/
+/storage/logs/
+/storage/composer-backups/
+/web/uploads/*
+!/web/uploads/products/.gitkeep
+!/web/uploads/content/.gitkeep
+.DS_Store
+*.log
+config/license.key

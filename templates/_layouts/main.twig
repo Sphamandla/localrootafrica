@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% hook 'seomaticRender' %}
+    {% if not seomatic.meta %}
+        <title>{% if title is defined %}{{ title }} – {% endif %}{{ siteSettings.siteName ?? 'Local Roots Africa' }}</title>
+    {% endif %}
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <link rel="stylesheet" href="/assets/wp-content/uploads/elementor/google-fonts/css/montserrat.css">
+    {% block head %}{% endblock %}
+</head>
+<body class="{% block bodyClass %}{% endblock %}">
+    {% include '_includes/header' %}
+
+    <main id="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include '_includes/newsletter' %}
+    {% include '_includes/footer' %}
+
+    <script>
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        img.addEventListener('load', () => img.classList.add('loaded'));
+        if (img.complete) img.classList.add('loaded');
+    });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

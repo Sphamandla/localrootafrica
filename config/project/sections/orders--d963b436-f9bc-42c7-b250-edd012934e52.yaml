@@ -1,0 +1,21 @@
+defaultPlacement: end
+enableVersioning: true
+entryTypes:
+  -
+    uid: 9b95f6ae-6ff0-4c04-99e6-50c0e8e1dc91 # Orders
+handle: orders
+maxAuthors: 1
+minAuthors: 1
+name: Orders
+previewTargets:
+  -
+    label: 'Primary entry page'
+    urlFormat: '{url}'
+propagationMethod: all
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: false
+    template: null
+    uriFormat: null
+type: channel

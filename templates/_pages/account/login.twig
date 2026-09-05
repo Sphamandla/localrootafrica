@@ -1,0 +1,25 @@
+{% extends '_layouts/main' %}
+
+{% block content %}
+<div class="container section" style="max-width: 400px;">
+    <h1 class="section-title">Login</h1>
+    <form method="post" accept-charset="UTF-8">
+        {{ csrfInput() }}
+        {{ actionInput('users/login') }}
+        {{ redirectInput('account') }}
+
+        <div class="form-group">
+            <label for="loginName">Email</label>
+            <input type="email" id="loginName" name="loginName" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn" style="width: 100%;">Login</button>
+    </form>
+    <p style="margin-top: 24px; text-align: center; font-size: 13px;">
+        Don't have an account? <a href="/checkout">Register at checkout</a>
+    </p>
+</div>
+{% endblock %}

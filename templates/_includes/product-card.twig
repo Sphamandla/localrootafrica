@@ -1,0 +1,24 @@
+{% set variant = product.defaultVariant %}
+<a href="{{ product.url }}" class="product-card">
+    <div class="product-card-image">
+        {% if product.productImages|length %}
+            <img src="{{ product.productImages.one().getUrl({ width: 600, height: 900, mode: 'crop' }) }}" alt="{{ product.title }}" loading="lazy" width="600" height="900">
+        {% else %}
+            <img src="/assets/wp-content/uploads/2024/02/20231214_VB_600_2200x-683x1024.jpg" alt="{{ product.title }}" loading="lazy">
+        {% endif %}
+        {% if variant and variant.onSale %}
+            <span class="product-badge">Sale</span>
+        {% endif %}
+    </div>
+    <div class="product-card-info">
+        <h3 class="product-card-title">{{ product.title }}</h3>
+        {% if variant %}
+        <p class="product-card-price">
+            {% if variant.onSale %}
+                <del>R{{ variant.price|commerceCurrency('ZAR') }}</del>
+            {% endif %}
+            R{{ variant.salePrice|commerceCurrency('ZAR') }}
+        </p>
+        {% endif %}
+    </div>
+</a>

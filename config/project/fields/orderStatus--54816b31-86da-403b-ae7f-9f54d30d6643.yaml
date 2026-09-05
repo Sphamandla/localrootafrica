@@ -1,0 +1,16 @@
+columnSuffix: null
+handle: orderStatus
+instructions: null
+name: 'Order Status'
+searchable: false
+settings:
+  byteLimit: null
+  charLimit: null
+  code: false
+  initialRows: 4
+  multiline: false
+  placeholder: null
+  uiMode: normal
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\PlainText

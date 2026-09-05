@@ -1,0 +1,21 @@
+defaultPlacement: end
+enableVersioning: true
+entryTypes:
+  -
+    uid: 44fe9edb-8cbb-4f10-97fd-dd45abe6f97c # Promotions
+handle: promotions
+maxAuthors: 1
+minAuthors: 1
+name: Promotions
+previewTargets:
+  -
+    label: 'Primary entry page'
+    urlFormat: '{url}'
+propagationMethod: all
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: false
+    template: null
+    uriFormat: null
+type: channel

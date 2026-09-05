@@ -1,0 +1,11 @@
+<section class="section" style="background: var(--color-light-gray); padding: 60px 0;">
+    <div class="container" style="text-align: center; max-width: 500px;">
+        <h3 style="font-size: 18px; font-weight: 400; letter-spacing: 0.05em; text-transform: uppercase; margin: 0 0 8px;">Newsletter</h3>
+        <p style="color: var(--color-gray); margin: 0 0 24px; font-size: 14px;">Subscribe for exclusive offers and new arrivals.</p>
+        <form class="newsletter-form" action="/newsletter/subscribe" method="post" style="background: var(--color-white);">
+            {{ csrfInput() }}
+            <input type="email" name="email" placeholder="Your email address" required aria-label="Email address">
+            <button type="submit">Subscribe</button>
+        </form>
+    </div>
+</section>

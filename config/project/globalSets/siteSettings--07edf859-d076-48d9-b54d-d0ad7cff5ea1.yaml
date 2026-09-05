@@ -1,0 +1,65 @@
+fieldLayouts:
+  791c4e0a-2a99-4035-a21a-744eb9a709ea:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: f5736581-910a-4423-95b6-324743c21a4e # Site Name
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 48bb2b84-b89a-4d26-ac32-ade6905b7391
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: acdbb89a-7773-4771-8fe9-b8592136e71e # Site Logo
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 7822a60f-bd2b-4503-9439-a51e9e3e8f5e
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 0e7959b4-7cec-4499-b2a1-f1ac3f4164a8 # Favicon
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 62092364-ec9b-46c3-a831-547e2e6bc8e7
+            userCondition: null
+            warning: null
+            width: 100
+        name: Content
+        uid: 2c272db9-6f6c-4613-a946-0705e0ab6577
+        userCondition: null
+    thumbFieldKey: null
+handle: siteSettings
+name: 'Site Settings'
+sortOrder: 1
