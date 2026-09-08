@@ -86,8 +86,14 @@
 		hydrateProductMeta(productData);
 		hydrateReviewsAndQA(productData);
 		initProductGallery();
-		replaceCarousel('.elementor-element-56fb727c .swiper-wrapper');
-		replaceCarousel('.elementor-element-35331e6 .swiper-wrapper');
+		replaceCarousel('localroots-related-source', productData.relatedCarouselSelectors || [
+			'.elementor-element-56fb727c .swiper-wrapper',
+			'.elementor-element-8461f19 .swiper-wrapper',
+		]);
+		replaceCarousel('localroots-fbt-source', productData.fbtCarouselSelectors || [
+			'.elementor-element-35331e6 .swiper-wrapper',
+			'.elementor-element-7191653 .swiper-wrapper',
+		]);
 		initStickyColumn();
 
 		if (window.LocalrootsWishlist) {
@@ -338,14 +344,23 @@
 		}
 	}
 
-	function replaceCarousel(selector) {
-		const wrapper = document.querySelector(selector);
-		const source = document.querySelector('#localroots-related-source');
-		if (!wrapper || !source || !source.children.length) return;
+	function replaceCarousel(sourceId, selectors) {
+		const source = document.getElementById(sourceId);
+		if (!source || !source.children.length) return;
+
+		let wrapper = null;
+		(selectors || []).some(function(selector) {
+			wrapper = document.querySelector(selector);
+			return !!wrapper;
+		});
+		if (!wrapper) return;
+
 		wrapper.innerHTML = '';
 		Array.from(source.children).forEach(function(child) {
 			wrapper.appendChild(child.cloneNode(true));
 		});
+		source.remove();
+
 		const carousel = wrapper.closest('.elementor-widget-loop-carousel');
 		if (carousel && typeof elementorFrontend !== 'undefined' && elementorFrontend.elementsHandler) {
 			elementorFrontend.elementsHandler.runReadyTrigger(carousel);

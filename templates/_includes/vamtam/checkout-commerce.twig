@@ -10,13 +10,14 @@
 {% if codGateway and codGateway.isFrontendEnabled %}
 	{% set gateways = gateways|merge([codGateway]) %}
 {% endif %}
-{% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.zipCode ?? null, cart.totalWeight) %}
+{% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.postalCode ?? null, cart.totalWeight) %}
 {% set billing = cart.billingAddress %}
 {% set shipping = cart.shippingAddress %}
-{% set shipDifferent = shipping and shipping.address1 and billing and shipping.address1 != billing.address1 %}
+{% set shipDifferent = shipping and shipping.addressLine1 and billing and shipping.addressLine1 != billing.addressLine1 %}
 
-<form name="checkout" method="post" class="checkout woocommerce-checkout localroots-checkout-form" action="{{ actionUrl('commerce/payments/pay') }}" enctype="multipart/form-data" aria-label="Checkout">
+<form name="checkout" method="post" class="checkout woocommerce-checkout localroots-checkout-form" action="{{ url('checkout') }}" enctype="multipart/form-data" aria-label="Checkout">
 	{{ csrfInput() }}
+	{{ actionInput('commerce/payments/pay') }}
 	{{ redirectInput('account') }}
 
 <div class="e-checkout__container">
@@ -58,23 +59,23 @@
 		</p>
 		<p class="form-row form-row-wide address-field validate-required" id="billing_address_1_field">
 			<label for="billing_address_1" class="required_field">Street address&nbsp;<span class="required" aria-hidden="true">*</span></label>
-			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[address1]" id="billing_address_1" placeholder="House number and street name" value="{{ billing.address1 ?? '' }}" required autocomplete="address-line1" /></span>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[addressLine1]" id="billing_address_1" placeholder="House number and street name" value="{{ billing.addressLine1 ?? '' }}" required autocomplete="address-line1" /></span>
 		</p>
 		<p class="form-row form-row-wide address-field" id="billing_address_2_field">
 			<label for="billing_address_2" class="screen-reader-text">Apartment, suite, unit, etc.&nbsp;<span class="optional">(optional)</span></label>
-			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[address2]" id="billing_address_2" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ billing.address2 ?? '' }}" autocomplete="address-line2" /></span>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[addressLine2]" id="billing_address_2" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ billing.addressLine2 ?? '' }}" autocomplete="address-line2" /></span>
 		</p>
 		<p class="form-row form-row-wide address-field validate-required" id="billing_city_field">
 			<label for="billing_city" class="required_field">Town / City&nbsp;<span class="required" aria-hidden="true">*</span></label>
-			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[city]" id="billing_city" value="{{ billing.city ?? '' }}" required autocomplete="address-level2" /></span>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[locality]" id="billing_city" value="{{ billing.locality ?? '' }}" required autocomplete="address-level2" /></span>
 		</p>
 		<p class="form-row form-row-wide address-field validate-required validate-postcode" id="billing_postcode_field">
 			<label for="billing_postcode" class="required_field">Postcode / ZIP&nbsp;<span class="required" aria-hidden="true">*</span></label>
-			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[zipCode]" id="billing_postcode" value="{{ billing.zipCode ?? '' }}" required autocomplete="postal-code" /></span>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[postalCode]" id="billing_postcode" value="{{ billing.postalCode ?? '' }}" required autocomplete="postal-code" /></span>
 		</p>
 		<p class="form-row form-row-wide validate-required validate-phone" id="billing_phone_field">
 			<label for="billing_phone" class="required_field">Phone&nbsp;<span class="required" aria-hidden="true">*</span></label>
-			<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="billingAddress[phone]" id="billing_phone" placeholder="Phone" value="{{ billing.phone ?? '' }}" required autocomplete="tel" /></span>
+			<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="billingAddress[phone]" id="billing_phone" placeholder="Phone" value="" required autocomplete="tel" /></span>
 		</p>
 		<p class="form-row form-row-wide validate-required validate-email" id="billing_email_field">
 			<label for="billing_email" class="required_field">Email Address&nbsp;<span class="required" aria-hidden="true">*</span></label>
@@ -87,9 +88,12 @@
 <div class="woocommerce-account-fields">
 	<p class="form-row form-row-wide create-account">
 		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-			<input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="createaccount" type="checkbox" name="createaccount" value="1" disabled />
+			<input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="createaccount" type="checkbox" name="registerUserOnOrderComplete" value="1"{% if cart.registerUserOnOrderComplete %} checked="checked"{% endif %} />
 			<span>Create an account?</span>
 		</label>
+	</p>
+	<p class="form-row form-row-wide localroots-create-account-note" id="createaccount_note"{% if not cart.registerUserOnOrderComplete %} style="display:none"{% endif %}>
+		<small>We’ll email you a link to set your password after your order is placed.</small>
 	</p>
 </div>
 {% endif %}
@@ -123,23 +127,23 @@
 			</p>
 			<p class="form-row form-row-wide address-field validate-required" id="shipping_address_1_field">
 				<label for="shipping_address_1" class="required_field">Street address&nbsp;<span class="required" aria-hidden="true">*</span></label>
-				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[address1]" id="shipping_address_1" placeholder="House number and street name" value="{{ shipping.address1 ?? billing.address1 ?? '' }}" autocomplete="shipping address-line1" /></span>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[addressLine1]" id="shipping_address_1" placeholder="House number and street name" value="{{ shipping.addressLine1 ?? billing.addressLine1 ?? '' }}" autocomplete="shipping address-line1" /></span>
 			</p>
 			<p class="form-row form-row-wide address-field" id="shipping_address_2_field">
 				<label for="shipping_address_2" class="screen-reader-text">Apartment, suite, unit, etc.&nbsp;<span class="optional">(optional)</span></label>
-				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[address2]" id="shipping_address_2" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ shipping.address2 ?? billing.address2 ?? '' }}" autocomplete="shipping address-line2" /></span>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[addressLine2]" id="shipping_address_2" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ shipping.addressLine2 ?? billing.addressLine2 ?? '' }}" autocomplete="shipping address-line2" /></span>
 			</p>
 			<p class="form-row form-row-wide address-field validate-required" id="shipping_city_field">
 				<label for="shipping_city" class="required_field">Town / City&nbsp;<span class="required" aria-hidden="true">*</span></label>
-				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[city]" id="shipping_city" value="{{ shipping.city ?? billing.city ?? '' }}" autocomplete="shipping address-level2" /></span>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[locality]" id="shipping_city" value="{{ shipping.locality ?? billing.locality ?? '' }}" autocomplete="shipping address-level2" /></span>
 			</p>
 			<p class="form-row form-row-wide address-field validate-required validate-postcode" id="shipping_postcode_field">
 				<label for="shipping_postcode" class="required_field">Postcode / ZIP&nbsp;<span class="required" aria-hidden="true">*</span></label>
-				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[zipCode]" id="shipping_postcode" value="{{ shipping.zipCode ?? billing.zipCode ?? '' }}" autocomplete="shipping postal-code" /></span>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[postalCode]" id="shipping_postcode" value="{{ shipping.postalCode ?? billing.postalCode ?? '' }}" autocomplete="shipping postal-code" /></span>
 			</p>
 			<p class="form-row form-row-wide validate-required validate-phone validate-tel" id="shipping_phone_field">
 				<label for="shipping_phone" class="required_field">Phone&nbsp;<span class="required" aria-hidden="true">*</span></label>
-				<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="shippingAddress[phone]" id="shipping_phone" value="{{ shipping.phone ?? billing.phone ?? '' }}" autocomplete="tel" /></span>
+				<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="shippingAddress[phone]" id="shipping_phone" value="" autocomplete="tel" /></span>
 			</p>
 		</div>
 	</div>

@@ -1,1 +1,9 @@
-<p>Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.</p>
+{% set bank = craft.app.getModule('localroots').cashEftEmail.getBankDetails() %}
+<p>Make your payment directly into our bank account. Please use your order number as the payment reference. Your order will not be shipped until the funds have cleared in our account.</p>
+<ul>
+	<li><strong>Bank:</strong> {{ bank.bankName }}</li>
+	<li><strong>Account name:</strong> {{ bank.accountName }}</li>
+	<li><strong>Account number:</strong> {{ bank.accountNumber }}</li>
+	<li><strong>Branch code:</strong> {{ bank.branchCode }}</li>
+	<li><strong>Account type:</strong> {{ bank.accountType }}</li>
+</ul>

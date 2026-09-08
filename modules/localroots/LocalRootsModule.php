@@ -33,6 +33,7 @@ class LocalRootsModule extends Module
             'transactionTracker' => services\TransactionTracker::class,
             'envCoupons' => services\EnvCouponService::class,
             'productReviews' => ProductReviewService::class,
+            'productRecommendations' => services\ProductRecommendationsService::class,
             'seo' => services\SeoService::class,
             'schemaBuilder' => services\SeoSchemaBuilder::class,
         ]);
@@ -67,24 +68,41 @@ class LocalRootsModule extends Module
 
             Event::on(
                 Order::class,
-                Order::EVENT_AFTER_ORDER_AUTHORIZED,
+                Order::EVENT_BEFORE_COMPLETE_ORDER,
                 function (Event $event) {
                     /** @var Order $order */
                     $order = $event->sender;
                     $gateway = $order->getGateway();
-                    if (!$gateway || !in_array($gateway->handle, ['cash-eft', 'cash-on-delivery'], true)) {
+                    if (!$gateway || $gateway->handle !== 'cash-eft') {
                         return;
                     }
 
-                    $module = $this;
                     $status = \craft\commerce\Plugin::getInstance()->getOrderStatuses()->getOrderStatusByHandle('awaitingPayment');
                     if ($status) {
                         $order->orderStatusId = $status->id;
-                        Craft::$app->getElements()->saveElement($order, false);
+                    }
+                }
+            );
+
+            Event::on(
+                Order::class,
+                Order::EVENT_AFTER_COMPLETE_ORDER,
+                function (Event $event) {
+                    /** @var Order $order */
+                    $order = $event->sender;
+                    $module = Craft::$app->getModule('localroots');
+                    $module->orderSync->syncOrder($order);
+                    $module->productReviews->sendReviewInvites($order);
+
+                    $gateway = $order->getGateway();
+                    if (!$gateway) {
+                        return;
                     }
 
                     if ($gateway->handle === 'cash-eft') {
                         $module->cashEftEmail->sendPendingConfirmation($order);
+                    } elseif ($gateway->handle === 'cash-on-delivery') {
+                        $module->cashEftEmail->sendCodConfirmation($order);
                     }
                 }
             );
@@ -116,21 +134,9 @@ class LocalRootsModule extends Module
                 function (ModelEvent $event) {
                     /** @var Order $order */
                     $order = $event->sender;
-                    if (!$event->isNew) {
+                    if (!$event->isNew && $order->isCompleted) {
                         Craft::$app->getModule('localroots')->orderSync->syncOrder($order);
                     }
-                }
-            );
-
-            Event::on(
-                Order::class,
-                Order::EVENT_AFTER_COMPLETE_ORDER,
-                function (Event $event) {
-                    /** @var Order $order */
-                    $order = $event->sender;
-                    $module = Craft::$app->getModule('localroots');
-                    $module->orderSync->syncOrder($order);
-                    $module->productReviews->sendReviewInvites($order);
                 }
             );
         }

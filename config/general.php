@@ -17,6 +17,8 @@ return GeneralConfig::create()
     ->defaultWeekStartDay(1)
     // Prevent generated URLs from including "index.php"
     ->omitScriptNameInUrls()
+    // Required with omitScriptNameInUrls so action URLs use /actions/... not index.php?p=...
+    ->pathParam(null)
     // Preload Single entries as Twig variables
     ->preloadSingles()
     // Prevent user enumeration attacks

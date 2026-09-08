@@ -24,6 +24,7 @@
 
 	fixBreadcrumbLinks();
 	initShippingToggle();
+	initCreateAccountToggle();
 	initShippingMethods(config);
 	initPaymentMethods();
 	initShippingCalculator(config);
@@ -52,6 +53,15 @@
 		if (!checkbox || !fields) return;
 		checkbox.addEventListener('change', () => {
 			fields.style.display = checkbox.checked ? 'block' : 'none';
+		});
+	}
+
+	function initCreateAccountToggle() {
+		const checkbox = document.getElementById('createaccount');
+		const note = document.getElementById('createaccount_note');
+		if (!checkbox || !note) return;
+		checkbox.addEventListener('change', () => {
+			note.style.display = checkbox.checked ? 'block' : 'none';
 		});
 	}
 
@@ -247,22 +257,42 @@
 
 			btn.disabled = true;
 			btn.textContent = 'Processing...';
+			clearCheckoutError();
 
 			const updateBody = new FormData(form);
 			updateBody.set('action', 'commerce/cart/update-cart');
-			updateBody.delete('gatewayId');
 			updateBody.delete('terms');
+
+			const createAccount = document.getElementById('createaccount');
+			if (createAccount) {
+				updateBody.set('registerUserOnOrderComplete', createAccount.checked ? '1' : '0');
+			}
 
 			const shipDifferent = document.getElementById('ship-to-different-address-checkbox')?.checked;
 			if (!shipDifferent) {
-				['firstName', 'lastName', 'address1', 'address2', 'city', 'zipCode', 'countryCode', 'phone'].forEach(field => {
+				['firstName', 'lastName', 'addressLine1', 'addressLine2', 'locality', 'postalCode', 'countryCode'].forEach(field => {
 					const billingVal = updateBody.get('billingAddress[' + field + ']');
 					if (billingVal !== null) updateBody.set('shippingAddress[' + field + ']', billingVal);
 				});
 			}
 
 			try {
-				await fetch(config.updateCartAction, { method: 'POST', body: updateBody, credentials: 'same-origin' });
+				const updateResponse = await fetch(config.cartPostUrl, {
+					method: 'POST',
+					body: updateBody,
+					credentials: 'same-origin',
+					headers: { Accept: 'application/json' },
+				});
+				const updateData = await updateResponse.json().catch(() => null);
+				if (!updateResponse.ok || !updateData?.cart) {
+					const message = updateData?.message
+						|| (updateData?.errors ? Object.values(updateData.errors).flat().join(' ') : '')
+						|| 'Could not save your checkout details. Please check your information and try again.';
+					showCheckoutError(message);
+					btn.disabled = false;
+					btn.textContent = 'Place order';
+					return;
+				}
 
 				const metaBody = new FormData();
 				metaBody.append(config.csrfName, config.csrfToken);
@@ -271,12 +301,36 @@
 				metaBody.append('shippingMethod', shippingMethod);
 				await fetch(config.saveCartMetaUrl, { method: 'POST', body: metaBody, credentials: 'same-origin' });
 
+				if (createAccount && !createAccount.checked) {
+					const hidden = document.createElement('input');
+					hidden.type = 'hidden';
+					hidden.name = 'registerUserOnOrderComplete';
+					hidden.value = '0';
+					form.appendChild(hidden);
+					form.submit();
+					hidden.remove();
+					return;
+				}
+
 				form.submit();
 			} catch (err) {
+				showCheckoutError('Something went wrong while placing your order. Please try again.');
 				btn.disabled = false;
 				btn.textContent = 'Place order';
 			}
 		});
+	}
+
+	function showCheckoutError(message) {
+		const wrapper = document.querySelector('.woocommerce-notices-wrapper');
+		if (!wrapper) return;
+		wrapper.innerHTML = '<div class="woocommerce-error" role="alert">' + message + '</div>';
+		wrapper.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+	}
+
+	function clearCheckoutError() {
+		const wrapper = document.querySelector('.woocommerce-notices-wrapper');
+		if (wrapper) wrapper.innerHTML = '';
 	}
 
 	function trackProgress(config, data, url) {

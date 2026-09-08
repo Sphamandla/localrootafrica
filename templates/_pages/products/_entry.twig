@@ -27,11 +27,9 @@
 {% set minPrice = priceValues|sort|first|default(0) %}
 {% set maxPrice = priceValues|sort|last|default(0) %}
 {% set shortDescription = product.productShortDescription ?? product.title %}
-{% set relatedProducts = craft.products()
-	.relatedTo(product.productCategories)
-	.id('not ' ~ product.id)
-	.limit(4)
-	.all() %}
+{% set recommendations = craft.app.getModule('localroots').productRecommendations %}
+{% set relatedProducts = recommendations.getRelatedProducts(product, 5) %}
+{% set frequentlyBoughtTogether = recommendations.getFrequentlyBoughtTogether(product, 5) %}
 {% set productSku = variant.sku ?? product.defaultSku ?? '' %}
 
 {% set reviewService = craft.app.getModule('localroots').productReviews %}
@@ -82,6 +80,11 @@
 	<div id="localroots-related-source">
 		{% for related in relatedProducts %}
 			{% include '_includes/vamtam/product-related-item-13500.twig' with { product: related } %}
+		{% endfor %}
+	</div>
+	<div id="localroots-fbt-source">
+		{% for bundleProduct in frequentlyBoughtTogether %}
+			{% include '_includes/vamtam/product-related-item-13500.twig' with { product: bundleProduct } %}
 		{% endfor %}
 	</div>
 	<div id="localroots-product-reviews-source">
@@ -144,7 +147,14 @@
 	"reviewWidth": {{ reviewStats.width }},
 	"canReview": {{ canReview ? 'true' : 'false' }},
 	"hasPurchased": {{ hasPurchased ? 'true' : 'false' }},
-	"reviewToken": {{ reviewTokenParam|json_encode|raw }},
+	"relatedCarouselSelectors": {{ (isVariable
+		? ['.elementor-element-56fb727c .swiper-wrapper']
+		: ['.elementor-element-8461f19 .swiper-wrapper', '.elementor-element-56fb727c .swiper-wrapper']
+	)|json_encode|raw }},
+	"fbtCarouselSelectors": {{ (isVariable
+		? ['.elementor-element-35331e6 .swiper-wrapper']
+		: ['.elementor-element-7191653 .swiper-wrapper', '.elementor-element-35331e6 .swiper-wrapper']
+	)|json_encode|raw }},
 	"images": [
 		{% for image in images %}
 		{

@@ -1,7 +1,7 @@
 {% extends '_layouts/vamtam' %}
 
 {% set cart = craft.commerce.carts.cart %}
-{% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.zipCode ?? null, cart.totalWeight) %}
+{% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.postalCode ?? null, cart.totalWeight) %}
 
 {% block head %}
 {% include '_includes/vamtam/head-checkout.twig' %}
@@ -18,7 +18,7 @@
 {
 	"csrfName": {{ craft.app.config.general.csrfTokenName|json_encode|raw }},
 	"csrfToken": {{ craft.app.request.csrfToken|json_encode|raw }},
-	"updateCartAction": {{ actionUrl('commerce/cart/update-cart')|json_encode|raw }},
+	"cartPostUrl": {{ url('checkout')|json_encode|raw }},
 	"trackProgressUrl": {{ url('localroots/checkout/track-progress')|json_encode|raw }},
 	"trackAttemptUrl": {{ url('localroots/checkout/track-attempt')|json_encode|raw }},
 	"calculateShippingUrl": {{ url('localroots/checkout/calculate-shipping')|json_encode|raw }},

@@ -45,6 +45,32 @@ class CashEftEmailService extends Component
         return $this->send($email, 'Order ' . $reference . ' – awaiting EFT payment', implode("\n", $lines));
     }
 
+    public function sendCodConfirmation(Order $order): bool
+    {
+        $email = $order->email;
+        if (!$email) {
+            return false;
+        }
+
+        $reference = $order->reference ?? (string) $order->id;
+        $total = MoneyHelper::formatCurrency($order->totalPrice, $order->currency);
+
+        $lines = [
+            'Hi ' . trim(($order->billingAddress?->firstName ?? '') . ' ' . ($order->billingAddress?->lastName ?? '')) . ',',
+            '',
+            'Thank you for your order. We have received it and will prepare it for delivery.',
+            '',
+            'Order number: ' . $reference,
+            'Amount due on delivery: ' . $total,
+            '',
+            'Please have the exact amount ready when your order arrives.',
+            '',
+            'If you have any questions, reply to this email.',
+        ];
+
+        return $this->send($email, 'Order ' . $reference . ' – cash on delivery', implode("\n", $lines));
+    }
+
     public function sendPaymentConfirmed(Order $order): bool
     {
         $email = $order->email;
