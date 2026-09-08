@@ -1,0 +1,3 @@
+{# WooCommerce-compatible price markup #}
+{% set amount = amount ?? 0 %}
+<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ amount|number_format(0, '.', ',') }}</bdi></span>

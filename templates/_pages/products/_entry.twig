@@ -1,52 +1,46 @@
-{% extends '_layouts/main' %}
+{% extends '_layouts/vamtam' %}
 
-{% set variant = product.defaultVariant %}
+{% set variant = product.defaultVariant ?? product.variants.first() %}
+
+{% block bodyClass %}{% include '_static/body-class-product.twig' %}{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="product-detail">
-        <div class="product-gallery">
-            {% if product.productImages|length %}
-                {% for image in product.productImages.all() %}
-                    <img src="{{ image.getUrl({ width: 800 }) }}" alt="{{ product.title }}" loading="lazy">
-                {% endfor %}
-            {% else %}
-                <img src="/assets/wp-content/uploads/2024/02/20231214_VB_600_2200x-683x1024.jpg" alt="{{ product.title }}">
-            {% endif %}
-        </div>
-
-        <div class="product-info">
-            <h1>{{ product.title }}</h1>
-            {% if variant %}
-            <p class="product-price">
-                {% if variant.onSale %}<del>R{{ variant.price|commerceCurrency('ZAR') }}</del> {% endif %}
-                R{{ variant.salePrice|commerceCurrency('ZAR') }}
-            </p>
-            {% endif %}
-
-            {% if product.productShortDescription %}
-            <div class="product-description">{{ product.productShortDescription|nl2br }}</div>
-            {% endif %}
-
-            <form method="post" class="add-to-cart-form">
-                {{ csrfInput() }}
-                {{ actionInput('commerce/cart/update-cart') }}
-                {{ hiddenInput('purchasableId', variant.id) }}
-                {{ hiddenInput('qty', 1) }}
-                <label for="qty" class="visually-hidden">Quantity</label>
-                <input type="number" id="qty" name="qty" value="1" min="1" class="qty-input" aria-label="Quantity">
-                <button type="submit" class="btn">Add to Bag</button>
-            </form>
-
-            {% if product.productCategories|length %}
-            <p style="margin-top: 24px; font-size: 13px; color: var(--color-gray);">
-                Categories:
-                {% for cat in product.productCategories.all() %}
-                    <a href="/shop?category={{ cat.slug }}">{{ cat.title }}</a>{% if not loop.last %}, {% endif %}
-                {% endfor %}
-            </p>
-            {% endif %}
-        </div>
-    </div>
+<div id="localroots-atc-source" hidden>
+	{% if variant %}
+	<form class="cart" method="post">
+		{{ csrfInput() }}
+		{{ actionInput('commerce/cart/update-cart') }}
+		{{ redirectInput(product.url) }}
+		{{ hiddenInput('purchasableId', variant.id) }}
+		<div class="quantity">
+			<label class="screen-reader-text" for="localroots-qty">{{ product.title }} quantity</label>
+			<input type="number" id="localroots-qty" class="input-text qty text" name="qty" value="1" min="1" step="1" aria-label="Product quantity" inputmode="numeric" autocomplete="off" />
+		</div>
+		<button type="submit" class="single_add_to_cart_button button alt">Add to cart</button>
+	</form>
+	{% endif %}
 </div>
+{% include '_static/content-product.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+	const title = {{ product.title|json_encode|raw }};
+	document.querySelectorAll('.product_title.entry-title').forEach(el => { el.textContent = title; });
+
+	const priceEl = document.querySelector('.elementor-widget-woocommerce-product-price .price');
+	{% if variant %}
+	if (priceEl) {
+		priceEl.innerHTML = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ variant.salePrice|number_format(0, '.', '') }}</bdi></span>';
+	}
+	{% endif %}
+
+	const sourceForm = document.querySelector('#localroots-atc-source form');
+	const targetForm = document.querySelector('.elementor-add-to-cart form.cart');
+	if (sourceForm && targetForm) {
+		targetForm.replaceWith(sourceForm.cloneNode(true));
+	}
+})();
+</script>
 {% endblock %}

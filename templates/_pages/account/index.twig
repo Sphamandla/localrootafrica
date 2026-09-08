@@ -1,48 +1,7 @@
-{% extends '_layouts/main' %}
+{% extends '_layouts/vamtam' %}
+
+{% block bodyClass %}{% include '_static/body-class-account.twig' %}{% endblock %}
 
 {% block content %}
-<div class="container section">
-    <h1 class="section-title">My Account</h1>
-
-    {% if currentUser %}
-    <p>Welcome, {{ currentUser.fullName ?? currentUser.email }}.</p>
-
-    <h2 style="font-size: 16px; font-weight: 500; margin: 40px 0 20px; text-transform: uppercase; letter-spacing: 0.05em;">Order History</h2>
-    {% set orders = craft.orders.customer(currentUser).isCompleted(true).orderBy('dateOrdered desc').all() %}
-
-    {% if orders|length %}
-    <table class="cart-table">
-        <thead>
-            <tr>
-                <th>Order</th>
-                <th>Date</th>
-                <th>Total</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in orders %}
-            <tr>
-                <td>{{ order.reference }}</td>
-                <td>{{ order.dateOrdered|date('M j, Y') }}</td>
-                <td>R{{ order.totalPrice|commerceCurrency('ZAR') }}</td>
-                <td>{% if order.isPaid %}Paid{% else %}Pending{% endif %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No orders yet.</p>
-    {% endif %}
-
-    <form method="post" style="margin-top: 40px;">
-        {{ csrfInput() }}
-        {{ actionInput('users/logout') }}
-        {{ redirectInput('/') }}
-        <button type="submit" class="btn btn-outline">Log Out</button>
-    </form>
-    {% else %}
-    <p>Please <a href="/login">log in</a> to view your account.</p>
-    {% endif %}
-</div>
+{% include '_static/content-account.twig' %}
 {% endblock %}
