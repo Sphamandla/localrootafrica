@@ -1,0 +1,21 @@
+defaultPlacement: end
+enableVersioning: true
+entryTypes:
+  -
+    uid: ca23274d-0577-4c86-97b4-58f34785693e # Order Status
+handle: orderStatus
+maxAuthors: 1
+minAuthors: 1
+name: 'Order Status'
+previewTargets:
+  -
+    label: 'Primary entry page'
+    urlFormat: '{url}'
+propagationMethod: all
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: true
+    template: _pages/order-status
+    uriFormat: order-status
+type: single

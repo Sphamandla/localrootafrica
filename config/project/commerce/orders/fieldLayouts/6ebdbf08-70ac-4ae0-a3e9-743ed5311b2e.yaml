@@ -3,4 +3,28 @@ cardView:
   - reference
   - orderStatus
   - totalPrice
+tabs:
+  -
+    elementCondition: null
+    elements:
+      -
+        dateAdded: null
+        editCondition: null
+        elementCondition: null
+        elementEditCondition: null
+        fieldUid: 9e3e6b4f-22bd-4179-ae46-a81618977097 # Courier Tracking Reference
+        handle: null
+        instructions: null
+        label: null
+        oldFieldUid: null
+        required: false
+        tip: null
+        type: craft\fieldlayoutelements\CustomField
+        uid: 6c387769-ed69-4e86-9f50-20e865d416e3
+        userCondition: null
+        warning: null
+        width: 100
+    name: Shipping
+    uid: a48f44f7-1b47-4961-9da4-c90ca91b8487
+    userCondition: null
 thumbFieldKey: null

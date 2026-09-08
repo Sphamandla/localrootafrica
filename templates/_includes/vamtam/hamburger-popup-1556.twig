@@ -1,0 +1,124 @@
+{% set menu = mobileMenuSettings ?? null %}
+{% set logo = siteSettings.siteLogo.one() ?? null %}
+{% set bgImage = menu.menuBackgroundImage.one() ?? null %}
+{% set promoImage = menu.menuPromoImage.one() ?? null %}
+{% set primaryNav = menu.menuPrimaryNav ?? [
+	{label: 'Sustainability', url: '/sustainability'},
+	{label: 'Press', url: '/press'},
+	{label: 'Contact', url: '/contact'},
+] %}
+{% set footerNav = menu.menuFooterNav ?? [
+	{label: 'Order status', url: '/order-status'},
+	{label: 'Delivery and returns', url: '/delivery-and-returns'},
+] %}
+{% set promoText = menu.menuPromoButtonText ?? 'Discover Winter 23' %}
+{% set promoUrl = menu.menuPromoButtonUrl ?? '/product-category/women/collections/winter-23' %}
+<div data-elementor-type="popup" data-elementor-id="1556" class="elementor elementor-1556 elementor-location-popup" data-elementor-settings="{&quot;entrance_animation&quot;:&quot;fadeIn&quot;,&quot;exit_animation&quot;:&quot;fadeIn&quot;,&quot;entrance_animation_duration&quot;:{&quot;unit&quot;:&quot;px&quot;,&quot;size&quot;:0.3,&quot;sizes&quot;:[]},&quot;classes&quot;:&quot;vamtam-header-mega-menu vamtam-popup vamtam-popup-icon&quot;,&quot;avoid_multiple_popups&quot;:&quot;yes&quot;,&quot;a11y_navigation&quot;:&quot;yes&quot;,&quot;triggers&quot;:[],&quot;timing&quot;:[]}" data-elementor-post-type="elementor_library">
+	<div class="elementor-element elementor-element-d6345e9 e-con-full e-flex e-con e-parent" data-id="d6345e9" data-element_type="container" data-e-type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+		<div class="elementor-element elementor-element-60dff60 e-con-full e-flex e-con e-child" data-id="60dff60" data-element_type="container" data-e-type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;,&quot;background_motion_fx_motion_fx_scrolling&quot;:&quot;yes&quot;,&quot;background_motion_fx_scale_effect&quot;:&quot;yes&quot;,&quot;background_motion_fx_scale_direction&quot;:&quot;in-out&quot;,&quot;background_motion_fx_scale_speed&quot;:{&quot;unit&quot;:&quot;px&quot;,&quot;size&quot;:2,&quot;sizes&quot;:[]},&quot;background_motion_fx_scale_range&quot;:{&quot;unit&quot;:&quot;%&quot;,&quot;size&quot;:&quot;&quot;,&quot;sizes&quot;:{&quot;start&quot;:20,&quot;end&quot;:65}},&quot;background_motion_fx_devices&quot;:[&quot;desktop&quot;]}"{% if bgImage %} style="background-image:url('{{ bgImage.url }}');background-size:cover;background-position:center;"{% endif %}>
+		</div>
+		<div class="elementor-element elementor-element-7dae899 e-con-full e-flex e-con e-child" data-id="7dae899" data-element_type="container" data-e-type="container">
+			<div class="elementor-element elementor-element-20a66fe e-con-full e-flex e-con e-child" data-id="20a66fe" data-element_type="container" data-e-type="container">
+				<div class="elementor-element elementor-element-170b9e0 visuallyhidden elementor-widget elementor-widget-heading" data-id="170b9e0" data-element_type="widget" data-e-type="widget" tabindex="0" data-widget_type="heading.default">
+					<div class="elementor-widget-container">
+						<h2 class="elementor-heading-title elementor-size-default">Inactive</h2>
+					</div>
+				</div>
+				<div class="elementor-element elementor-element-dbf1a06 elementor-widget elementor-widget-theme-site-logo elementor-widget-image" data-id="dbf1a06" data-element_type="widget" data-e-type="widget" data-widget_type="theme-site-logo.default">
+					<div class="elementor-widget-container">
+						<a href="/">
+							<img width="162" height="19" src="{{ logo ? logo.url : '/wp-content/uploads/2023/12/Logo.svg' }}" class="attachment-full size-full wp-image-53" alt="{{ siteSettings.siteName ?? 'Innove Couture' }}" />
+						</a>
+					</div>
+				</div>
+			</div>
+			<div class="elementor-element elementor-element-d0931c6 e-con-full e-flex e-con e-child" data-id="d0931c6" data-element_type="container" data-e-type="container">
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-788cb3e elementor-widget__width-auto vamtam-has-mobile-disable-scroll elementor-widget elementor-widget-nav-menu" data-id="788cb3e" data-element_type="widget" data-e-type="widget" data-settings="{&quot;layout&quot;:&quot;dropdown&quot;,&quot;submenu_icon&quot;:{&quot;value&quot;:&quot;&quot;,&quot;library&quot;:&quot;&quot;}}" data-widget_type="nav-menu.default">
+					<div class="elementor-widget-container">
+						<nav class="elementor-nav-menu--dropdown elementor-nav-menu__container" aria-hidden="true">
+							<ul id="menu-2-788cb3e" class="elementor-nav-menu">
+								{% for item in primaryNav %}
+								<li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="{{ item.url }}" class="elementor-item" tabindex="-1">{{ item.label }}</a></li>
+								{% endfor %}
+							</ul>
+						</nav>
+					</div>
+				</div>
+				{% if promoImage %}
+				<div class="elementor-element elementor-element-9d87c55 elementor-widget elementor-widget-image" data-id="9d87c55" data-element_type="widget" data-e-type="widget" data-widget_type="image.default">
+					<div class="elementor-widget-container">
+						<img fetchpriority="high" width="191" height="292" src="{{ promoImage.url }}" class="attachment-large size-large wp-image-1613" alt="" />
+					</div>
+				</div>
+				{% endif %}
+				{% if promoText and promoUrl %}
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-ca0e21f elementor-align-left vamtam-has-underline-anim elementor-widget elementor-widget-button" data-id="ca0e21f" data-element_type="widget" data-e-type="widget" data-widget_type="button.default">
+					<div class="elementor-widget-container">
+						<div class="elementor-button-wrapper">
+							<a class="elementor-button elementor-button-link elementor-size-sm" href="{{ promoUrl }}">
+								<span class="elementor-button-content-wrapper">
+									<span class="elementor-button-text">{{ promoText }}</span>
+								</span>
+							</a>
+						</div>
+					</div>
+				</div>
+				{% endif %}
+			</div>
+			<div class="elementor-element elementor-element-6d98ec2 e-con-full e-flex e-con e-child" data-id="6d98ec2" data-element_type="container" data-e-type="container">
+				<div class="elementor-element elementor-element-eba6cb4 e-con-full e-flex e-con e-child" data-id="eba6cb4" data-element_type="container" data-e-type="container">
+					<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-5d0b139 elementor-nav-menu__align-start elementor-nav-menu--dropdown-none elementor-widget__width-initial vamtam-has-mobile-disable-scroll elementor-widget elementor-widget-nav-menu" data-id="5d0b139" data-element_type="widget" data-e-type="widget" data-settings="{&quot;layout&quot;:&quot;vertical&quot;,&quot;submenu_icon&quot;:{&quot;value&quot;:&quot;&quot;,&quot;library&quot;:&quot;&quot;}}" data-widget_type="nav-menu.default">
+						<div class="elementor-widget-container">
+							<nav aria-label="Menu" class="elementor-nav-menu--main elementor-nav-menu__container elementor-nav-menu--layout-vertical e--pointer-none">
+								<ul id="menu-1-5d0b139" class="elementor-nav-menu sm-vertical">
+									{% for item in footerNav %}
+									<li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="{{ item.url }}" class="elementor-item">{{ item.label }}</a></li>
+									{% endfor %}
+								</ul>
+							</nav>
+							<nav class="elementor-nav-menu--dropdown elementor-nav-menu__container" aria-hidden="true">
+								<ul id="menu-2-5d0b139" class="elementor-nav-menu sm-vertical">
+									{% for item in footerNav %}
+									<li class="menu-item menu-item-type-post_type menu-item-object-page"><a href="{{ item.url }}" class="elementor-item" tabindex="-1">{{ item.label }}</a></li>
+									{% endfor %}
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+				<div class="elementor-element elementor-element-72689c1 e-con-full e-flex e-con e-child" data-id="72689c1" data-element_type="container" data-e-type="container">
+					<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-2def033 elementor-nav-menu__align-start elementor-nav-menu--dropdown-none elementor-widget__width-initial vamtam-has-mobile-disable-scroll elementor-widget elementor-widget-nav-menu" data-id="2def033" data-element_type="widget" data-e-type="widget" data-settings="{&quot;layout&quot;:&quot;vertical&quot;,&quot;submenu_icon&quot;:{&quot;value&quot;:&quot;&quot;,&quot;library&quot;:&quot;&quot;}}" data-widget_type="nav-menu.default">
+						<div class="elementor-widget-container">
+							<nav aria-label="Menu" class="elementor-nav-menu--main elementor-nav-menu__container elementor-nav-menu--layout-vertical e--pointer-none">
+								<ul id="menu-1-2def033" class="elementor-nav-menu sm-vertical">
+									{% if footerSettings.socialInstagram ?? null %}
+									<li class="menu-item menu-item-type-custom menu-item-object-custom"><a target="_blank" rel="noopener" href="{{ footerSettings.socialInstagram }}" class="elementor-item">Instagram</a></li>
+									{% endif %}
+									{% if footerSettings.socialFacebook ?? null %}
+									<li class="menu-item menu-item-type-custom menu-item-object-custom"><a target="_blank" rel="noopener" href="{{ footerSettings.socialFacebook }}" class="elementor-item">Facebook</a></li>
+									{% endif %}
+									{% if footerSettings.socialPinterest ?? null %}
+									<li class="menu-item menu-item-type-custom menu-item-object-custom"><a target="_blank" rel="noopener" href="{{ footerSettings.socialPinterest }}" class="elementor-item">Pinterest</a></li>
+									{% endif %}
+								</ul>
+							</nav>
+							<nav class="elementor-nav-menu--dropdown elementor-nav-menu__container" aria-hidden="true">
+								<ul id="menu-2-2def033" class="elementor-nav-menu sm-vertical">
+									{% if footerSettings.socialInstagram ?? null %}
+									<li class="menu-item menu-item-type-custom menu-item-object-custom"><a target="_blank" rel="noopener" href="{{ footerSettings.socialInstagram }}" class="elementor-item" tabindex="-1">Instagram</a></li>
+									{% endif %}
+									{% if footerSettings.socialFacebook ?? null %}
+									<li class="menu-item menu-item-type-custom menu-item-object-custom"><a target="_blank" rel="noopener" href="{{ footerSettings.socialFacebook }}" class="elementor-item" tabindex="-1">Facebook</a></li>
+									{% endif %}
+									{% if footerSettings.socialPinterest ?? null %}
+									<li class="menu-item menu-item-type-custom menu-item-object-custom"><a target="_blank" rel="noopener" href="{{ footerSettings.socialPinterest }}" class="elementor-item" tabindex="-1">Pinterest</a></li>
+									{% endif %}
+								</ul>
+							</nav>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,18 @@
+{% set shopFilter = craft.app.getModule('localroots').shopFilter %}
+{% set brandsByLetter = shopFilter.getBrandsByLetter() %}
+{% for letter, letterBrands in brandsByLetter %}
+<div class="elementor-element e-con-full e-flex e-con e-child localroots-brand-column">
+	<div class="elementor-element elementor-widget elementor-widget-heading">
+		<div class="elementor-widget-container">
+			<h5 class="elementor-heading-title elementor-size-default">{{ letter }}</h5>
+		</div>
+	</div>
+	{% for brand in letterBrands %}
+	<div class="elementor-element elementor-widget elementor-widget-heading">
+		<div class="elementor-widget-container">
+			<div class="elementor-heading-title elementor-size-default"><a href="{{ brand.url }}">{{ brand.title }}</a></div>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+{% endfor %}

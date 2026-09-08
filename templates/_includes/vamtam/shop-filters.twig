@@ -1,4 +1,5 @@
 {% import '_includes/vamtam/shop-filter-type-tree.twig' as typeTree %}
+{% set brandContext = brandContext|default(null) %}
 {# BeRocket-compatible shop filters — markup matches reference shop #}
 <form id="localroots-shop-filters" class="localroots-shop-filters" method="get" action="{{ formAction ?? url('shop') }}">
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5132 bapf_wid_5131" data-wid="5131" data-id="5132">

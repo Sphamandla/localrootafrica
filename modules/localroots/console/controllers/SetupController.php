@@ -132,6 +132,7 @@ class SetupController extends Controller
             ['handle' => 'totalPrice', 'name' => 'Total Price', 'type' => Number::class],
             ['handle' => 'paymentStatus', 'name' => 'Payment Status', 'type' => PlainText::class],
             ['handle' => 'orderStatus', 'name' => 'Order Status', 'type' => PlainText::class],
+            ['handle' => 'courierTrackingReference', 'name' => 'Courier Tracking Reference', 'type' => PlainText::class, 'settings' => ['placeholder' => 'TCGD000404']],
             ['handle' => 'featuredProduct', 'name' => 'Featured', 'type' => Lightswitch::class],
             ['handle' => 'simplePurchase', 'name' => 'Simple purchase (no options)', 'type' => Lightswitch::class],
             ['handle' => 'reviewBody', 'name' => 'Review Body', 'type' => PlainText::class, 'settings' => ['multiline' => true, 'initialRows' => 4]],
@@ -160,6 +161,22 @@ class SetupController extends Controller
                     ['label' => 'Rejected', 'value' => 'rejected', 'default' => ''],
                 ],
             ]],
+            ['handle' => 'menuBackgroundImage', 'name' => 'Menu Background Image', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image'], 'maxRelations' => 1, 'viewMode' => 'large']],
+            ['handle' => 'menuPromoImage', 'name' => 'Menu Promo Image', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image'], 'maxRelations' => 1, 'viewMode' => 'large']],
+            ['handle' => 'menuPromoButtonText', 'name' => 'Menu Promo Button Text', 'type' => PlainText::class],
+            ['handle' => 'menuPromoButtonUrl', 'name' => 'Menu Promo Button URL', 'type' => PlainText::class],
+            ['handle' => 'menuPrimaryNav', 'name' => 'Menu Primary Navigation', 'type' => Table::class, 'settings' => [
+                'columns' => [
+                    'col1' => ['heading' => 'Label', 'handle' => 'label', 'width' => '40%', 'type' => 'singleline'],
+                    'col2' => ['heading' => 'URL', 'handle' => 'url', 'width' => '60%', 'type' => 'singleline'],
+                ],
+            ]],
+            ['handle' => 'menuFooterNav', 'name' => 'Menu Footer Navigation', 'type' => Table::class, 'settings' => [
+                'columns' => [
+                    'col1' => ['heading' => 'Label', 'handle' => 'label', 'width' => '40%', 'type' => 'singleline'],
+                    'col2' => ['heading' => 'URL', 'handle' => 'url', 'width' => '60%', 'type' => 'singleline'],
+                ],
+            ]],
         ];
 
         foreach ($fieldDefs as $def) {
@@ -169,7 +186,7 @@ class SetupController extends Controller
             $settings = $def['settings'] ?? [];
             if (str_contains($def['handle'], 'Image') || str_contains($def['handle'], 'Logo') || str_contains($def['handle'], 'Favicon')) {
                 $settings['sources'] = ['volume:' . ($productsVolume?->uid ?? '')];
-                if (str_contains($def['handle'], 'page') || str_contains($def['handle'], 'promo')) {
+                if (str_contains($def['handle'], 'page') || str_contains($def['handle'], 'promo') || str_contains($def['handle'], 'menu')) {
                     $settings['sources'] = ['volume:' . ($contentVolume?->uid ?? '')];
                 }
             }
@@ -213,6 +230,10 @@ class SetupController extends Controller
         $globalSets = [
             'siteSettings' => ['Site Settings', ['siteName', 'siteLogo', 'siteFavicon']],
             'footerSettings' => ['Footer Settings', ['copyrightText', 'socialFacebook', 'socialInstagram', 'socialTwitter', 'socialPinterest']],
+            'mobileMenuSettings' => ['Mobile Menu', [
+                'menuBackgroundImage', 'menuPromoImage', 'menuPromoButtonText', 'menuPromoButtonUrl',
+                'menuPrimaryNav', 'menuFooterNav',
+            ]],
             'seoSettings' => ['SEO Settings', ['defaultSeoTitle', 'defaultSeoDescription']],
         ];
 
@@ -289,6 +310,13 @@ class SetupController extends Controller
                 'type' => Section::TYPE_SINGLE,
                 'uriFormat' => 'sustainability',
                 'template' => '_pages/sustainability',
+                'fields' => ['pageBody'],
+            ],
+            'orderStatus' => [
+                'name' => 'Order Status',
+                'type' => Section::TYPE_SINGLE,
+                'uriFormat' => 'order-status',
+                'template' => '_pages/order-status',
                 'fields' => ['pageBody'],
             ],
             'productReviews' => [
@@ -465,6 +493,39 @@ class SetupController extends Controller
             $store->currency = 'ZAR';
             $commerce->getStores()->saveStore($store);
         }
+
+        $this->_configureOrderFields();
+    }
+
+    private function _configureOrderFields(): void
+    {
+        $fieldsService = Craft::$app->getFields();
+        $field = $fieldsService->getFieldByHandle('courierTrackingReference');
+        if (!$field) {
+            return;
+        }
+
+        $layout = $fieldsService->getLayoutByType(\craft\commerce\elements\Order::class);
+        foreach ($layout->getCustomFields() as $customField) {
+            if ($customField->handle === 'courierTrackingReference') {
+                return;
+            }
+        }
+
+        $tab = $layout->getTabs()[0] ?? new FieldLayoutTab(['name' => 'Shipping', 'layout' => $layout]);
+        $elements = $tab->getElements();
+        $elements[] = Craft::$app->getFields()->createLayoutElement([
+            'type' => CustomField::class,
+            'fieldUid' => $field->uid,
+        ]);
+        $tab->setElements($elements);
+
+        if (!$layout->getTabs()) {
+            $layout->setTabs([$tab]);
+        }
+
+        $fieldsService->saveLayout($layout);
+        $this->stdout("  Added courierTrackingReference to order field layout\n");
     }
 
     private function _configureUsers(): void

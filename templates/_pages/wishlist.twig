@@ -9,6 +9,60 @@
 {% block bodyClass %}{% include '_static/body-class-wishlist.twig' %}{% endblock %}
 
 {% block content %}
+<style>
+tr.woosw-item.localroots-wishlist-item--removing {
+	opacity: 0;
+	transform: translateX(12px);
+	transition: opacity 0.25s ease, transform 0.25s ease;
+	pointer-events: none;
+}
+.localroots-wishlist-toast {
+	position: fixed;
+	left: 50%;
+	bottom: 28px;
+	z-index: 99999;
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	max-width: min(92vw, 520px);
+	padding: 14px 18px;
+	background: #111;
+	color: #fff;
+	border-radius: 2px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+	font-size: 14px;
+	line-height: 1.4;
+	transform: translate(-50%, 120%);
+	opacity: 0;
+	transition: transform 0.28s ease, opacity 0.28s ease;
+}
+.localroots-wishlist-toast.is-visible {
+	transform: translate(-50%, 0);
+	opacity: 1;
+}
+.localroots-wishlist-toast__message {
+	flex: 1 1 auto;
+}
+.localroots-wishlist-toast__undo {
+	flex: 0 0 auto;
+	border: 0;
+	background: transparent;
+	color: #fff;
+	font: inherit;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	text-decoration: underline;
+	cursor: pointer;
+	padding: 0;
+}
+.localroots-wishlist-toast__undo:hover,
+.localroots-wishlist-toast__undo:focus {
+	opacity: 0.75;
+}
+.localroots-wishlist-toast--error {
+	background: #6d1b1b;
+}
+</style>
 {% if wishlistItems|length == 0 %}
 <style>
 .elementor-element-3991d2fd .vamtam-empty-wishlist-notice { display: block !important; }
@@ -26,7 +80,9 @@
 	csrfName: craft.app.config.general.csrfTokenName,
 	csrfToken: craft.app.request.csrfToken,
 	listId: userList.id ?? null,
-	confirmMessage: 'This action cannot be undone. Are you sure?'
+	removedMessage: 'Removed from wishlist',
+	undoLabel: 'Undo',
+	undoDelay: 5000
 }|json_encode|raw }}</script>
 
 {% include '_static/content-wishlist.twig' %}

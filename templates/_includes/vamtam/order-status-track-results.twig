@@ -1,0 +1,84 @@
+{# Courier Guy tracking results for order status page #}
+{% set order = result.order ?? null %}
+{% set tracking = result.tracking ?? null %}
+{% set waybill = result.waybill ?? null %}
+
+{% if order %}
+<div class="localroots-order-track-results woocommerce">
+	<div class="localroots-order-track-summary">
+		<h5>Order #{{ order.reference }}</h5>
+		<p class="localroots-order-track-meta">
+			{% if order.dateOrdered %}
+				Placed on {{ order.dateOrdered|date('F j, Y') }} ·
+			{% endif %}
+			{{ order.orderStatus ?? (order.isPaid ? 'Paid' : 'Awaiting payment') }}
+		</p>
+
+		{% if order.lineItems|length %}
+		<table class="shop_table localroots-order-track-items">
+			<thead>
+				<tr>
+					<th>Product</th>
+					<th>Qty</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in order.lineItems %}
+				<tr>
+					<td>{{ item.description }}</td>
+					<td>{{ item.qty|number_format(0) }}</td>
+					<td>R {{ item.total|number_format(2, '.', ' ') }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+	</div>
+
+	{% if tracking %}
+	<div class="localroots-order-track-shipment">
+		<h5>Shipment tracking{% if tracking.reference %} · {{ tracking.reference }}{% endif %}</h5>
+		{% if tracking.mock ?? false %}
+		<p class="localroots-order-track-note">Showing sample tracking data (Courier Guy test mode).</p>
+		{% endif %}
+		<p class="localroots-order-track-status">
+			<strong>Status:</strong> {{ tracking.status|replace({'-': ' '})|title }}
+			{% if tracking.serviceLevel %} · {{ tracking.serviceLevel }}{% endif %}
+		</p>
+		{% if tracking.collectionHub or tracking.deliveryHub %}
+		<p class="localroots-order-track-route">
+			{% if tracking.collectionHub %}{{ tracking.collectionHub }}{% endif %}
+			{% if tracking.collectionHub and tracking.deliveryHub %} → {% endif %}
+			{% if tracking.deliveryHub %}{{ tracking.deliveryHub }}{% endif %}
+		</p>
+		{% endif %}
+
+		{% if tracking.events|length %}
+		<ol class="localroots-order-track-timeline">
+			{% for event in tracking.events %}
+			<li class="localroots-order-track-event">
+				<span class="localroots-order-track-event-date">
+					{% if event.date %}{{ event.date|date('M j, Y g:i A') }}{% endif %}
+				</span>
+				<span class="localroots-order-track-event-status">{{ event.status|replace({'-': ' '})|title }}</span>
+				{% if event.location %}
+				<span class="localroots-order-track-event-location">{{ event.location }}</span>
+				{% endif %}
+				{% if event.message %}
+				<span class="localroots-order-track-event-message">{{ event.message }}</span>
+				{% endif %}
+			</li>
+			{% endfor %}
+		</ol>
+		{% else %}
+		<p>No tracking events are available yet. Please check back soon.</p>
+		{% endif %}
+	</div>
+	{% elseif waybill %}
+	<p class="localroots-order-track-note">We could not retrieve live tracking for waybill {{ waybill }}. Please contact support if this persists.</p>
+	{% else %}
+	<p class="localroots-order-track-note">Your order is confirmed. Courier tracking will appear here once your parcel has been dispatched.</p>
+	{% endif %}
+</div>
+{% endif %}

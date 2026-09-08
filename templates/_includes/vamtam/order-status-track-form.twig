@@ -1,0 +1,23 @@
+{# Order status track form — posts to Craft + Courier Guy integration #}
+<div class="woocommerce">
+	<form method="post" action="/actions/localroots/order-status/track" class="woocommerce-form woocommerce-form-track-order track_order" accept-charset="UTF-8">
+		{{ csrfInput() }}
+		{{ redirectInput('/order-status') }}
+
+		<p>To track your order please enter your Order ID in the box below and press the "Track" button. This was given to you on your receipt and in the confirmation email you should have received.</p>
+
+		<p class="form-row form-row-first">
+			<label for="orderid">Order ID</label>
+			<input class="input-text" type="text" name="orderid" id="orderid" value="{{ submitted.orderid ?? '' }}" placeholder="Found in your order confirmation email." required />
+		</p>
+		<p class="form-row form-row-last">
+			<label for="order_email">Billing email</label>
+			<input class="input-text" type="email" name="order_email" id="order_email" value="{{ submitted.order_email ?? '' }}" placeholder="Email you used during checkout." required />
+		</p>
+		<div class="clear"></div>
+
+		<p class="form-row">
+			<button type="submit" class="button" name="track" value="Track">Track</button>
+		</p>
+	</form>
+</div>

@@ -27,16 +27,18 @@ class TemplateExtractorService extends Component
         'about' => 'about/index.html',
         'contact' => 'contact/index.html',
         'terms' => 'index.html?p=3.html',
+        'brands' => 'index.html?p=3101.html',
         'wishlist' => 'index.html?p=10.html',
         'sustainability' => 'index.html?p=4565.html',
         'press' => 'index.html?p=726.html',
         'press-detail' => 'index.html?p=9809.html',
         'collection' => 'product-category/women/clothing/index.html',
         'delivery-and-returns' => 'index.html?p=736.html',
+        'order-status' => 'index.html?p=732.html',
     ];
 
     /** Pages that use the alternate header (elementor-150) */
-    private array $altLayoutPages = ['about', 'contact', 'terms', 'faq', 'wishlist', 'sustainability', 'press', 'press-detail', 'delivery-and-returns'];
+    private array $altLayoutPages = ['about', 'contact', 'terms', 'brands', 'faq', 'wishlist', 'sustainability', 'press', 'press-detail', 'delivery-and-returns', 'order-status'];
 
     public function init(): void
     {
@@ -102,6 +104,7 @@ class TemplateExtractorService extends Component
             $headerHtml = '<header data-elementor-type="header" data-elementor-id="' . $elementId . '" class="elementor elementor-' . $elementId . ' elementor-location-header" data-elementor-post-type="elementor_library">' . $m[1] . '</header>';
             $headerHtml = $this->rewritePaths($headerHtml);
             $headerHtml = $this->injectCraftNav($headerHtml);
+            $headerHtml = preg_replace('/href="[^"#]*#elementor-action/', 'href="#elementor-action', $headerHtml) ?: $headerHtml;
             $written[] = $this->writeFragment('header-alt.twig', "{# Extracted from {$source} #}\n" . $headerHtml);
         }
 
@@ -109,6 +112,8 @@ class TemplateExtractorService extends Component
             $footer = $this->rewritePaths($m[1]);
             $written[] = $this->writeFragment('footer-alt.twig', "{# Extracted from {$source} #}\n" . $footer);
         }
+
+        $written = array_merge($written, $this->extractPopupsFromHtml($html, $source));
 
         return $written;
     }
@@ -182,6 +187,9 @@ class TemplateExtractorService extends Component
             if ($handle === 'wishlist') {
                 $inner = $this->sanitizeWishlistContent($inner);
             }
+            if ($handle === 'brands') {
+                $inner = $this->sanitizeBrandsContent($inner);
+            }
             $content = '<div id="page" class="main-container">' . "\n"
                 . '<div id="main-content">' . "\n"
                 . $inner . "\n"
@@ -206,6 +214,9 @@ class TemplateExtractorService extends Component
             }
             if ($handle === 'wishlist') {
                 $inner = $this->sanitizeWishlistContent($inner);
+            }
+            if ($handle === 'brands') {
+                $inner = $this->sanitizeBrandsContent($inner);
             }
             $content = '<div id="page" class="main-container">' . "\n"
                 . $inner;
@@ -292,6 +303,42 @@ class TemplateExtractorService extends Component
         ) ?: $html;
     }
 
+    /**
+     * Replace static demo brand lists — Twig partials render from Craft tags.
+     */
+    private function sanitizeBrandsContent(string $html): string
+    {
+        $html = preg_replace(
+            '/(<div class="elementor-element elementor-element-cbbe6ac[^>]*>\s*<div class="e-con-inner">)[\s\S]*?(<\/div>\s*<\/div>\s*<div class="elementor-element elementor-element-d53f73c)/',
+            '$1{% include \'_includes/vamtam/brands-az-grid.twig\' %}$2',
+            $html,
+            1
+        ) ?: $html;
+
+        $html = preg_replace(
+            '/(<div class="elementor-element elementor-element-3341a53[^>]*>\s*<div class="e-con-inner">)[\s\S]*?(<\/div>\s*<\/div>\s*<div class="elementor-element elementor-element-1decc7b)/',
+            '$1{% include \'_includes/vamtam/brands-flat-grid.twig\' %}$2',
+            $html,
+            1
+        ) ?: $html;
+
+        $html = preg_replace(
+            '/(<div class="elementor-element elementor-element-6656d88[^>]*>\s*<div class="e-con-inner">)[\s\S]*?(<\/div>\s*<\/div>\s*<div class="elementor-element elementor-element-[a-f0-9]+ elementor-widget-divider)/',
+            '$1{% include \'_includes/vamtam/brands-flat-grid.twig\' %}$2',
+            $html,
+            1
+        ) ?: $html;
+
+        $html = preg_replace(
+            '/(<div class="elementor-element elementor-element-5f82e77[^>]*>\s*<div class="e-con-inner">)[\s\S]*?(<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/article>)/',
+            '$1{% include \'_includes/vamtam/brands-flat-grid.twig\' %}$2',
+            $html,
+            1
+        ) ?: $html;
+
+        return $html;
+    }
+
     private function writeFragment(string $filename, string $content): string
     {
         $path = $this->outputBase . '/' . $filename;
@@ -370,13 +417,17 @@ class TemplateExtractorService extends Component
             '/%3Fp=736.html' => '/delivery-and-returns',
             'index.html%3Fp=736.html' => '/delivery-and-returns',
             '/%3Fp=1904.html' => '/shop?sale=1',
-            '/%3Fp=3101.html' => '/shop',
+            '/%3Fp=3101.html' => '/brands',
+            'index.html%3Fp=3101.html' => '/brands',
             '/%3Fp=736.html' => '/delivery-and-returns',
             'index.html%3Fp=736.html' => '/delivery-and-returns',
             '/%3Fp=4565.html' => '/sustainability',
             'index.html%3Fp=4565.html' => '/sustainability',
+            '/%3Fp=732.html' => '/order-status',
+            'index.html%3Fp=732.html' => '/order-status',
+            '/%3Fp=728.html' => '/contact',
+            'index.html%3Fp=728.html' => '/contact',
             '/%3Fp=8.html' => '/account',
-            '/%3Fp=732.html' => '/account',
             '/%3Fp=13838.html' => '/faq',
             '../faq/index.html' => '/faq',
             '../faq/' => '/faq/',
@@ -444,12 +495,58 @@ class TemplateExtractorService extends Component
     private function extractPopupsFromHtml(string $html, string $source): array
     {
         $written = [];
-        if (!preg_match_all('/(<div[^>]*data-elementor-type="popup"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>)/i', $html, $matches)) {
+        $ids = ['10064', '5578', '1946', '1669'];
+        $popups = [];
+
+        foreach ($ids as $id) {
+            $pos = strpos($html, 'data-elementor-id="' . $id . '"');
+            if ($pos === false) {
+                continue;
+            }
+            $start = strrpos(substr($html, 0, $pos), '<div data-elementor-type="popup"');
+            if ($start === false) {
+                continue;
+            }
+            $depth = 0;
+            $i = $start;
+            $len = strlen($html);
+            while ($i < $len) {
+                if (preg_match('/<div[\s>]/', $html, $m, PREG_OFFSET_CAPTURE, $i) && $m[0][1] === $i) {
+                    $depth++;
+                    $i += 4;
+                    continue;
+                }
+                if (preg_match('/<\/div>/', $html, $m, PREG_OFFSET_CAPTURE, $i) && $m[0][1] === $i) {
+                    $depth--;
+                    $i += 6;
+                    if ($depth === 0) {
+                        $popups[] = substr($html, $start, $i - $start);
+                        break;
+                    }
+                    continue;
+                }
+                $i++;
+            }
+        }
+
+        if ($popups === []) {
             return $written;
         }
 
-        $popups = $this->rewritePaths(implode("\n", $matches[1]));
-        $written[] = $this->writeFragment('popups.twig', "{# Extracted from {$source} #}\n" . $popups);
+        $content = $this->rewritePaths(implode("\n", $popups));
+        $content = preg_replace('/href="[^"#]*#elementor-action/', 'href="#elementor-action', $content) ?: $content;
+        $content = preg_replace('/data-lazy-src="([^"]+)"/', 'src="$1"', $content) ?: $content;
+        $content = preg_replace('/\s*data-lazy-srcset="[^"]*"/', '', $content) ?: $content;
+        $content = preg_replace('/\s*data-lazy-sizes="[^"]*"/', '', $content) ?: $content;
+        $content = preg_replace(
+            '/src="data:image\/svg\+xml[^"]*"/',
+            'src="/wp-content/uploads/2024/01/pexels-cottonbro-studio-7870749.jpg"',
+            $content,
+            1
+        ) ?: $content;
+
+        $written[] = $this->writeFragment('popups-alt.twig', "{# Extracted from {$source} #}\n" . $content);
+
         return $written;
     }
 
@@ -486,7 +583,8 @@ class TemplateExtractorService extends Component
             '/%3Fp=736.html' => '/delivery-and-returns',
             'index.html%3Fp=736.html' => '/delivery-and-returns',
             '/%3Fp=1904.html' => '/shop?sale=1',
-            '/%3Fp=3101.html' => '/shop',
+            '/%3Fp=3101.html' => '/brands',
+            'index.html%3Fp=3101.html' => '/brands',
             '/product-category/women/index.html' => '/product-category/women',
             '/product-category/men/index.html' => '/product-category/men',
         ];

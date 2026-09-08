@@ -1,51 +1,55 @@
-{% extends '_layouts/vamtam' %}
+{% extends '_layouts/vamtam-alt' %}
 
-{% set shopFilter = craft.app.getModule('localroots').shopFilter %}
-{% set brands = shopFilter.getAllBrands() %}
-
-{% block head %}{% include '_includes/vamtam/head-shop.twig' %}{% endblock %}
-{% block bodyClass %}{% include '_static/body-class-shop.twig' %}{% endblock %}
+{% block head %}{% include '_includes/vamtam/head-brands.twig' %}{% endblock %}
+{% block bodyClass %}{% include '_static/body-class-brands.twig' %}{% endblock %}
 
 {% block content %}
-<div id="localroots-brands-source" hidden>
-	<div class="localroots-brands-index">
-		<ul class="localroots-brands-list">
-			{% for brand in brands %}
-			<li>
-				<a href="{{ brand.url }}">{{ brand.title }}</a>
-				{% if brand.count %}<span class="count">({{ brand.count }})</span>{% endif %}
-			</li>
-			{% endfor %}
-		</ul>
-	</div>
-</div>
-
-<script type="application/json" id="localroots-shop-config">
-{
-	"categoryTitle": "Brands",
-	"categoryBreadcrumb": [
-		{"title": "Home", "url": "/"},
-		{"title": "Brands", "url": null}
-	]
+<style>
+/* Match reference post-3101: 5 columns on desktop, 3 on tablet, 2 on mobile */
+.elementor-3101 .localroots-brand-column {
+	--display: flex;
+	--flex-direction: column;
+	--flex-grow: 0;
+	--flex-shrink: 0;
+	--width: 20%;
+	flex: 0 0 20%;
+	max-width: 20%;
+	width: 20%;
+	box-sizing: border-box;
+	padding-right: 10px;
 }
-</script>
 
-{% include '_static/content-shop.twig' %}
-{% endblock %}
+.elementor-3101 .localroots-brand-column .elementor-heading-title {
+	font-size: inherit;
+	line-height: 1.6;
+}
 
-{% block scripts %}
-{% include '_includes/vamtam/scripts-shop.twig' %}
-<script src="{{ alias('@web') }}/js/shop.js"></script>
-<script>
-(function() {
-	const source = document.getElementById('localroots-brands-source');
-	const grid = document.querySelector('.elementor-element-e0ad6a8');
-	if (!source || !grid) return;
-	const widget = grid.closest('.elementor-element');
-	if (widget) {
-		widget.innerHTML = source.innerHTML;
-		source.remove();
+.elementor-3101 .localroots-brand-column .elementor-heading-title a {
+	text-decoration: none;
+}
+
+.elementor-3101 .localroots-brand-column .elementor-heading-title a:hover {
+	opacity: 0.7;
+}
+
+@media (max-width: 1024px) and (min-width: 768px) {
+	.elementor-3101 .localroots-brand-column {
+		--width: 33.333%;
+		flex: 0 0 33.333%;
+		max-width: 33.333%;
+		width: 33.333%;
 	}
-})();
-</script>
+}
+
+@media (max-width: 767px) {
+	.elementor-3101 .localroots-brand-column {
+		--width: 50%;
+		flex: 0 0 50%;
+		max-width: 50%;
+		width: 50%;
+		padding-right: 0;
+	}
+}
+</style>
+{% include '_static/content-brands.twig' %}
 {% endblock %}

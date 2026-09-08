@@ -1,0 +1,56 @@
+{% extends '_layouts/vamtam-alt' %}
+
+{% set entry = craft.entries().section('orderStatus').one() %}
+{% set trackResult = craft.app.session.getFlash('orderStatusTrack') %}
+{% set submitted = trackResult.submitted ?? {} %}
+
+{% block head %}{% include '_includes/vamtam/head-order-status.twig' %}{% endblock %}
+{% block bodyClass %}{% include '_static/body-class-order-status.twig' %}{% endblock %}
+
+{% block content %}
+{% if craft.app.session.hasFlash('error') %}
+<div class="localroots-flash localroots-flash--error" role="alert" style="max-width:1280px;margin:0 auto 1rem;padding:0.75rem 1rem;background:#fdecea;color:#611a15;border:1px solid #f5c6cb;">{{ craft.app.session.getFlash('error') }}</div>
+{% endif %}
+
+<div id="localroots-order-status-source" hidden>
+	{% if trackResult %}
+	<div data-order-status-results>
+		{% include '_includes/vamtam/order-status-track-results.twig' with { result: trackResult } %}
+	</div>
+	{% endif %}
+	<div data-order-status-form>
+		{% include '_includes/vamtam/order-status-track-form.twig' with { submitted: submitted } %}
+	</div>
+	{% if entry %}
+	<div data-order-status-body>{{ entry.pageBody|raw }}</div>
+	{% endif %}
+</div>
+
+<style>
+.localroots-order-track-results { margin-top: 2rem; }
+.localroots-order-track-summary h5,
+.localroots-order-track-shipment h5 { margin: 0 0 0.75rem; font-size: 1rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.localroots-order-track-meta { margin: 0 0 1.25rem; color: #666; }
+.localroots-order-track-items { width: 100%; margin-bottom: 2rem; border-collapse: collapse; }
+.localroots-order-track-items th,
+.localroots-order-track-items td { padding: 0.65rem 0; border-bottom: 1px solid #e8e8e8; text-align: left; }
+.localroots-order-track-shipment { padding-top: 1.5rem; border-top: 1px solid #e8e8e8; }
+.localroots-order-track-status,
+.localroots-order-track-route,
+.localroots-order-track-note { margin: 0 0 1rem; }
+.localroots-order-track-timeline { list-style: none; margin: 1.5rem 0 0; padding: 0; }
+.localroots-order-track-event { position: relative; padding: 0 0 1.25rem 1.5rem; border-left: 1px solid #ddd; }
+.localroots-order-track-event:last-child { padding-bottom: 0; }
+.localroots-order-track-event:before { content: ''; position: absolute; left: -5px; top: 0.35rem; width: 9px; height: 9px; border-radius: 50%; background: #0a0505; }
+.localroots-order-track-event-date { display: block; font-size: 0.85rem; color: #666; }
+.localroots-order-track-event-status { display: block; font-weight: 600; margin-top: 0.15rem; }
+.localroots-order-track-event-location,
+.localroots-order-track-event-message { display: block; margin-top: 0.15rem; color: #444; }
+</style>
+
+{% include '_static/content-order-status.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/order-status.js"></script>
+{% endblock %}

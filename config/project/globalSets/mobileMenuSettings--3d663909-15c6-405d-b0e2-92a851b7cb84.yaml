@@ -1,0 +1,116 @@
+fieldLayouts:
+  a88f493c-df61-493d-9e5d-4d386a571ce1:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        elements:
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 48b6686d-2766-4385-acf8-65ccb834f858 # Menu Background Image
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: cb51e0e8-5678-4833-ad4f-4b77c63d5aaa
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 36c58e2b-4d5d-4a9c-a161-f9919f7d479d # Menu Promo Image
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: e3cb4ff6-6a21-4cae-bad6-d2b0e1ad1d0a
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: a49f2b22-a696-42da-ab48-f8d8467af794 # Menu Promo Button Text
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 482c025b-47f0-49d1-a97d-b888fec7b4bf
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 046c1d80-13bb-45b4-98d3-7540fd71a835 # Menu Promo Button URL
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 21e0a7b0-2b16-4c9c-9ce6-fd1bc875e2ff
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: c426f424-bf71-44f7-8199-62983c341b13 # Menu Primary Navigation
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: a50690b7-650a-4526-828f-a19be9937d09
+            userCondition: null
+            warning: null
+            width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 8c970138-330c-4c0d-8429-ee9f27fe4fb4 # Menu Footer Navigation
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: b6792361-0aac-4bfc-a73f-96b885ab2e8e
+            userCondition: null
+            warning: null
+            width: 100
+        name: Content
+        uid: 0dada0e5-4429-4beb-9b33-87a5c01afaeb
+        userCondition: null
+    thumbFieldKey: null
+handle: mobileMenuSettings
+name: 'Mobile Menu'
+sortOrder: 4

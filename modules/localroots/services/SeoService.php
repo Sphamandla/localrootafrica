@@ -137,7 +137,8 @@ class SeoService extends Component
             $type = 'faq';
         }
 
-        $hero = $entry->pageHeroImage?->one() ?? $entry->pressHeroImage?->one() ?? null;
+        $hero = $entry->pageHeroImage?->one()
+            ?? (isset($entry->pressHeroImage) ? $entry->pressHeroImage->one() : null);
 
         return [
             'type' => $type,

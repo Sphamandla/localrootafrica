@@ -6,15 +6,19 @@ use Craft;
 use craft\commerce\elements\Product;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\elements\GlobalSet;
 use craft\elements\Tag;
 use craft\fieldlayoutelements\CustomField;
 use craft\fieldlayoutelements\TitleField;
 use craft\fields\Lightswitch;
+use craft\fields\PlainText;
 use craft\fields\Table;
 use craft\helpers\App;
 use craft\helpers\StringHelper;
 use craft\models\FieldLayout;
 use craft\models\FieldLayoutTab;
+use craft\models\Section;
+use craft\models\Section_SiteSettings;
 use modules\localroots\services\ShopFilterService;
 use modules\localroots\services\TemplateExtractorService;
 use yii\console\Controller;
@@ -48,6 +52,8 @@ class SeedController extends Controller
         $this->actionFaq($basePath);
         $this->actionPress($basePath);
         $this->actionDeliveryAndReturns($basePath);
+        $this->actionOrderStatus($basePath);
+        $this->actionMobileMenu($basePath);
         $this->actionSustainability($basePath);
 
         $this->stdout("Running product import...\n");
@@ -763,5 +769,245 @@ class SeedController extends Controller
 
         $this->stdout('  Seeded Sustainability single (' . strlen($body) . " bytes body)\n");
         return ExitCode::OK;
+    }
+
+    public function actionOrderStatus(?string $basePath = null): int
+    {
+        $basePath = rtrim($basePath ?? App::env('TEMPLATE_HTML_PATH') ?: '/Users/test/www/localrootsafrica/innovecouture.vamtam.com', '/');
+        $this->_ensureOrderStatusSection();
+
+        $section = Craft::$app->entries->getSectionByHandle('orderStatus');
+        if (!$section) {
+            $this->stderr("  Order Status section not found. Run setup first.\n", Console::FG_YELLOW);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $file = $basePath . '/index.html?p=732.html';
+        if (!file_exists($file)) {
+            $file = $basePath . '/order-status/index.html';
+        }
+        if (!file_exists($file)) {
+            $this->stderr("  Missing order-status HTML\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $html = file_get_contents($file);
+        $rewriter = new TemplateExtractorService(['templateBase' => $basePath]);
+        $body = '';
+        if (preg_match('/elementor-element-6bd4fae.*?<div class="elementor-widget-container">\s*(.*?)\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/div>\s*<\/article/is', $html, $bodyMatch)) {
+            $body = $rewriter->rewritePaths($bodyMatch[1]);
+            $body = preg_replace('/action="[^"]*"/', 'action="/order-status"', $body) ?: $body;
+        }
+
+        $entry = Entry::find()->section('orderStatus')->one();
+        if (!$entry) {
+            $entryType = $section->getEntryTypes()[0] ?? null;
+            if (!$entryType) {
+                return ExitCode::UNSPECIFIED_ERROR;
+            }
+            $entry = new Entry([
+                'sectionId' => $section->id,
+                'typeId' => $entryType->id,
+                'enabled' => true,
+            ]);
+        }
+
+        $entry->title = 'Order status';
+        $entry->setFieldValues(['pageBody' => $body ?: $entry->title]);
+
+        if (!Craft::$app->elements->saveElement($entry)) {
+            $this->stderr("  Failed to save Order Status single\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $this->stdout('  Seeded Order Status single (' . strlen($body) . " bytes body)\n");
+        return ExitCode::OK;
+    }
+
+    public function actionMobileMenu(?string $basePath = null): int
+    {
+        $basePath = rtrim($basePath ?? App::env('TEMPLATE_HTML_PATH') ?: '/Users/test/www/localrootsafrica/innovecouture.vamtam.com', '/');
+        $this->_ensureMobileMenuGlobal();
+
+        $volume = Craft::$app->getVolumes()->getVolumeByHandle('content');
+        if (!$volume) {
+            $this->stderr("  Content volume not found.\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $bgAsset = $this->_importContentAsset($basePath . '/wp-content/uploads/2024/01/farol-106-JlriaTaLavA-unsplash.jpg', $volume)
+            ?? $this->_importContentAsset(Craft::getAlias('@webroot/assets/wp-content/uploads/2024/01/farol-106-JlriaTaLavA-unsplash.jpg'), $volume);
+        $promoAsset = $this->_importContentAsset($basePath . '/wp-content/uploads/2024/01/pexels-cottonbro-studio-7870749.jpg', $volume)
+            ?? $this->_importContentAsset(Craft::getAlias('@webroot/assets/wp-content/uploads/2024/01/pexels-cottonbro-studio-7870749.jpg'), $volume);
+        $logoAsset = $this->_importContentAsset($basePath . '/wp-content/uploads/2023/12/Logo.svg', $volume)
+            ?? $this->_importContentAsset(Craft::getAlias('@webroot/assets/wp-content/uploads/2023/12/Logo.svg'), $volume);
+
+        $menu = Craft::$app->getGlobals()->getSetByHandle('mobileMenuSettings');
+        if (!$menu) {
+            $this->stderr("  mobileMenuSettings global not found.\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $menu->setFieldValues([
+            'menuBackgroundImage' => $bgAsset ? [$bgAsset->id] : [],
+            'menuPromoImage' => $promoAsset ? [$promoAsset->id] : [],
+            'menuPromoButtonText' => 'Discover Winter 23',
+            'menuPromoButtonUrl' => '/product-category/women/collections/winter-23',
+            'menuPrimaryNav' => [
+                ['label' => 'Sustainability', 'url' => '/sustainability'],
+                ['label' => 'Press', 'url' => '/press'],
+                ['label' => 'Contact', 'url' => '/contact'],
+            ],
+            'menuFooterNav' => [
+                ['label' => 'Order status', 'url' => '/order-status'],
+                ['label' => 'Delivery and returns', 'url' => '/delivery-and-returns'],
+            ],
+        ]);
+
+        if (!Craft::$app->elements->saveElement($menu)) {
+            $this->stderr("  Failed to save mobileMenuSettings global\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $footer = Craft::$app->getGlobals()->getSetByHandle('footerSettings');
+        if ($footer) {
+            $footer->setFieldValues([
+                'socialInstagram' => $footer->socialInstagram ?: 'https://www.instagram.com/innovecouture.vamtam/',
+                'socialFacebook' => $footer->socialFacebook ?: 'https://www.facebook.com/',
+                'socialPinterest' => $footer->socialPinterest ?: 'https://www.pinterest.com/',
+            ]);
+            Craft::$app->elements->saveElement($footer);
+        }
+
+        $site = Craft::$app->getGlobals()->getSetByHandle('siteSettings');
+        if ($site && $logoAsset && !$site->siteLogo->one()) {
+            $site->setFieldValues(['siteLogo' => [$logoAsset->id]]);
+            Craft::$app->elements->saveElement($site);
+        }
+
+        $this->stdout("  Seeded mobileMenuSettings global\n");
+        return ExitCode::OK;
+    }
+
+    private function _ensureMobileMenuGlobal(): void
+    {
+        $fieldsService = Craft::$app->getFields();
+        $tableColumns = [
+            'col1' => ['heading' => 'Label', 'handle' => 'label', 'width' => '40%', 'type' => 'singleline'],
+            'col2' => ['heading' => 'URL', 'handle' => 'url', 'width' => '60%', 'type' => 'singleline'],
+        ];
+
+        $fieldDefs = [
+            ['handle' => 'menuBackgroundImage', 'name' => 'Menu Background Image', 'type' => \craft\fields\Assets::class, 'settings' => ['allowedKinds' => ['image'], 'maxRelations' => 1]],
+            ['handle' => 'menuPromoImage', 'name' => 'Menu Promo Image', 'type' => \craft\fields\Assets::class, 'settings' => ['allowedKinds' => ['image'], 'maxRelations' => 1]],
+            ['handle' => 'menuPromoButtonText', 'name' => 'Menu Promo Button Text', 'type' => PlainText::class],
+            ['handle' => 'menuPromoButtonUrl', 'name' => 'Menu Promo Button URL', 'type' => PlainText::class],
+            ['handle' => 'menuPrimaryNav', 'name' => 'Menu Primary Navigation', 'type' => Table::class, 'settings' => ['columns' => $tableColumns]],
+            ['handle' => 'menuFooterNav', 'name' => 'Menu Footer Navigation', 'type' => Table::class, 'settings' => ['columns' => $tableColumns]],
+        ];
+
+        $contentVolume = Craft::$app->getVolumes()->getVolumeByHandle('content');
+        foreach ($fieldDefs as $def) {
+            if ($fieldsService->getFieldByHandle($def['handle'])) {
+                continue;
+            }
+            $settings = $def['settings'] ?? [];
+            if ($def['type'] === \craft\fields\Assets::class && $contentVolume) {
+                $settings['sources'] = ['volume:' . $contentVolume->uid];
+            }
+            $field = $fieldsService->createField([
+                'type' => $def['type'],
+                'name' => $def['name'],
+                'handle' => $def['handle'],
+                'settings' => $settings,
+            ]);
+            $fieldsService->saveField($field);
+            $this->stdout("  Created field: {$def['handle']}\n");
+        }
+
+        $globalsService = Craft::$app->getGlobals();
+        if ($globalsService->getSetByHandle('mobileMenuSettings')) {
+            return;
+        }
+
+        $layout = new FieldLayout(['type' => GlobalSet::class]);
+        $tab = new FieldLayoutTab(['name' => 'Content', 'layout' => $layout]);
+        $elements = [];
+        foreach (['menuBackgroundImage', 'menuPromoImage', 'menuPromoButtonText', 'menuPromoButtonUrl', 'menuPrimaryNav', 'menuFooterNav'] as $handle) {
+            $field = $fieldsService->getFieldByHandle($handle);
+            if ($field) {
+                $elements[] = Craft::$app->getFields()->createLayoutElement([
+                    'type' => CustomField::class,
+                    'fieldUid' => $field->uid,
+                ]);
+            }
+        }
+        $tab->setElements($elements);
+        $layout->setTabs([$tab]);
+
+        $set = new GlobalSet(['name' => 'Mobile Menu', 'handle' => 'mobileMenuSettings']);
+        $set->setFieldLayout($layout);
+        $globalsService->saveSet($set);
+        $this->stdout("  Created global set: mobileMenuSettings\n");
+    }
+
+    private function _ensureOrderStatusSection(): void
+    {
+        $sectionsService = Craft::$app->entries;
+        if ($sectionsService->getSectionByHandle('orderStatus')) {
+            return;
+        }
+
+        $fieldsService = Craft::$app->getFields();
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+        $pageBody = $fieldsService->getFieldByHandle('pageBody');
+        if (!$pageBody) {
+            return;
+        }
+
+        $layout = new FieldLayout(['type' => Entry::class]);
+        $tab = new FieldLayoutTab(['name' => 'Content', 'layout' => $layout]);
+        $tab->setElements([
+            Craft::$app->getFields()->createLayoutElement(['type' => TitleField::class]),
+            Craft::$app->getFields()->createLayoutElement([
+                'type' => CustomField::class,
+                'fieldUid' => $pageBody->uid,
+            ]),
+        ]);
+        $layout->setTabs([$tab]);
+
+        $entryType = new \craft\models\EntryType([
+            'name' => 'Order Status',
+            'handle' => 'orderStatus',
+            'hasTitleField' => true,
+        ]);
+        $entryType->setFieldLayout($layout);
+        $sectionsService->saveEntryType($entryType);
+
+        $section = new Section([
+            'name' => 'Order Status',
+            'handle' => 'orderStatus',
+            'type' => Section::TYPE_SINGLE,
+            'enableVersioning' => true,
+        ]);
+        $section->setSiteSettings([$primarySite->id => new Section_SiteSettings([
+            'siteId' => $primarySite->id,
+            'enabledByDefault' => true,
+            'hasUrls' => true,
+            'uriFormat' => 'order-status',
+            'template' => '_pages/order-status',
+        ])]);
+        $section->setEntryTypes([$entryType]);
+        $sectionsService->saveSection($section);
+        $this->stdout("  Created section: orderStatus\n");
+    }
+
+    private function _importContentAsset(string $filePath, $volume): ?Asset
+    {
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        return $this->_importPressAsset($filePath, $volume);
     }
 }

@@ -1,4 +1,4 @@
-dateModified: 1788890750
+dateModified: 1788895827
 email:
   fromEmail: admin@localroots.africa
   fromName: 'Local Roots Africa'
@@ -17,19 +17,26 @@ meta:
     1e53ff99-0003-49e4-ba74-958649cfd00f: 'Delivery and Returns' # Delivery and Returns
     2b4bdf13-c848-4441-8cc7-b9b5addbac4c: 'Product Images' # Product Images
     3c4eb748-8fca-4aec-bd80-e25f9824a536: 'Footer Settings' # Footer Settings
+    3d663909-15c6-405d-b0e2-92a851b7cb84: 'Mobile Menu' # Mobile Menu
+    3e47fc9f-68e7-4f23-9125-8ef72d051ff1: 'Order Status' # Order Status
     5bbc5ad1-9817-4833-8b89-5dc5a2e8ca19: 'Product Reviews' # Product Reviews
     5d16cef5-02fa-44d6-bd34-95cef356c020: 'Author Email' # Author Email
     6fb8bd1f-38e9-4db1-a9ab-7c27e3078b6d: Categories # Categories
     7d0ebec0-7962-437a-9f95-ea9ff801ea3d: 'Facebook URL' # Facebook URL
     07edf859-d076-48d9-b54d-d0ad7cff5ea1: 'Site Settings' # Site Settings
     8ad9482c-8b91-421f-986b-77924340147b: 'Promo Title' # Promo Title
+    8c970138-330c-4c0d-8429-ee9f27fe4fb4: 'Menu Footer Navigation' # Menu Footer Navigation
     8ced4d92-c820-4439-ad29-57206b41d01e: 'Review Status' # Review Status
     9b95f6ae-6ff0-4c04-99e6-50c0e8e1dc91: Orders # Orders
+    9e3e6b4f-22bd-4179-ae46-a81618977097: 'Courier Tracking Reference' # Courier Tracking Reference
     10af4ecc-50e3-4d62-bdaa-3220592eb183: 'Total Price' # Total Price
     18e9718e-2fa1-4a5a-bd8c-71196c597976: 'Promo Subtitle' # Promo Subtitle
     21badc0e-de2c-4037-9bce-dc90cabd3814: Promotions # Promotions
     31fe6892-e89d-47bf-9288-fa9d81bab7e4: Product # Product
+    36c58e2b-4d5d-4a9c-a161-f9919f7d479d: 'Menu Promo Image' # Menu Promo Image
     44fe9edb-8cbb-4f10-97fd-dd45abe6f97c: Promotions # Promotions
+    046c1d80-13bb-45b4-98d3-7540fd71a835: 'Menu Promo Button URL' # Menu Promo Button URL
+    48b6686d-2766-4385-acf8-65ccb834f858: 'Menu Background Image' # Menu Background Image
     68e72579-42b0-4808-9e4a-25a5c2e695f1: Primary # Primary
     68fc7f40-b380-4871-8249-609331fcf48e: Dummy # Dummy
     76fe0ed1-d578-4cec-b1d5-f0679316eb18: 'Product Questions' # Product Questions
@@ -52,9 +59,10 @@ meta:
     17139417-d6f7-47d4-a3e8-fb0ed9d211f0: New # New
     32300246-7065-4e64-9e65-57e400c5735b: 'Line Items' # Line Items
     94376659-de21-437e-8203-9d5fd6fdf7c2: 'Cash on delivery' # Cash on delivery
+    a9b8c7d6-e5f4-4a3b-9c8d-7e6f5a4b3c2d: Sustainability # Sustainability
+    a49f2b22-a696-42da-ab48-f8d8467af794: 'Menu Promo Button Text' # Menu Promo Button Text
     a91b2c97-99db-4173-bd77-842cc5068000: Product # Product
     a256d8f3-d589-4dca-934d-9ef523504b64: 'Public Schema' # Public Schema
-    a9b8c7d6-e5f4-4a3b-9c8d-7e6f5a4b3c2d: Sustainability # Sustainability
     ab291bd6-8e36-41d8-aecc-bf6ff45c20d1: Featured # Featured
     acdbb89a-7773-4771-8fe9-b8592136e71e: 'Site Logo' # Site Logo
     afae4c11-b33a-46ae-bc57-0de0a5c688fd: 'Direct bank transfer' # Direct bank transfer
@@ -64,7 +72,9 @@ meta:
     be035570-dd96-4f29-af3d-40dd03989f7f: 'Hero Image' # Hero Image
     c4fe28e1-cb96-4682-8230-0c16ab5a4fad: 'Default SEO Title' # Default SEO Title
     c8f4e2a1-9b3d-4e7f-a1c2-3d4e5f607182: 'Delivery and Returns' # Delivery and Returns
+    c426f424-bf71-44f7-8199-62983c341b13: 'Menu Primary Navigation' # Menu Primary Navigation
     c3149d0e-5554-441f-9d95-c4200e34c451: 'Copyright Text' # Copyright Text
+    ca23274d-0577-4c86-97b4-58f34785693e: 'Order Status' # Order Status
     cb09419f-b182-43cd-9e3b-e31a25f0edf8: 'Author Name' # Author Name
     cbf2aa08-d837-46af-9b02-82aeef042a60: 'Product Questions' # Product Questions
     d2e366a6-2155-4586-833d-a5c2f8bdc16e: 'Customer Info' # Customer Info

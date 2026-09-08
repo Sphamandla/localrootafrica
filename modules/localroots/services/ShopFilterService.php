@@ -289,6 +289,52 @@ class ShopFilterService extends Component
         return $brands;
     }
 
+    /**
+     * @return array<string, list<array{title: string, slug: string, count: int, url: string, legacyId: ?string}>>
+     */
+    public function getBrandsByLetter(): array
+    {
+        $grouped = [];
+        foreach ($this->getAllBrands() as $brand) {
+            $letter = strtoupper(substr($brand['title'], 0, 1));
+            if (!ctype_alpha($letter)) {
+                $letter = '#';
+            }
+            $grouped[$letter][] = $brand;
+        }
+        ksort($grouped);
+
+        return $grouped;
+    }
+
+    /**
+     * @param list<array{title: string, slug: string, count: int, url: string, legacyId: ?string}> $brands
+     * @return list<list<array{title: string, slug: string, count: int, url: string, legacyId: ?string}>>
+     */
+    public function splitBrandsIntoColumns(array $brands, int $columns = 5): array
+    {
+        if ($brands === [] || $columns < 1) {
+            return [];
+        }
+
+        $columns = min($columns, count($brands));
+        $perColumn = (int)ceil(count($brands) / $columns);
+        $result = array_fill(0, $columns, []);
+        $column = 0;
+        $count = 0;
+
+        foreach ($brands as $brand) {
+            $result[$column][] = $brand;
+            $count++;
+            if ($count >= $perColumn && $column < $columns - 1) {
+                $column++;
+                $count = 0;
+            }
+        }
+
+        return array_values(array_filter($result, fn(array $col) => $col !== []));
+    }
+
     public function findBrandTagByLegacyId(string $id): ?Tag
     {
         $title = self::LEGACY_BRAND_IDS[$id] ?? null;

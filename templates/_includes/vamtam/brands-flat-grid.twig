@@ -1,0 +1,13 @@
+{% set shopFilter = craft.app.getModule('localroots').shopFilter %}
+{% set brandColumns = shopFilter.splitBrandsIntoColumns(shopFilter.getAllBrands(), 5) %}
+{% for column in brandColumns %}
+<div class="elementor-element e-con-full e-flex e-con e-child localroots-brand-column">
+	{% for brand in column %}
+	<div class="elementor-element elementor-widget elementor-widget-heading">
+		<div class="elementor-widget-container">
+			<div class="elementor-heading-title elementor-size-default"><a href="{{ brand.url }}">{{ brand.title }}</a></div>
+		</div>
+	</div>
+	{% endfor %}
+</div>
+{% endfor %}
