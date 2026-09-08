@@ -19,6 +19,7 @@ class TemplateExtractorService extends Component
         'checkout' => 'checkout/index.html',
         'account' => 'my-account/index.html',
         'product' => 'product/cotton-grey-overshirt/index.html',
+        'product-feather-down-puffer-green-gilet' => 'product/feather-down-puffer-green-gilet/index.html',
         'product-simple' => 'product/bianca-jean-in-light-blue-denim/index.html',
         'product-variant' => 'product/generation-blazer/index.html',
         'about' => 'about/index.html',

@@ -1,10 +1,18 @@
 {% extends '_layouts/vamtam' %}
 
+{% set productHandle = 'product-' ~ product.slug %}
+{% set contentTemplate = craft.app.view.doesTemplateExist('_static/content-' ~ productHandle ~ '.twig')
+	? '_static/content-' ~ productHandle ~ '.twig'
+	: '_static/content-product.twig' %}
+{% set bodyClassTemplate = craft.app.view.doesTemplateExist('_static/body-class-' ~ productHandle ~ '.twig')
+	? '_static/body-class-' ~ productHandle ~ '.twig'
+	: '_static/body-class-product.twig' %}
+
 {% set variants = product.variants.all() %}
 {% set variant = product.defaultVariant ?? variants|first %}
 {% set images = product.productImages.all() %}
 {% set primaryImage = images|first %}
-{% set fallbackImage = '/wp-content/uploads/2024/02/2421320800_2_1_1.jpg' %}
+{% set fallbackImage = '/wp-content/uploads/2024/02/4302405505_1_1_1.jpg' %}
 {% set imageUrl = primaryImage ? primaryImage.getUrl() : fallbackImage %}
 {% set imageThumb = primaryImage ? primaryImage.getUrl({ width: 866, height: 1299 }) : fallbackImage %}
 {% set thumb150 = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : fallbackImage %}
@@ -13,154 +21,57 @@
 {% set onSale = variant and variant.onPromotion and regularPrice > salePrice %}
 {% set shortDescription = product.productShortDescription ?? product.title %}
 {% set relatedProducts = craft.products()
-    .id('not ' ~ product.id)
-    .limit(12)
-    .all() %}
-{% set priceMarkup %}
-{% include '_includes/vamtam/price-sale.twig' with { saleAmount: salePrice, regularAmount: regularPrice } %}
-{% endset %}
+	.id('not ' ~ product.id)
+	.limit(12)
+	.all() %}
 
-{% block bodyClass %}{% include '_static/body-class-product.twig' %}{% endblock %}
+{% block head %}
+{% include '_includes/vamtam/head-product.twig' %}
+{% endblock %}
+
+{% block bodyClass %}{% include bodyClassTemplate %}{% endblock %}
 
 {% block content %}
 <div id="localroots-product-sources" hidden>
-	<div id="localroots-atc-source">
-		{% include '_includes/vamtam/product-variable-cart.twig' with { variants: variants } %}
-	</div>
 	<div id="localroots-related-source">
 		{% for related in relatedProducts %}
 			{% include '_includes/vamtam/product-related-item-13500.twig' with { product: related } %}
 		{% endfor %}
 	</div>
 </div>
-{% include '_static/content-product.twig' %}
+
+<script type="application/json" id="localroots-product-config">
+{
+	"title": {{ product.title|json_encode|raw }},
+	"id": {{ product.id }},
+	"onSale": {{ onSale ? 'true' : 'false' }},
+	"description": {{ shortDescription|json_encode|raw }},
+	"imageUrl": {{ imageUrl|json_encode|raw }},
+	"imageThumb": {{ imageThumb|json_encode|raw }},
+	"thumb150": {{ thumb150|json_encode|raw }},
+	"url": {{ product.url|json_encode|raw }},
+	"images": [
+		{% for image in images %}
+		{
+			"url": {{ image.getUrl()|json_encode|raw }},
+			"thumb": {{ image.getUrl({ width: 866, height: 1299 })|json_encode|raw }},
+			"alt": {{ product.title|json_encode|raw }}
+		}{% if not loop.last %},{% endif %}
+		{% else %}
+		{
+			"url": {{ imageUrl|json_encode|raw }},
+			"thumb": {{ imageThumb|json_encode|raw }},
+			"alt": {{ product.title|json_encode|raw }}
+		}
+		{% endfor %}
+	]
+}
+</script>
+
+{% include contentTemplate with { product: product, variants: variants } %}
 {% endblock %}
 
 {% block scripts %}
-<script>
-(function() {
-	const productData = {
-		title: {{ product.title|json_encode|raw }},
-		id: {{ product.id }},
-		onSale: {{ onSale ? 'true' : 'false' }},
-		priceHtml: {{ priceMarkup|trim|json_encode|raw }},
-		description: {{ shortDescription|json_encode|raw }},
-		imageUrl: {{ imageUrl|json_encode|raw }},
-		imageThumb: {{ imageThumb|json_encode|raw }},
-		thumb150: {{ thumb150|json_encode|raw }},
-		url: {{ product.url|json_encode|raw }}
-	};
-
-	document.querySelectorAll('.product_title.entry-title').forEach(el => { el.textContent = productData.title; });
-
-	const priceWrap = document.querySelector('.elementor-element-7aef695f .elementor-widget-container');
-	if (priceWrap && productData.priceHtml) {
-		priceWrap.innerHTML = productData.priceHtml;
-	}
-
-	const onsaleEl = document.querySelector('.elementor-element-12b6582 .onsale');
-	if (onsaleEl && !productData.onSale) {
-		onsaleEl.remove();
-	}
-
-	const breadcrumb = document.querySelector('.woocommerce-breadcrumb');
-	if (breadcrumb) {
-		const parts = breadcrumb.innerHTML.split('&nbsp;&#47;&nbsp;');
-		if (parts.length) {
-			parts[parts.length - 1] = productData.title;
-			breadcrumb.innerHTML = parts.join('&nbsp;&#47;&nbsp;');
-		}
-	}
-
-	document.querySelectorAll('.woocommerce-review-link').forEach(el => {
-		el.href = productData.url + '#reviews';
-	});
-
-	const galleryImg = document.querySelector('.woocommerce-product-gallery__image img.wp-post-image');
-	if (galleryImg && productData.imageUrl) {
-		galleryImg.src = productData.imageUrl;
-		galleryImg.alt = productData.title;
-		galleryImg.setAttribute('data-src', productData.imageUrl);
-		galleryImg.setAttribute('data-large_image', productData.imageUrl);
-		const zoomImg = document.querySelector('.woocommerce-product-gallery__image .wpcpv-item img');
-		if (zoomImg) zoomImg.src = productData.imageUrl;
-		const galleryWrap = document.querySelector('.woocommerce-product-gallery__image');
-		if (galleryWrap) {
-			galleryWrap.setAttribute('data-thumb', productData.imageThumb);
-			galleryWrap.setAttribute('data-thumb-alt', productData.title);
-		}
-	}
-
-	const descPanel = document.querySelector('#tab-description .vgblk-rw-wrapper, #tab-description');
-	if (descPanel) {
-		descPanel.innerHTML = productData.description;
-	}
-
-	document.querySelectorAll('.woocommerce-Reviews-title span').forEach(el => {
-		el.textContent = productData.title;
-	});
-
-	document.querySelectorAll('#producttitle, input[name="ets_Product_Title"]').forEach(el => {
-		el.value = productData.title;
-	});
-
-	const sourceCart = document.querySelector('#localroots-atc-source .elementor-add-to-cart');
-	const targetCart = document.querySelector('.elementor-element-48216332 .elementor-add-to-cart');
-	if (sourceCart && targetCart) {
-		const cloned = sourceCart.cloneNode(true);
-		const sizeSelect = cloned.querySelector('.localroots-size-select');
-		if (sizeSelect) sizeSelect.id = 'pa_size';
-		targetCart.replaceWith(cloned);
-		initVariableCart(document.querySelector('.elementor-element-48216332 .localroots-commerce-form'));
-	}
-
-	const gallery = document.querySelector('.woocommerce-product-gallery');
-	if (gallery) gallery.style.opacity = '1';
-
-	replaceCarousel('.elementor-element-56fb727c .swiper-wrapper');
-	replaceCarousel('.elementor-element-35331e6 .swiper-wrapper');
-
-	function replaceCarousel(selector) {
-		const wrapper = document.querySelector(selector);
-		const source = document.querySelector('#localroots-related-source');
-		if (!wrapper || !source || !source.children.length) return;
-		wrapper.innerHTML = '';
-		Array.from(source.children).forEach(child => {
-			wrapper.appendChild(child.cloneNode(true));
-		});
-		const carousel = wrapper.closest('.elementor-widget-loop-carousel');
-		if (carousel && typeof elementorFrontend !== 'undefined' && elementorFrontend.elementsHandler) {
-			elementorFrontend.elementsHandler.runReadyTrigger(carousel);
-		}
-	}
-
-	function initVariableCart(form) {
-		if (!form) return;
-		const sizeSelect = form.querySelector('.localroots-size-select');
-		const purchasableInput = form.querySelector('.localroots-purchasable-id');
-		const submitBtn = form.querySelector('.single_add_to_cart_button');
-		const resetLink = form.querySelector('.localroots-reset-size');
-
-		function updateCartState() {
-			const option = sizeSelect.options[sizeSelect.selectedIndex];
-			const variantId = option ? option.getAttribute('data-variant-id') : null;
-			if (variantId) {
-				purchasableInput.value = variantId;
-				submitBtn.disabled = false;
-			} else {
-				purchasableInput.value = '';
-				submitBtn.disabled = true;
-			}
-		}
-
-		sizeSelect?.addEventListener('change', updateCartState);
-		resetLink?.addEventListener('click', function(e) {
-			e.preventDefault();
-			sizeSelect.value = '';
-			updateCartState();
-		});
-		updateCartState();
-	}
-})();
-</script>
+{% include '_includes/vamtam/scripts-product.twig' %}
+<script src="{{ alias('@web') }}/js/product.js"></script>
 {% endblock %}

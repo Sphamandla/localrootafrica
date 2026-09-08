@@ -74,9 +74,10 @@ class ImportController extends Controller
                 'sku' => 'LR-12602',
             ],
             'feather-down-puffer-green-gilet' => [
-                'price' => 1450,
-                'image' => 'wp-content/uploads/2024/02/20231214_VB_600_2200x.jpg',
-                'sku' => 'LR-FEATHER',
+                'price' => 1600,
+                'image' => 'wp-content/uploads/2024/02/4302405505_1_1_1.jpg',
+                'sku' => 'LR-12588',
+                'forceImage' => true,
             ],
         ];
 
@@ -103,6 +104,18 @@ class ImportController extends Controller
                     Craft::$app->getElements()->saveElement($product);
                     $changed = true;
                     $this->stdout("  {$slug}: attached image\n");
+                }
+            } elseif (($config['forceImage'] ?? false) === true) {
+                $asset = $this->_importAsset($basePath . '/' . $config['image'], $productsVolume);
+                if (!$asset) {
+                    $local = Craft::getAlias('@webroot/uploads/products/' . basename($config['image']));
+                    $asset = $this->_importAsset($local, $productsVolume);
+                }
+                if ($asset) {
+                    $product->setFieldValue('productImages', [$asset->id]);
+                    Craft::$app->getElements()->saveElement($product);
+                    $changed = true;
+                    $this->stdout("  {$slug}: replaced image\n");
                 }
             }
 

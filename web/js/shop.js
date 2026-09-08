@@ -18,7 +18,7 @@
 		}
 	}
 
-	if (gridSource) {
+		if (gridSource) {
 		const grid = document.querySelector('.elementor-element-e0ad6a8 .elementor-loop-container');
 		if (grid) {
 			grid.innerHTML = '';
@@ -26,6 +26,11 @@
 				grid.appendChild(item.cloneNode(true));
 			});
 			gridSource.remove();
+
+			const loopWidget = document.querySelector('.elementor-element-e0ad6a8');
+			if (loopWidget && typeof elementorFrontend !== 'undefined' && elementorFrontend.elementsHandler) {
+				elementorFrontend.elementsHandler.runReadyTrigger(loopWidget);
+			}
 		}
 	}
 
