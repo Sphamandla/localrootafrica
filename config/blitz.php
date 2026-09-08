@@ -16,6 +16,7 @@ return [
             ['uriPattern' => 'login'],
             ['uriPattern' => 'register'],
             ['uriPattern' => 'wishlist'],
+            ['uriPattern' => 'contact'],
             ['uriPattern' => 'commerce/.*'],
             ['uriPattern' => 'localroots/.*'],
         ],

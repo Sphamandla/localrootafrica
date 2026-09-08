@@ -26,6 +26,8 @@ class LocalRootsModule extends Module
         Craft::setAlias('@modules/localroots', __DIR__);
         $this->setComponents([
             'payfast' => PayfastService::class,
+            'ozow' => services\OzowService::class,
+            'yoco' => services\YocoService::class,
             'orderSync' => OrderSyncService::class,
             'cashEftEmail' => CashEftEmailService::class,
             'courierGuy' => services\CourierGuyService::class,

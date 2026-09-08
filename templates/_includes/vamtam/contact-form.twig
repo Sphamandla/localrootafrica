@@ -1,0 +1,35 @@
+{# Contact form — posts to ContactController #}
+<form method="post" action="{{ url('localroots/contact/submit') }}" class="elementor-form localroots-contact-form" aria-label="Contact">
+	{{ csrfInput() }}
+	{{ redirectInput('/contact') }}
+
+	<div class="elementor-form-fields-wrapper elementor-labels-above">
+		<div class="elementor-field-type-text elementor-field-group elementor-column elementor-col-50 elementor-field-required">
+			<label for="localroots-contact-name" class="elementor-field-label">Your name</label>
+			<input size="1" type="text" name="name" id="localroots-contact-name" class="elementor-field elementor-size-sm elementor-field-textual" required autocomplete="name">
+		</div>
+		<div class="elementor-field-type-email elementor-field-group elementor-column elementor-col-50 elementor-field-required">
+			<label for="localroots-contact-email" class="elementor-field-label">Email address</label>
+			<input size="1" type="email" name="email" id="localroots-contact-email" class="elementor-field elementor-size-sm elementor-field-textual" required autocomplete="email">
+		</div>
+		<div class="elementor-field-type-tel elementor-field-group elementor-column elementor-col-50 elementor-field-required">
+			<label for="localroots-contact-phone" class="elementor-field-label">Phone number</label>
+			<input size="1" type="tel" name="phone" id="localroots-contact-phone" class="elementor-field elementor-size-sm elementor-field-textual" required autocomplete="tel">
+		</div>
+		<div class="elementor-field-type-text elementor-field-group elementor-column elementor-col-50">
+			<label for="localroots-contact-order" class="elementor-field-label">Order number</label>
+			<input size="1" type="text" name="orderNumber" id="localroots-contact-order" class="elementor-field elementor-size-sm elementor-field-textual">
+		</div>
+		<div class="elementor-field-type-textarea elementor-field-group elementor-column elementor-col-100 elementor-field-required">
+			<label for="localroots-contact-message" class="elementor-field-label">Your message</label>
+			<textarea class="elementor-field-textual elementor-field elementor-size-sm" name="message" id="localroots-contact-message" rows="5" required></textarea>
+		</div>
+		<div class="elementor-field-group elementor-column elementor-field-type-submit elementor-col-100 e-form__buttons">
+			<button class="elementor-button elementor-size-sm" type="submit">
+				<span class="elementor-button-content-wrapper">
+					<span class="elementor-button-text">Submit</span>
+				</span>
+			</button>
+		</div>
+	</div>
+</form>

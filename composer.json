@@ -32,6 +32,7 @@
   "scripts": {
     "post-root-package-install": [
       "@php -r \"file_exists('.env') || copy('.env.example.dev', '.env');\""
-    ]
+    ],
+    "smoke-test": "bash scripts/smoke-test.sh"
   }
 }

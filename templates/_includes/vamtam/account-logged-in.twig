@@ -145,8 +145,8 @@
 							{% if billing %}
 								{{ billing.fullName }}<br>
 								{{ billing.addressLine1 }}{% if billing.addressLine2 %}, {{ billing.addressLine2 }}{% endif %}<br>
-								{{ billing.city }}{% if billing.state %} {{ billing.state }}{% endif %} {{ billing.zipCode }}<br>
-								{{ billing.countryId }}
+								{{ billing.locality }}{% if billing.administrativeArea %} {{ billing.administrativeArea }}{% endif %} {{ billing.postalCode }}<br>
+								{{ billing.countryCode }}
 							{% else %}
 								You have not set up this type of address yet.
 							{% endif %}
@@ -159,8 +159,8 @@
 							{% if shipping %}
 								{{ shipping.fullName }}<br>
 								{{ shipping.addressLine1 }}{% if shipping.addressLine2 %}, {{ shipping.addressLine2 }}{% endif %}<br>
-								{{ shipping.city }}{% if shipping.state %} {{ shipping.state }}{% endif %} {{ shipping.zipCode }}<br>
-								{{ shipping.countryId }}
+								{{ shipping.locality }}{% if shipping.administrativeArea %} {{ shipping.administrativeArea }}{% endif %} {{ shipping.postalCode }}<br>
+								{{ shipping.countryCode }}
 							{% else %}
 								You have not set up this type of address yet.
 							{% endif %}

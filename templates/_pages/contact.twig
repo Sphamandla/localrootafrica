@@ -20,5 +20,16 @@
 {% if craft.app.session.hasFlash('error') %}
 <div class="localroots-flash localroots-flash--error" role="alert">{{ craft.app.session.getFlash('error') }}</div>
 {% endif %}
+
+<div id="localroots-contact-source" hidden>
+	<div data-contact-form>
+		{% include '_includes/vamtam/contact-form.twig' %}
+	</div>
+</div>
+
 {% include '_static/content-contact.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/contact.js"></script>
 {% endblock %}
