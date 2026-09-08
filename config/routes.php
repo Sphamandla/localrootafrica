@@ -13,6 +13,7 @@ return [
     'localroots/payfast/notify' => 'localroots/payfast/notify',
     'localroots/newsletter/subscribe' => 'localroots/newsletter/subscribe',
     'shop' => ['template' => '_pages/products/index'],
+    'shop/page/<page:\d+>' => ['template' => '_pages/products/index'],
     'shop/<slug:{slug}>' => ['template' => '_pages/products/category'],
     'product-category/<path:.*>' => ['template' => '_pages/products/category'],
     'cart' => ['template' => '_pages/cart/index'],

@@ -23,6 +23,7 @@ class LocalRootsModule extends Module
             'payfast' => PayfastService::class,
             'orderSync' => OrderSyncService::class,
             'courierGuy' => services\CourierGuyService::class,
+            'shopFilter' => services\ShopFilterService::class,
         ]);
 
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {

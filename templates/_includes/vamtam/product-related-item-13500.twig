@@ -1,0 +1,67 @@
+{# Related product carousel item — elementor-13500 loop template #}
+{% set variant = product.defaultVariant ?? product.variants.first() %}
+{% set image = product.productImages.one() %}
+{% set imageUrl = image ? image.getUrl({ width: 683, height: 1024 }) : '/wp-content/uploads/2024/02/2421320800_2_1_1-683x1024.jpg' %}
+{% set thumb150 = image ? image.getUrl({ width: 150, height: 150, mode: 'crop' }) : '/wp-content/uploads/2024/02/2421320800_2_1_1-150x150.jpg' %}
+{% set price = variant ? variant.salePrice : 0 %}
+
+<div data-elementor-type="loop-item" data-elementor-id="13500" class="elementor elementor-13500 swiper-slide e-loop-item e-loop-item-{{ product.id }} product type-product status-publish has-post-thumbnail instock taxable shipping-taxable purchasable product-type-variable" data-elementor-post-type="elementor_library" role="group" aria-roledescription="slide" data-custom-edit-handle="1">
+	<div class="elementor-element elementor-element-2e307ec9 e-con-full e-flex e-con e-parent" data-id="2e307ec9" data-element_type="container" data-e-type="container">
+		<div class="elementor-element elementor-element-7b797194 e-flex e-con-boxed e-con e-child" data-id="7b797194" data-element_type="container" data-e-type="container" data-settings="{&quot;position&quot;:&quot;absolute&quot;}">
+			<div class="e-con-inner">
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-4cf484ae elementor-widget elementor-widget-shortcode" data-id="4cf484ae" data-element_type="widget" data-e-type="widget" data-widget_type="shortcode.default">
+					<div class="elementor-widget-container"><div class="elementor-shortcode"></div></div>
+				</div>
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-709e2a0a elementor-widget elementor-widget-shortcode" data-id="709e2a0a" data-element_type="widget" data-e-type="widget" data-widget_type="shortcode.default">
+					<div class="elementor-widget-container"><div class="elementor-shortcode"></div></div>
+				</div>
+			</div>
+		</div>
+		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-1aae6a58 elementor-widget elementor-widget-theme-post-featured-image elementor-widget-image" data-id="1aae6a58" data-element_type="widget" data-e-type="widget" data-widget_type="theme-post-featured-image.default">
+			<div class="elementor-widget-container">
+				<a href="{{ product.url }}">
+					<img width="683" height="1024" src="{{ imageUrl }}" class="attachment-large size-large" alt="{{ product.title }}" loading="lazy" />
+				</a>
+			</div>
+		</div>
+		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-5089929 elementor-absolute vamtam-show-on-hover elementor-widget elementor-widget-shortcode" data-id="5089929" data-element_type="widget" data-e-type="widget" data-settings="{&quot;_position&quot;:&quot;absolute&quot;}" data-widget_type="shortcode.default">
+			<div class="elementor-widget-container">
+				<div class="elementor-shortcode"><button type="button" class="vamtam-loading woosw-btn woosw-btn-{{ product.id }} woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn" data-id="{{ product.id }}" data-product_name="{{ product.title }}" data-product_image="{{ thumb150 }}" aria-label="Add to wishlist"><span class="vamtam-loading woosw-btn-icon woosw-icon-5"></span><span class="vamtam-loading woosw-btn-text">Add to wishlist</span></button></div>
+			</div>
+		</div>
+		<div class="elementor-element elementor-element-67713315 vamtam-show-on-hover e-flex e-con-boxed e-con e-child" data-id="67713315" data-element_type="container" data-e-type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
+			<div class="e-con-inner">
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-1f1e52d7 elementor-add-to-cart--align-justify elementor-add-to-cart--layout-stacked elementor-widget elementor-widget-woocommerce-product-add-to-cart" data-id="1f1e52d7" data-element_type="widget" data-e-type="widget" data-widget_type="woocommerce-product-add-to-cart.default">
+					<div class="elementor-widget-container">
+						<div class="elementor-add-to-cart elementor-product-variable">
+							<div class="e-loop-add-to-cart-form-container">
+								{% if variant %}
+								<form class="cart e-loop-add-to-cart-form" method="post">
+									{{ csrfInput() }}
+									{{ actionInput('commerce/cart/update-cart') }}
+									{{ redirectInput(craft.app.request.pathInfo) }}
+									{{ hiddenInput('purchasableId', variant.id) }}
+									{{ hiddenInput('qty', 1) }}
+									<div class="e-atc-qty-button-holder">
+										<button type="submit" class="button product_type_simple add_to_cart_button" aria-label="Add &ldquo;{{ product.title }}&rdquo; to your cart">Add to cart</button>
+									</div>
+								</form>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="elementor-element elementor-element-52c052e3 elementor-widget elementor-widget-heading" data-id="52c052e3" data-element_type="widget" data-e-type="widget" data-widget_type="heading.default">
+			<div class="elementor-widget-container">
+				<div class="elementor-heading-title elementor-size-default"><a href="{{ product.url }}">{{ product.title }}</a></div>
+			</div>
+		</div>
+		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-59909353 elementor-widget elementor-widget-woocommerce-product-price" data-id="59909353" data-element_type="widget" data-e-type="widget" data-widget_type="woocommerce-product-price.default">
+			<div class="elementor-widget-container">
+				<p class="price">{% include '_includes/vamtam/price.twig' with { amount: price } %}</p>
+			</div>
+		</div>
+	</div>
+</div>

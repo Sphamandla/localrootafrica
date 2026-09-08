@@ -1,0 +1,8 @@
+{# WooCommerce-compatible sale price markup #}
+{% set saleAmount = saleAmount ?? 0 %}
+{% set regularAmount = regularAmount ?? saleAmount %}
+{% if regularAmount > saleAmount %}
+<p class="price"><del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ regularAmount|number_format(0, '.', ',') }}</bdi></span></del> <span class="screen-reader-text">Original price was: R{{ regularAmount|number_format(0, '.', ',') }}.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ saleAmount|number_format(0, '.', ',') }}</bdi></span></ins><span class="screen-reader-text">Current price is: R{{ saleAmount|number_format(0, '.', ',') }}.</span></p>
+{% else %}
+<p class="price"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ saleAmount|number_format(0, '.', ',') }}</bdi></span></p>
+{% endif %}

@@ -1,0 +1,46 @@
+{# WooCommerce-compatible variable product add-to-cart — matches elementor-13806 markup #}
+{% set variants = variants ?? product.variants.all() %}
+{% set primaryImage = product.productImages.one() %}
+{% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : '/wp-content/uploads/2024/02/20231214_VB_600_2200x-150x150.jpg' %}
+
+<div class="elementor-add-to-cart elementor-product-variable">
+<form class="variations_form cart localroots-commerce-form" method="post" action="{{ product.url }}">
+	{{ csrfInput() }}
+	{{ actionInput('commerce/cart/update-cart') }}
+	{{ redirectInput(product.url) }}
+
+	<table class="variations" cellspacing="0" role="presentation">
+		<tbody>
+			<tr>
+				<th class="label"><label for="pa_size">Size</label></th>
+				<td class="value">
+					<select class="localroots-size-select" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes">
+						<option value="">Choose an option</option>
+						{% set sizeSlugs = { 'XS': 'xs', 'S': 's', 'M': 'm', 'L': 'xl', 'XL': 'xl-2' } %}
+						{% for variant in variants %}
+							<option value="{{ sizeSlugs[variant.title] ?? variant.title|lower }}" data-variant-id="{{ variant.id }}">{{ variant.title }}</option>
+						{% endfor %}
+					</select>
+					<a class="reset_variations localroots-reset-size" href="#" aria-label="Clear options">Clear</a>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
+
+	<div class="single_variation_wrap">
+		<div class="woocommerce-variation single_variation" role="alert" aria-relevant="additions"></div>
+		<div class="woocommerce-variation-add-to-cart variations_button">
+			<div class="quantity">
+				<label class="screen-reader-text" for="localroots-product-qty">{{ product.title }} quantity</label>
+				<input type="number" id="localroots-product-qty" class="input-text qty text" name="qty" value="1" aria-label="Product quantity" min="1" step="1" placeholder="" inputmode="numeric" autocomplete="off" />
+			</div>
+
+			<button type="submit" class="single_add_to_cart_button button alt" disabled>Add to cart</button>
+
+			<button type="button" class="vamtam-loading woosw-btn woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn" data-id="{{ product.id }}" data-product_name="{{ product.title }}" data-product_image="{{ thumbUrl }}" aria-label="Add to wishlist"><span class="vamtam-loading woosw-btn-icon woosw-icon-5"></span><span class="vamtam-loading woosw-btn-text">Add to wishlist</span></button>
+			<input type="hidden" name="purchasableId" class="variation_id localroots-purchasable-id" value="" />
+		</div>
+	</div>
+</form>
+</div>

@@ -1,11 +1,14 @@
-{# Product grid item — matches Elementor loop-item markup from static shop #}
-{% set variant = product.defaultVariant %}
+{% set variant = product.defaultVariant ?? product.variants.first() %}
+{% set isVariable = product.variants.all()|length > 1 %}
 {% set image = product.productImages.one() %}
 {% set imageUrl = image ? image.getUrl({ width: 866, height: 1299 }) : '/wp-content/uploads/2023/12/2-2-866x1299.jpg' %}
 {% set thumbUrl = image ? image.getUrl({ width: 683, height: 1024 }) : '/wp-content/uploads/2023/12/2-2-683x1024.jpg' %}
-{% set price = variant ? variant.salePrice : 0 %}
+{% set salePrice = variant ? variant.salePrice : 0 %}
+{% set regularPrice = variant ? variant.price : 0 %}
+{% set onSale = variant and variant.onPromotion and regularPrice > salePrice %}
+{% set productTypeClass = isVariable ? 'product-type-variable' : 'product-type-simple' %}
 
-<div data-elementor-type="loop-item" data-elementor-id="9231" class="elementor elementor-9231 e-loop-item e-loop-item-{{ product.id }} product type-product status-publish has-post-thumbnail instock taxable shipping-taxable purchasable product-type-simple" data-elementor-post-type="elementor_library" data-custom-edit-handle="1">
+<div data-elementor-type="loop-item" data-elementor-id="9231" class="elementor elementor-9231 e-loop-item e-loop-item-{{ product.id }} product type-product status-publish has-post-thumbnail instock taxable shipping-taxable purchasable {{ productTypeClass }}" data-elementor-post-type="elementor_library" data-custom-edit-handle="1">
 	<div class="elementor-element elementor-element-7eadb9dc e-con-full e-flex e-con e-parent" data-id="7eadb9dc" data-element_type="container" data-e-type="container">
 		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-20f08ce9 vamtam-has-post-gallery elementor-widget elementor-widget-theme-post-featured-image elementor-widget-image" data-id="20f08ce9" data-element_type="widget" data-e-type="widget" data-widget_type="theme-post-featured-image.default">
 			<div class="elementor-widget-container">
@@ -20,9 +23,11 @@
 			<div class="e-con-inner">
 				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-112fc240 elementor-add-to-cart--align-justify elementor-add-to-cart--layout-stacked elementor-widget elementor-widget-woocommerce-product-add-to-cart" data-id="112fc240" data-element_type="widget" data-e-type="widget" data-widget_type="woocommerce-product-add-to-cart.default">
 					<div class="elementor-widget-container">
-						<div class="elementor-add-to-cart elementor-product-simple">
+						<div class="elementor-add-to-cart elementor-product-{{ isVariable ? 'variable' : 'simple' }}">
 							<div class="e-loop-add-to-cart-form-container">
-								{% if variant %}
+								{% if isVariable %}
+								<a href="{{ product.url }}" class="button product_type_variable add_to_cart_button" aria-label="Select options for &ldquo;{{ product.title }}&rdquo;">Select options</a>
+								{% elseif variant %}
 								<form class="cart e-loop-add-to-cart-form" method="post">
 									{{ csrfInput() }}
 									{{ actionInput('commerce/cart/update-cart') }}
@@ -47,7 +52,7 @@
 		</div>
 		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-650efc70 elementor-widget elementor-widget-woocommerce-product-price" data-id="650efc70" data-element_type="widget" data-e-type="widget" data-widget_type="woocommerce-product-price.default">
 			<div class="elementor-widget-container">
-				<p class="price">{% include '_includes/vamtam/price.twig' with { amount: price } %}</p>
+				{% if onSale %}{% include '_includes/vamtam/price-sale.twig' with { saleAmount: salePrice, regularAmount: regularPrice } %}{% else %}<p class="price">{% include '_includes/vamtam/price.twig' with { amount: salePrice } %}</p>{% endif %}
 			</div>
 		</div>
 	</div>

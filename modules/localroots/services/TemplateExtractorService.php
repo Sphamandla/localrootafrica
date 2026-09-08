@@ -18,7 +18,7 @@ class TemplateExtractorService extends Component
         'cart' => 'cart/index.html',
         'checkout' => 'checkout/index.html',
         'account' => 'my-account/index.html',
-        'product' => 'product/sunday-best/index.html',
+        'product' => 'product/oversized-pea-blazer-in-black/index.html',
         'product-simple' => 'product/bianca-jean-in-light-blue-denim/index.html',
         'product-variant' => 'product/generation-blazer/index.html',
         'about' => 'about/index.html',
@@ -126,10 +126,13 @@ class TemplateExtractorService extends Component
             $written[] = $this->writeFragment('footer.twig', "{# Extracted from {$source} #}\n" . $footer);
         }
 
-        if (preg_match('/(<script[\s\S]*?<\/body>)/i', $html, $m)) {
-            $scripts = $this->rewritePaths($m[1]);
-            $scripts = preg_replace('/<\/body>\s*$/i', '', $scripts);
-            $written[] = $this->writeFragment('scripts.twig', "{# Extracted from {$source} #}\n" . $scripts);
+        if (preg_match('/<div[^>]*id="scroll-to-top"[\s\S]*?<\/div>\s*<\/div>\s*([\s\S]*?)<\/body>/i', $html, $m)) {
+            $chunk = $this->rewritePaths($m[1]);
+            preg_match_all('/<script[\s\S]*?<\/script>|<link[^>]+rel=[\'"]stylesheet[\'"][^>]*>/i', $chunk, $matches);
+            $scripts = trim(implode("\n", $matches[0] ?? []));
+            if ($scripts !== '') {
+                $written[] = $this->writeFragment('scripts.twig', "{# Extracted from {$source} #}\n" . $scripts);
+            }
         }
 
         if (preg_match('/<body[^>]*class="([^"]*)"/i', $html, $m)) {
@@ -182,6 +185,8 @@ class TemplateExtractorService extends Component
             'https://innovecouture.vamtam.com/default-shop/' => '/',
             'https://innovecouture.vamtam.com/' => '/',
             '../wp-content/' => '/wp-content/',
+            '../../wp-content/' => '/wp-content/',
+            '..//wp-content/' => '/wp-content/',
             '../wp-includes/' => '/wp-includes/',
             '../default-shop/index.html' => '/',
             '../default-shop/' => '/',
@@ -200,6 +205,7 @@ class TemplateExtractorService extends Component
             '../about/' => '/about/',
             '../sustainability/' => '/sustainability/',
             '../press/' => '/press/',
+            '../cdn-cgi/' => '/cdn-cgi/',
             '../contact/' => '/contact/',
             '../../product-category/' => '/product-category/',
             '../product-category/' => '/product-category/',

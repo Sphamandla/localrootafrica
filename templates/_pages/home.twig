@@ -1,5 +1,144 @@
 {% extends '_layouts/vamtam' %}
 
+{% set allProducts = craft.products().type('default').all() %}
+
 {% block content %}
+<script type="application/json" id="localroots-product-catalog">
+[
+{% for product in allProducts %}
+	{% set variant = product.defaultVariant ?? product.variants.first() %}
+	{% set image = product.productImages.one() %}
+	{
+		"title": {{ product.title|json_encode|raw }},
+		"url": {{ product.url|json_encode|raw }},
+		"id": {{ product.id }},
+		"variantId": {{ variant ? variant.id : 'null' }},
+		"isVariable": {{ product.variants.all()|length > 1 ? 'true' : 'false' }},
+		"image": {{ (image ? image.getUrl({ width: 683, height: 1024 }) : '')|json_encode|raw }},
+		"thumb": {{ (image ? image.getUrl({ width: 150, height: 150, mode: 'crop' }) : '')|json_encode|raw }},
+		"price": {{ variant ? variant.salePrice : 0 }}
+	}{% if not loop.last %},{% endif %}
+{% endfor %}
+]
+</script>
+<script type="application/json" id="localroots-commerce-config">
+{
+	"csrfName": {{ craft.app.config.general.csrfTokenName|json_encode|raw }},
+	"csrfToken": {{ craft.app.request.csrfToken|json_encode|raw }},
+	"cartAction": {{ actionUrl('commerce/cart/update-cart')|json_encode|raw }},
+	"shopUrl": {{ url('shop')|json_encode|raw }}
+}
+</script>
 {% include '_static/content-home.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+	const catalogEl = document.getElementById('localroots-product-catalog');
+	const configEl = document.getElementById('localroots-commerce-config');
+	if (!catalogEl || !configEl) return;
+
+	const catalog = JSON.parse(catalogEl.textContent);
+	const config = JSON.parse(configEl.textContent);
+	const byTitle = {};
+	const byTitleLower = {};
+	catalog.forEach(p => {
+		byTitle[p.title] = p;
+		byTitleLower[p.title.toLowerCase()] = p;
+	});
+
+	function lookupProduct(name) {
+		if (!name) return null;
+		return byTitle[name] || byTitleLower[name.toLowerCase()] || null;
+	}
+
+	function priceHtml(amount) {
+		const formatted = Math.round(amount).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+		return '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>' + formatted + '</bdi></span>';
+	}
+
+	function fixCategoryLinks() {
+		document.querySelectorAll('[href*="product-category"]').forEach(el => {
+			el.href = config.shopUrl;
+		});
+		document.querySelectorAll('a[href*="%3Fp="]').forEach(a => {
+			if (/view all|shop now/i.test(a.textContent || '')) {
+				a.href = config.shopUrl;
+			}
+		});
+	}
+
+	function wireSimpleAddToCart(item, product) {
+		if (!product.variantId) return;
+		const form = item.querySelector('form.e-loop-add-to-cart-form');
+		const holder = item.querySelector('.e-atc-qty-button-holder');
+		if (!form || !holder) return;
+
+		form.method = 'post';
+		form.action = product.url;
+		form.innerHTML = ''
+			+ '<input type="hidden" name="' + config.csrfName + '" value="' + config.csrfToken + '">'
+			+ '<input type="hidden" name="action" value="commerce/cart/update-cart">'
+			+ '<input type="hidden" name="purchasableId" value="' + product.variantId + '">'
+			+ '<input type="hidden" name="qty" value="1">'
+			+ '<div class="e-atc-qty-button-holder">'
+			+ '<button type="submit" class="button product_type_simple add_to_cart_button" aria-label="Add &ldquo;' + product.title.replace(/"/g, '&quot;') + '&rdquo; to your cart">Add to cart</button>'
+			+ '</div>';
+	}
+
+	function fixProductCard(item) {
+		const wishlistBtn = item.querySelector('[data-product_name]');
+		const productName = wishlistBtn ? wishlistBtn.getAttribute('data-product_name') : null;
+		const titleLink = item.querySelector('.elementor-heading-title a');
+		const nameFromTitle = titleLink ? titleLink.textContent.trim() : null;
+		const product = lookupProduct(productName || nameFromTitle);
+		if (!product) return;
+
+		item.querySelectorAll('a[href]').forEach(a => {
+			const href = a.getAttribute('href') || '';
+			if (href.includes('%3Fp=') || href.includes('index.html%3F') || href.includes('add-to-cart')) {
+				a.href = product.url;
+			}
+		});
+
+		if (titleLink) titleLink.textContent = product.title;
+		const titleOnly = item.querySelector('.elementor-heading-title:not(:has(a))');
+		if (titleOnly && !titleLink) titleOnly.textContent = product.title;
+
+		const img = item.querySelector('.elementor-element-1aae6a58 img, .elementor-widget-theme-post-featured-image img');
+		if (img && product.image) {
+			img.src = product.image;
+			img.removeAttribute('data-lazy-src');
+			if (img.parentElement && img.parentElement.tagName === 'NOSCRIPT') {
+				img.parentElement.querySelector('img')?.setAttribute('src', product.image);
+			}
+		}
+
+		const priceEl = item.querySelector('.elementor-element-59909353 .price, .elementor-widget-woocommerce-product-price .price');
+		if (priceEl && product.price) {
+			priceEl.innerHTML = priceHtml(product.price);
+		}
+
+		item.querySelectorAll('.woosw-btn[data-product_name]').forEach(btn => {
+			btn.setAttribute('data-id', product.id);
+			btn.setAttribute('data-product_name', product.title);
+			if (product.thumb) btn.setAttribute('data-product_image', product.thumb);
+		});
+
+		if (product.isVariable) {
+			const atcLink = item.querySelector('a.add_to_cart_button, a.product_type_variable');
+			if (atcLink) {
+				atcLink.href = product.url;
+				atcLink.classList.remove('ajax_add_to_cart');
+			}
+		} else {
+			wireSimpleAddToCart(item, product);
+		}
+	}
+
+	document.querySelectorAll('.e-loop-item.product').forEach(fixProductCard);
+	fixCategoryLinks();
+})();
+</script>
 {% endblock %}
