@@ -1,4 +1,4 @@
-dateModified: 1788872075
+dateModified: 1788876428
 email:
   fromEmail: admin@localroots.africa
   fromName: 'Local Roots Africa'
@@ -35,6 +35,7 @@ meta:
     99c37949-cba9-4110-b5a3-fbd8834689dc: Content # Content
     462ba2ec-8fa1-4f29-82ff-c740590fd07d: Body # Body
     542a0f2e-7f12-4af9-a4df-db6af3cc0456: 'Order Number' # Order Number
+    912aabb1-fecb-4960-8bf0-e1c4b9a84052: Press # Press
     945a904f-bce5-4531-93c7-79698d606620: 'Product Tags' # Product Tags
     11802c2b-3476-4997-bf59-3543084c0e64: Ozow # Ozow
     12673b94-3667-4415-9321-7c537ba9a185: 'Instagram URL' # Instagram URL
@@ -45,6 +46,7 @@ meta:
     acdbb89a-7773-4771-8fe9-b8592136e71e: 'Site Logo' # Site Logo
     b7bef018-a476-49bc-a40c-5f672778e4ea: 'Short Description' # Short Description
     b5193905-1004-4487-b59a-23a45146ee6b: 'Default SEO Description' # Default SEO Description
+    bc98ea82-68eb-48a3-9029-4005f46a5c7e: Press # Press
     be035570-dd96-4f29-af3d-40dd03989f7f: 'Hero Image' # Hero Image
     c4fe28e1-cb96-4682-8230-0c16ab5a4fad: 'Default SEO Title' # Default SEO Title
     c3149d0e-5554-441f-9d95-c4200e34c451: 'Copyright Text' # Copyright Text
@@ -63,6 +65,7 @@ meta:
     ebc26618-696b-4530-9ee1-3f64e6e70218: Default # Default
     ed76d2b1-5c15-4156-902c-f859980f0e22: 'Twitter URL' # Twitter URL
     f4a17b21-afdd-4e79-b839-10ae6eaac4bb: 'Local Roots Africa' # Local Roots Africa
+    f9b62df4-06c7-47ad-b103-d631daf7db32: Wishlist # Wishlist
     f5736581-910a-4423-95b6-324743c21a4e: 'Site Name' # Site Name
     fce2e58c-af0f-4dd1-bc98-79434a3eb8de: 'Pinterest URL' # Pinterest URL
     fdf0314e-8d94-47b2-a8a5-dc786343c002: 'Payment Status' # Payment Status
@@ -70,17 +73,34 @@ plugins:
   blitz:
     edition: standard
     enabled: true
+    licenseKey: I7UG9VGWAC3JOSVG6RF6S2OC
     schemaVersion: 5.12.0
   commerce:
     edition: pro
     enabled: true
+    licenseKey: T41P037FKOC3YE6SDR6XO20K
     schemaVersion: 5.7.0.0
+  notifier:
+    edition: standard
+    enabled: true
+    licenseKey: YMPGT4Q77JV2WNACWILTV90Z
+    schemaVersion: 3.2.0
   seomatic:
     edition: standard
     enabled: true
+    licenseKey: ERVB4AG8RGHGB46W181ZQDV2
     schemaVersion: 3.0.13
+  sprig:
+    edition: standard
+    enabled: true
+    schemaVersion: 1.0.1
+  wishlist:
+    edition: standard
+    enabled: true
+    licenseKey: 94AX5OKSBL0J3KNZ8A8QF6VR
+    schemaVersion: 1.1.0
 system:
-  edition: solo
+  edition: pro
   live: true
   name: 'Local Roots Africa'
   schemaVersion: 5.11.0.2

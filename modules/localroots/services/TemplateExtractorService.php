@@ -19,7 +19,18 @@ class TemplateExtractorService extends Component
         'checkout' => 'checkout/index.html',
         'account' => 'my-account/index.html',
         'product' => 'product/sunday-best/index.html',
+        'product-simple' => 'product/bianca-jean-in-light-blue-denim/index.html',
+        'product-variant' => 'product/generation-blazer/index.html',
+        'about' => 'about/index.html',
+        'wishlist' => 'wishlist/index.html',
+        'sustainability' => 'sustainability/index.html',
+        'press' => 'press/index.html',
+        'press-detail' => '2024/02/08/innove-new-yorks-first-store-opening-in-soho-ny/index.html',
+        'collection' => 'product-category/women/collections/summer-24/index.html',
     ];
+
+    /** Pages that use the alternate header (elementor-150) */
+    private array $altLayoutPages = ['about', 'wishlist', 'sustainability', 'press', 'press-detail'];
 
     public function init(): void
     {
@@ -40,6 +51,12 @@ class TemplateExtractorService extends Component
             $written = array_merge($written, $this->extractSharedFromHtml($html, 'home'));
         }
 
+        $aboutFile = $this->templateBase . '/' . $this->pageMap['about'];
+        if (file_exists($aboutFile)) {
+            $html = file_get_contents($aboutFile);
+            $written = array_merge($written, $this->extractAltLayoutFromHtml($html, 'about'));
+        }
+
         foreach ($this->pageMap as $handle => $relativePath) {
             $file = $this->templateBase . '/' . $relativePath;
             if (!file_exists($file)) {
@@ -47,6 +64,38 @@ class TemplateExtractorService extends Component
             }
             $html = file_get_contents($file);
             $written = array_merge($written, $this->extractPageContent($html, $handle));
+        }
+
+        return $written;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function extractAltLayoutFromHtml(string $html, string $source): array
+    {
+        $written = [];
+
+        if (preg_match('/<head[^>]*>(.*?)<\/head>/is', $html, $m)) {
+            $head = $this->rewritePaths($m[1]);
+            $head = $this->stripWordPressMeta($head);
+            $written[] = $this->writeFragment('head-alt.twig', "{# Extracted from {$source} #}\n" . $head);
+        }
+
+        if (preg_match('/<header[^>]*elementor-location-header[^>]*>(.*)<\/header>/is', $html, $m)) {
+            $elementId = '150';
+            if (preg_match('/<header[^>]*data-elementor-id="(\d+)"/is', $html, $idMatch)) {
+                $elementId = $idMatch[1];
+            }
+            $headerHtml = '<header data-elementor-type="header" data-elementor-id="' . $elementId . '" class="elementor elementor-' . $elementId . ' elementor-location-header" data-elementor-post-type="elementor_library">' . $m[1] . '</header>';
+            $headerHtml = $this->rewritePaths($headerHtml);
+            $headerHtml = $this->injectCraftNav($headerHtml);
+            $written[] = $this->writeFragment('header-alt.twig', "{# Extracted from {$source} #}\n" . $headerHtml);
+        }
+
+        if (preg_match('/(<div[^>]*class="footer-wrapper"[^>]*>[\s\S]*?<\/div>\s*<\/div><!--\s*\/?\s*#page\s*-->[\s\S]*?<div[^>]*id="scroll-to-top"[\s\S]*?<\/div>\s*<\/div>)/i', $html, $m)) {
+            $footer = $this->rewritePaths($m[1]);
+            $written[] = $this->writeFragment('footer-alt.twig', "{# Extracted from {$source} #}\n" . $footer);
         }
 
         return $written;
@@ -149,7 +198,19 @@ class TemplateExtractorService extends Component
             '../product/' => '/products/',
             '../wishlist/' => '/wishlist/',
             '../about/' => '/about/',
+            '../sustainability/' => '/sustainability/',
+            '../press/' => '/press/',
             '../contact/' => '/contact/',
+            '../../product-category/' => '/product-category/',
+            '../product-category/' => '/product-category/',
+            '../../about/' => '/about/',
+            '../../shop/' => '/shop/',
+            '../../cart/' => '/cart/',
+            '../../wishlist/' => '/wishlist/',
+            '../../press/' => '/press/',
+            '../../sustainability/' => '/sustainability/',
+            '../../2024/' => '/press/',
+            '../../../2024/' => '/press/',
         ];
 
         $html = str_replace(array_keys($replacements), array_values($replacements), $html);

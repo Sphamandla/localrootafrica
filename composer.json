@@ -7,10 +7,14 @@
     }
   },
   "require": {
+    "clarknelson/craft-mailchimp": "dev-master",
     "craftcms/cms": "^5.9.0",
     "craftcms/commerce": "^5.0",
+    "doublesecretagency/craft-notifier": "^3.2",
     "nystudio107/craft-seomatic": "^5.0",
     "putyourlightson/craft-blitz": "^5.0",
+    "putyourlightson/craft-sprig": "^3.7",
+    "verbb/wishlist": "^3.0",
     "vlucas/phpdotenv": "^5.4.0"
   },
   "require-dev": {

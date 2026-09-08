@@ -1,0 +1,21 @@
+{# Sprig product search results #}
+{% set q = q ?? '' %}
+{% set products = q|length >= 2 ? craft.products.search(q).limit(8).all() : [] %}
+
+{% if q|length >= 2 %}
+<ul class="dgwt-wcas-suggestions-wrapp">
+    {% for product in products %}
+    {% set variant = product.defaultVariant ?? product.variants.first() %}
+    {% set image = product.productImages.one() %}
+    <li class="dgwt-wcas-suggestion">
+        <a href="{{ product.url }}" class="dgwt-wcas-suggestion-product">
+            {% if image %}<img src="{{ image.getUrl({ width: 64, height: 96 }) }}" alt="{{ product.title }}" />{% endif %}
+            <span class="dgwt-wcas-suggestion-title">{{ product.title }}</span>
+            {% if variant %}<span class="dgwt-wcas-suggestion-price">R{{ variant.salePrice|number_format(0, '.', '') }}</span>{% endif %}
+        </a>
+    </li>
+    {% else %}
+    <li class="dgwt-wcas-suggestion dgwt-wcas-suggestion-no-results">No products found</li>
+    {% endfor %}
+</ul>
+{% endif %}

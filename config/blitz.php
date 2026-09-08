@@ -14,6 +14,8 @@ return [
             ['uriPattern' => 'checkout'],
             ['uriPattern' => 'account'],
             ['uriPattern' => 'login'],
+            ['uriPattern' => 'register'],
+            ['uriPattern' => 'wishlist'],
             ['uriPattern' => 'commerce/.*'],
             ['uriPattern' => 'localroots/.*'],
         ],

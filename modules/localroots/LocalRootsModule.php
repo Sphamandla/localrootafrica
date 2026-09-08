@@ -22,6 +22,7 @@ class LocalRootsModule extends Module
         $this->setComponents([
             'payfast' => PayfastService::class,
             'orderSync' => OrderSyncService::class,
+            'courierGuy' => services\CourierGuyService::class,
         ]);
 
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {

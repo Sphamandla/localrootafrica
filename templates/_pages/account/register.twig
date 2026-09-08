@@ -8,22 +8,22 @@
 <div id="main" role="main" class="vamtam-main layout-full">
 <div class="page-wrapper">
 <div class="woocommerce">
-    <h2>Login</h2>
-    <form method="post" accept-charset="UTF-8" class="woocommerce-form woocommerce-form-login login">
+    <h2>Register</h2>
+    <form method="post" accept-charset="UTF-8" class="woocommerce-form woocommerce-form-register register">
         {{ csrfInput() }}
-        {{ actionInput('users/login') }}
+        {{ actionInput('users/save-user') }}
         {{ redirectInput('account') }}
         <p class="form-row">
-            <label for="loginName">Email</label>
-            <input type="email" name="loginName" id="loginName" required>
+            <label for="email">Email</label>
+            <input type="email" name="email" id="email" required>
         </p>
         <p class="form-row">
             <label for="password">Password</label>
-            <input type="password" name="password" id="password" required>
+            <input type="password" name="password" id="password" required minlength="6">
         </p>
-        <button type="submit" class="button woocommerce-button">Log in</button>
+        <button type="submit" class="button woocommerce-button">Register</button>
     </form>
-    <p><a href="/register">Create an account</a></p>
+    <p><a href="/login">Already have an account? Log in</a></p>
 </div>
 </div>
 </div>

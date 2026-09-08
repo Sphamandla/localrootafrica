@@ -1,7 +1,25 @@
 {% extends '_layouts/vamtam' %}
 
+{% set products = craft.products.type('default').limit(12).all() %}
+
 {% block bodyClass %}{% include '_static/body-class-shop.twig' %}{% endblock %}
 
 {% block content %}
+{% if products|length %}
+<div id="page" class="main-container">
+<div id="main-content">
+<div id="main" role="main" class="vamtam-main layout-full">
+<div class="page-wrapper">
+<div class="elementor-loop-container elementor-grid">
+    {% for product in products %}
+        {% include '_includes/vamtam/product-loop-item.twig' with { product: product } %}
+    {% endfor %}
+</div>
+</div>
+</div>
+</div>
+</div>
+{% else %}
 {% include '_static/content-shop.twig' %}
+{% endif %}
 {% endblock %}

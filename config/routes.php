@@ -11,10 +11,17 @@
 
 return [
     'localroots/payfast/notify' => 'localroots/payfast/notify',
+    'localroots/newsletter/subscribe' => 'localroots/newsletter/subscribe',
     'shop' => ['template' => '_pages/products/index'],
     'shop/<slug:{slug}>' => ['template' => '_pages/products/category'],
+    'product-category/<path:.*>' => ['template' => '_pages/products/category'],
     'cart' => ['template' => '_pages/cart/index'],
     'checkout' => ['template' => '_pages/checkout/index'],
     'account' => ['template' => '_pages/account/index'],
+    'login' => ['template' => '_pages/account/login'],
     'register' => ['template' => '_pages/account/register'],
+    'wishlist' => ['template' => '_pages/wishlist'],
+    'about' => ['template' => '_pages/about'],
+    'sustainability' => ['template' => '_pages/sustainability'],
+    'press' => ['template' => '_pages/press/index'],
 ];

@@ -1,0 +1,23 @@
+default: true
+handle: wishlist
+itemFieldLayouts:
+  38f4786f-ab66-45fd-8027-c3a388e484e1:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        name: Content
+        uid: 52a7493f-9bdb-4673-9e9a-bdbf412d19a7
+        userCondition: null
+    thumbFieldKey: null
+listFieldLayouts:
+  9e370d5b-bdef-410f-9d46-92062ff5df3d:
+    cardThumbAlignment: end
+    tabs:
+      -
+        elementCondition: null
+        name: Content
+        uid: d753e4f7-533b-4969-909a-80789c30f2b9
+        userCondition: null
+    thumbFieldKey: null
+name: Wishlist

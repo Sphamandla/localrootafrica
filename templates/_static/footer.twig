@@ -101,18 +101,14 @@
 		<div class="elementor-element elementor-element-a926b21 e-con-full e-flex e-con e-child" data-id="a926b21" data-element_type="container" data-e-type="container">
 				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-1985a5d elementor-widget-mobile__width-inherit elementor-widget elementor-widget-form" data-id="1985a5d" data-element_type="widget" data-e-type="widget" data-settings="{&quot;button_width&quot;:&quot;30&quot;,&quot;button_width_mobile&quot;:&quot;25&quot;,&quot;step_next_label&quot;:&quot;Next&quot;,&quot;step_previous_label&quot;:&quot;Previous&quot;,&quot;step_type&quot;:&quot;number_text&quot;,&quot;step_icon_shape&quot;:&quot;circle&quot;}" data-widget_type="form.default">
 				<div class="elementor-widget-container">
-							<form class="elementor-form" method="post" name="New Form" aria-label="New Form">
-			<input type="hidden" name="post_id" value="13214"/>
-			<input type="hidden" name="form_id" value="1985a5d"/>
-			<input type="hidden" name="referer_title" value="Default Shop" />
-
-							<input type="hidden" name="queried_id" value="12444"/>
-			
+							<form class="elementor-form" method="post" action="/localroots/newsletter/subscribe" aria-label="Newsletter">
+			{{ csrfInput() }}
+			<input type="hidden" name="redirect" value="{{ craft.app.request.absoluteUrl }}" />
 			<div class="elementor-form-fields-wrapper elementor-labels-">
 								<div class="elementor-field-type-email elementor-field-group elementor-column elementor-field-group-email elementor-col-70 elementor-sm-75 elementor-field-required">
 												<label for="form-field-email" class="elementor-field-label elementor-screen-only">
 								Email							</label>
-														<input size="1" type="email" name="form_fields[email]" id="form-field-email" class="elementor-field elementor-size-md  elementor-field-textual" placeholder="Enter your email address" required="required">
+														<input size="1" type="email" name="email" id="form-field-email" class="elementor-field elementor-size-md  elementor-field-textual" placeholder="Enter your email address" required="required">
 											</div>
 								<div class="elementor-field-group elementor-column elementor-field-type-submit elementor-col-30 e-form__buttons elementor-sm-25">
 					<button class="elementor-button elementor-size-md" type="submit">
@@ -184,14 +180,14 @@
 				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-5fc5658 elementor-nav-menu__align-start elementor-widget__width-auto elementor-nav-menu--dropdown-none vamtam-has-mobile-disable-scroll elementor-widget elementor-widget-nav-menu" data-id="5fc5658" data-element_type="widget" data-e-type="widget" data-settings="{&quot;layout&quot;:&quot;vertical&quot;,&quot;submenu_icon&quot;:{&quot;value&quot;:&quot;&lt;i class=\&quot;fas fa-caret-down\&quot; aria-hidden=\&quot;true\&quot;&gt;&lt;\/i&gt;&quot;,&quot;library&quot;:&quot;fa-solid&quot;}}" data-widget_type="nav-menu.default">
 				<div class="elementor-widget-container">
 								<nav aria-label="Menu" class="elementor-nav-menu--main elementor-nav-menu__container elementor-nav-menu--layout-vertical e--pointer-none">
-				<ul id="menu-1-5fc5658" class="elementor-nav-menu sm-vertical"><li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13635"><a href="../product-category/women/index.html" class="elementor-item">Women</a></li>
-<li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13636"><a href="../product-category/men/index.html" class="elementor-item">Men</a></li>
+				<ul id="menu-1-5fc5658" class="elementor-nav-menu sm-vertical"><li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13635"><a href="/product-category/women/index.html" class="elementor-item">Women</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13636"><a href="/product-category/men/index.html" class="elementor-item">Men</a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-13637"><a href="/%3Fp=1904.html" class="elementor-item">Sale</a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-13638"><a href="/%3Fp=3101.html" class="elementor-item">Brands</a></li>
 </ul>			</nav>
 						<nav class="elementor-nav-menu--dropdown elementor-nav-menu__container" aria-hidden="true">
-				<ul id="menu-2-5fc5658" class="elementor-nav-menu sm-vertical"><li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13635"><a href="../product-category/women/index.html" class="elementor-item" tabindex="-1">Women</a></li>
-<li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13636"><a href="../product-category/men/index.html" class="elementor-item" tabindex="-1">Men</a></li>
+				<ul id="menu-2-5fc5658" class="elementor-nav-menu sm-vertical"><li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13635"><a href="/product-category/women/index.html" class="elementor-item" tabindex="-1">Women</a></li>
+<li class="menu-item menu-item-type-taxonomy menu-item-object-product_cat menu-item-13636"><a href="/product-category/men/index.html" class="elementor-item" tabindex="-1">Men</a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-13637"><a href="/%3Fp=1904.html" class="elementor-item" tabindex="-1">Sale</a></li>
 <li class="menu-item menu-item-type-post_type menu-item-object-page menu-item-13638"><a href="/%3Fp=3101.html" class="elementor-item" tabindex="-1">Brands</a></li>
 </ul>			</nav>

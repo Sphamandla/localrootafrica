@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en-US" class="no-js">
+<head>
+{% include '_static/head-alt.twig' %}
+{% hook 'seomaticRender' %}
+{% block head %}{% endblock %}
+</head>
+<body class="{% block bodyClass %}{% endblock %}">
+<a href="#" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
+<div id="top"></div>
+
+{% include '_static/header-alt.twig' %}
+
+{% block content %}{% endblock %}
+
+{% include '_static/footer-alt.twig' %}
+
+{% include '_static/scripts.twig' %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

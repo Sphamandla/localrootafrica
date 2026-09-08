@@ -230,6 +230,13 @@ class SetupController extends Controller
                 'template' => null,
                 'fields' => ['orderNumber', 'customerInfo', 'lineItems', 'totalPrice', 'paymentStatus', 'orderStatus'],
             ],
+            'press' => [
+                'name' => 'Press',
+                'type' => Section::TYPE_CHANNEL,
+                'uriFormat' => 'press/{slug}',
+                'template' => '_pages/press/_entry',
+                'fields' => ['pageHeroImage', 'pageBody'],
+            ],
         ];
 
         foreach ($sections as $handle => $config) {

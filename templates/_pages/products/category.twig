@@ -1,0 +1,40 @@
+{% extends '_layouts/vamtam' %}
+
+{% set categorySlug = craft.app.request.getParam('category') ?? slug ?? null %}
+{% set category = categorySlug ? craft.categories.group('productCategories').slug(categorySlug).one() : null %}
+{% set query = craft.products.type('default') %}
+{% if category %}
+    {% set query = query.relatedTo(category) %}
+{% endif %}
+{% paginate query.limit(12) as pageInfo, products %}
+
+{% block bodyClass %}{% include '_static/body-class-collection.twig' %}{% endblock %}
+
+{% block content %}
+<div id="page" class="main-container">
+<div id="main-content">
+<div id="main" role="main" class="vamtam-main layout-full">
+<div class="page-wrapper">
+<div class="elementor elementor-shop">
+    <div class="elementor-loop-container">
+        {% for product in products %}
+            {% include '_includes/vamtam/product-loop-item.twig' with { product: product } %}
+        {% else %}
+            {% include '_static/content-collection.twig' %}
+        {% endfor %}
+    </div>
+    {% if pageInfo.totalPages > 1 %}
+    <nav class="woocommerce-pagination">
+        {% if pageInfo.prevUrl %}<a href="{{ pageInfo.prevUrl }}" class="prev">←</a>{% endif %}
+        {% for page in 1..pageInfo.totalPages %}
+            {% if page == pageInfo.currentPage %}<span class="current">{{ page }}</span>{% else %}<a href="{{ pageInfo.getPageUrl(page) }}">{{ page }}</a>{% endif %}
+        {% endfor %}
+        {% if pageInfo.nextUrl %}<a href="{{ pageInfo.nextUrl }}" class="next">→</a>{% endif %}
+    </nav>
+    {% endif %}
+</div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

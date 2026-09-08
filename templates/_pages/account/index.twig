@@ -3,5 +3,45 @@
 {% block bodyClass %}{% include '_static/body-class-account.twig' %}{% endblock %}
 
 {% block content %}
+{% if currentUser %}
+<div id="page" class="main-container">
+<div id="main-content">
+<div id="main" role="main" class="vamtam-main layout-full">
+<div class="page-wrapper">
+<div class="woocommerce">
+    <h2>My Account</h2>
+    <p>Welcome, {{ currentUser.fullName ?? currentUser.email }}.</p>
+    {% set orders = craft.orders.customer(currentUser).isCompleted(true).orderBy('dateOrdered desc').all() %}
+    {% if orders|length %}
+    <table class="shop_table">
+        <thead><tr><th>Order</th><th>Date</th><th>Total</th><th>Status</th></tr></thead>
+        <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.reference }}</td>
+            <td>{{ order.dateOrdered|date('M j, Y') }}</td>
+            <td>{% include '_includes/vamtam/price.twig' with { amount: order.totalPrice } %}</td>
+            <td>{% if order.isPaid %}Paid{% else %}Pending{% endif %}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No orders yet.</p>
+    {% endif %}
+    <p><a href="/wishlist">View Wishlist</a></p>
+    <form method="post">
+        {{ csrfInput() }}
+        {{ actionInput('users/logout') }}
+        {{ redirectInput('/') }}
+        <button type="submit" class="button">Log out</button>
+    </form>
+</div>
+</div>
+</div>
+</div>
+</div>
+{% else %}
 {% include '_static/content-account.twig' %}
+{% endif %}
 {% endblock %}

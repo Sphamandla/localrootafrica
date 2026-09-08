@@ -1,0 +1,11 @@
+{# Header search — Sprig reactive product search #}
+<div class="dgwt-wcas-search-wrapp dgwt-wcas-has-submit woocommerce dgwt-wcas-style-pirx">
+    {{ sprig('_sprig/product-search', { q: q ?? '' }, { 's-trigger': 'keyup changed delay:300ms', 's-target': 'find .dgwt-wcas-suggestions-wrapp' }) }}
+    <form class="dgwt-wcas-search-form" role="search" action="/shop" method="get">
+        <div class="dgwt-wcas-sf-wrapp">
+            <label class="screen-reader-text" for="dgwt-wcas-search-input">Products search</label>
+            <input id="dgwt-wcas-search-input" type="search" class="dgwt-wcas-search-input" name="q" value="{{ q ?? '' }}" placeholder="Search here..." autocomplete="off" sprig s-trigger="keyup changed delay:300ms" s-target="find .dgwt-wcas-suggestions-wrapp" />
+            <button type="submit" aria-label="Search" class="dgwt-wcas-search-submit"><i class="vamtamtheme- vamtam-theme-search"></i></button>
+        </div>
+    </form>
+</div>

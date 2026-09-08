@@ -1,0 +1,10 @@
+{% extends '_layouts/vamtam-alt' %}
+
+{% block bodyClass %}{% include '_static/body-class-wishlist.twig' %}{% endblock %}
+
+{% block content %}
+{% if not currentUser %}
+    {% redirect '/login' %}
+{% endif %}
+{% include '_static/content-wishlist.twig' %}
+{% endblock %}

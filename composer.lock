@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53b72b218eabac9544b1508115a9c836",
+    "content-hash": "587382f1f5c29b905596b2c8cde1b452",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1306,6 +1306,65 @@
             "time": "2018-03-26T11:24:36+00:00"
         },
         {
+            "name": "clarknelson/craft-mailchimp",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/clarknelson/craft-mailchimp.git",
+                "reference": "db0523e5506971b7799b8d186a1c50bebf947cb8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/clarknelson/craft-mailchimp/zipball/db0523e5506971b7799b8d186a1c50bebf947cb8",
+                "reference": "db0523e5506971b7799b8d186a1c50bebf947cb8",
+                "shasum": ""
+            },
+            "require": {
+                "craftcms/cms": "^5.0",
+                "mailchimp/marketing": "^3.0",
+                "php": "^8.2"
+            },
+            "default-branch": true,
+            "type": "craft-plugin",
+            "extra": {
+                "name": "Craft Mailchimp",
+                "handle": "craft-mailchimp",
+                "hasCpSettings": true
+            },
+            "autoload": {
+                "psr-4": {
+                    "clarknelson\\mailchimp\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "Clark Nelson",
+                    "homepage": "https://clarknelson.com/"
+                }
+            ],
+            "description": "A plugin to assist with managing the connection to your MailChimp account.",
+            "keywords": [
+                "Craft",
+                "craft cms",
+                "craft-plugin",
+                "mailchimp",
+                "newsletter",
+                "newsletters",
+                "php"
+            ],
+            "support": {
+                "docs": "https://github.com/developer/repo/blob/master/README.md",
+                "email": "email@clarknelson.com",
+                "issues": "https://github.com/developer/repo/issues?state=open",
+                "source": "https://github.com/developer/repo"
+            },
+            "time": "2026-04-29T21:54:40+00:00"
+        },
+        {
             "name": "commerceguys/addressing",
             "version": "v2.3.1",
             "source": {
@@ -2591,6 +2650,89 @@
             "time": "2026-01-02T16:01:13+00:00"
         },
         {
+            "name": "doublesecretagency/craft-notifier",
+            "version": "3.2.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/doublesecretagency/craft-notifier.git",
+                "reference": "b32a98bdcd8bf83932458d74122d83f42fca6960"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/doublesecretagency/craft-notifier/zipball/b32a98bdcd8bf83932458d74122d83f42fca6960",
+                "reference": "b32a98bdcd8bf83932458d74122d83f42fca6960",
+                "shasum": ""
+            },
+            "require": {
+                "craftcms/cms": "^4.5.0 || ^5.0.0",
+                "league/html-to-markdown": "^5.1",
+                "nystudio107/craft-code-editor": "^1.0",
+                "nystudio107/craft-twig-sandbox": "^4.0.2 || ^5.0.2",
+                "php-mqtt/client": "^2.0",
+                "twilio/sdk": "^7.14"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^10.0"
+            },
+            "type": "craft-plugin",
+            "extra": {
+                "name": "Notifier",
+                "class": "doublesecretagency\\notifier\\NotifierPlugin",
+                "handle": "notifier"
+            },
+            "autoload": {
+                "psr-4": {
+                    "doublesecretagency\\notifier\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "Double Secret Agency",
+                    "homepage": "https://plugins.doublesecretagency.com"
+                }
+            ],
+            "description": "First-class Notifications for Craft CMS.",
+            "keywords": [
+                "Craft",
+                "Ntfy",
+                "alerts",
+                "bluesky",
+                "cms",
+                "craft-plugin",
+                "craftcms",
+                "discord",
+                "email",
+                "facebook",
+                "instagram",
+                "linkedin",
+                "mastodon",
+                "message",
+                "messaging",
+                "mqtt",
+                "notifications",
+                "notifier",
+                "notify",
+                "push-notifications",
+                "pushover",
+                "slack",
+                "sms",
+                "text",
+                "twilio",
+                "twitter",
+                "webhook"
+            ],
+            "support": {
+                "docs": "https://plugins.doublesecretagency.com/notifier",
+                "issues": "https://github.com/doublesecretagency/craft-notifier/issues",
+                "source": "https://github.com/doublesecretagency/craft-notifier/tree/3.2.2"
+            },
+            "time": "2026-08-05T18:18:01+00:00"
+        },
+        {
             "name": "egulias/email-validator",
             "version": "4.0.4",
             "source": {
@@ -3635,6 +3777,95 @@
             "time": "2023-02-03T21:26:53+00:00"
         },
         {
+            "name": "league/html-to-markdown",
+            "version": "5.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/html-to-markdown.git",
+                "reference": "db234ecdb160b9d2b422c1c130db4b01eb3e9e24"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/html-to-markdown/zipball/db234ecdb160b9d2b422c1c130db4b01eb3e9e24",
+                "reference": "db234ecdb160b9d2b422c1c130db4b01eb3e9e24",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-xml": "*",
+                "php": "^7.2.5 || ^8.0"
+            },
+            "require-dev": {
+                "mikehaertl/php-shellcommand": "^1.1.0",
+                "phpstan/phpstan": "^1.8.8 || ^2.0",
+                "phpunit/phpunit": "^8.5 || ^9.2 || ^10.5 || ^11.0 || ^12.0 || ^13.0",
+                "scrutinizer/ocular": "^1.6",
+                "unleashedtech/php-coding-standard": "^2.7 || ^3.0",
+                "vimeo/psalm": "^4.22 || ^5.0 || ^6.0"
+            },
+            "bin": [
+                "bin/html-to-markdown"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "League\\HTMLToMarkdown\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Colin O'Dell",
+                    "email": "colinodell@gmail.com",
+                    "homepage": "https://www.colinodell.com",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Nick Cernis",
+                    "email": "nick@cern.is",
+                    "homepage": "http://modernnerd.net",
+                    "role": "Original Author"
+                }
+            ],
+            "description": "An HTML-to-markdown conversion helper for PHP",
+            "homepage": "https://github.com/thephpleague/html-to-markdown",
+            "keywords": [
+                "html",
+                "markdown"
+            ],
+            "support": {
+                "issues": "https://github.com/thephpleague/html-to-markdown/issues",
+                "source": "https://github.com/thephpleague/html-to-markdown/tree/5.1.2"
+            },
+            "funding": [
+                {
+                    "url": "https://www.colinodell.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.paypal.me/colinpodell/10.00",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/colinodell",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/league/html-to-markdown",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-07T13:53:32+00:00"
+        },
+        {
             "name": "league/uri",
             "version": "7.8.1",
             "source": {
@@ -3977,6 +4208,61 @@
                 }
             ],
             "time": "2026-04-11T18:38:28+00:00"
+        },
+        {
+            "name": "mailchimp/marketing",
+            "version": "3.0.80",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mailchimp/mailchimp-marketing-php.git",
+                "reference": "c1a38f7248d8de7de412418fed8dae759b9e4b97"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mailchimp/mailchimp-marketing-php/zipball/c1a38f7248d8de7de412418fed8dae759b9e4b97",
+                "reference": "c1a38f7248d8de7de412418fed8dae759b9e4b97",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^6.4 || ^7.2",
+                "guzzlehttp/psr7": "^1.7 || ^2.0",
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "~2.12",
+                "phpunit/phpunit": "^7",
+                "squizlabs/php_codesniffer": "~2.6"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MailchimpMarketing\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "Mailchimp",
+                    "homepage": "https://github.com/mailchimp/mailchimp-marketing-php"
+                }
+            ],
+            "homepage": "http://swagger.io",
+            "keywords": [
+                "api",
+                "php",
+                "sdk",
+                "swagger"
+            ],
+            "support": {
+                "source": "https://github.com/mailchimp/mailchimp-marketing-php/tree/v3.0.80"
+            },
+            "time": "2022-11-02T19:19:48+00:00"
         },
         {
             "name": "markbaker/complex",
@@ -4390,6 +4676,69 @@
                 }
             ],
             "time": "2026-09-02T12:39:56+00:00"
+        },
+        {
+            "name": "myclabs/php-enum",
+            "version": "1.8.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/myclabs/php-enum.git",
+                "reference": "e7be26966b7398204a234f8673fdad5ac6277802"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/myclabs/php-enum/zipball/e7be26966b7398204a234f8673fdad5ac6277802",
+                "reference": "e7be26966b7398204a234f8673fdad5ac6277802",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5",
+                "squizlabs/php_codesniffer": "1.*",
+                "vimeo/psalm": "^4.6.2 || ^5.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MyCLabs\\Enum\\": "src/"
+                },
+                "classmap": [
+                    "stubs/Stringable.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP Enum contributors",
+                    "homepage": "https://github.com/myclabs/php-enum/graphs/contributors"
+                }
+            ],
+            "description": "PHP Enum implementation",
+            "homepage": "https://github.com/myclabs/php-enum",
+            "keywords": [
+                "enum"
+            ],
+            "support": {
+                "issues": "https://github.com/myclabs/php-enum/issues",
+                "source": "https://github.com/myclabs/php-enum/tree/1.8.5"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/myclabs/php-enum",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2025-01-14T11:49:03+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -4851,6 +5200,63 @@
                 "source": "https://github.com/paragonie/constant_time_encoding"
             },
             "time": "2025-09-24T15:06:41+00:00"
+        },
+        {
+            "name": "php-mqtt/client",
+            "version": "v2.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-mqtt/client.git",
+                "reference": "97df2f592599f72fb7975eb504333a8df3841ea9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-mqtt/client/zipball/97df2f592599f72fb7975eb504333a8df3841ea9",
+                "reference": "97df2f592599f72fb7975eb504333a8df3841ea9",
+                "shasum": ""
+            },
+            "require": {
+                "myclabs/php-enum": "^1.7",
+                "php": "^8.0",
+                "psr/log": "^1.1|^2.0|^3.0"
+            },
+            "require-dev": {
+                "phpunit/php-invoker": "^3.0",
+                "phpunit/phpunit": "^9.0",
+                "squizlabs/php_codesniffer": "^3.5"
+            },
+            "suggest": {
+                "ext-redis": "Required for the RedisRepository"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpMqtt\\Client\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Marvin Mall",
+                    "email": "marvin-mall@msn.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "An MQTT client written in and for PHP.",
+            "keywords": [
+                "client",
+                "mqtt",
+                "publish",
+                "subscribe"
+            ],
+            "support": {
+                "issues": "https://github.com/php-mqtt/client/issues",
+                "source": "https://github.com/php-mqtt/client/tree/v2.3.2"
+            },
+            "time": "2026-03-28T12:01:13+00:00"
         },
         {
             "name": "php-science/textrank",
@@ -6109,6 +6515,64 @@
                 "source": "https://github.com/putyourlightson/craft-blitz"
             },
             "time": "2026-09-02T10:59:53+00:00"
+        },
+        {
+            "name": "putyourlightson/craft-sprig",
+            "version": "3.7.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/putyourlightson/craft-sprig.git",
+                "reference": "8eeb8e1dee275ff52c81b0daabd9c278cafcb080"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/putyourlightson/craft-sprig/zipball/8eeb8e1dee275ff52c81b0daabd9c278cafcb080",
+                "reference": "8eeb8e1dee275ff52c81b0daabd9c278cafcb080",
+                "shasum": ""
+            },
+            "require": {
+                "craftcms/cms": "^5.0",
+                "nystudio107/craft-code-editor": "^1.0",
+                "nystudio107/craft-twig-sandbox": "^5.0.2",
+                "php": "^8.2",
+                "putyourlightson/craft-sprig-core": "^3.7.3"
+            },
+            "require-dev": {
+                "craftcms/ecs": "dev-main",
+                "craftcms/phpstan": "dev-main"
+            },
+            "type": "craft-plugin",
+            "extra": {
+                "name": "Sprig",
+                "class": "putyourlightson\\sprig\\plugin\\Sprig",
+                "handle": "sprig",
+                "developer": "PutYourLightsOn",
+                "changelogUrl": "https://raw.githubusercontent.com/putyourlightson/craft-sprig/develop/CHANGELOG.md",
+                "developerUrl": "https://putyourlightson.com/",
+                "documentationUrl": "https://putyourlightson.com/plugins/sprig"
+            },
+            "autoload": {
+                "psr-4": {
+                    "putyourlightson\\sprig\\plugin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "mit"
+            ],
+            "description": "A reactive Twig component framework for Craft.",
+            "support": {
+                "docs": "https://putyourlightson.com/plugins/sprig",
+                "issues": "https://github.com/putyourlightson/craft-sprig/issues",
+                "source": "https://github.com/putyourlightson/craft-sprig"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/bencroker",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-07-15T09:07:58+00:00"
         },
         {
             "name": "putyourlightson/craft-sprig-core",
@@ -9927,6 +10391,174 @@
             "time": "2026-07-03T20:44:34+00:00"
         },
         {
+            "name": "twilio/sdk",
+            "version": "7.16.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twilio/twilio-php.git",
+                "reference": "02ad214b0cc9fc513bd67df251d54aed8901284f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/twilio/twilio-php/zipball/02ad214b0cc9fc513bd67df251d54aed8901284f",
+                "reference": "02ad214b0cc9fc513bd67df251d54aed8901284f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^6.3 || ^7.0",
+                "phpunit/phpunit": ">=7.0 < 10"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "An HTTP client to execute the API requests"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Twilio\\": "src/Twilio/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Twilio API Team",
+                    "email": "api@twilio.com"
+                }
+            ],
+            "description": "A PHP wrapper for Twilio's API",
+            "homepage": "https://github.com/twilio/twilio-php",
+            "keywords": [
+                "api",
+                "sms",
+                "twilio"
+            ],
+            "support": {
+                "issues": "https://github.com/twilio/twilio-php/issues",
+                "source": "https://github.com/twilio/twilio-php/tree/7.16.2"
+            },
+            "time": "2024-04-01T10:34:42+00:00"
+        },
+        {
+            "name": "verbb/base",
+            "version": "3.0.14",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/verbb/verbb-base.git",
+                "reference": "c847f893fa7278413b6554324447137b815e7d3e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/verbb/verbb-base/zipball/c847f893fa7278413b6554324447137b815e7d3e",
+                "reference": "c847f893fa7278413b6554324447137b815e7d3e",
+                "shasum": ""
+            },
+            "require": {
+                "craftcms/cms": "^5.0.0",
+                "php": "^8.2"
+            },
+            "type": "yii-module",
+            "autoload": {
+                "psr-4": {
+                    "verbb\\base\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Verbb",
+                    "homepage": "https://verbb.io"
+                }
+            ],
+            "description": "Common utilities and building-blocks for Verbb plugins for Craft CMS.",
+            "support": {
+                "docs": "https://github.com/verbb/verbb-base",
+                "email": "support@verbb.io",
+                "issues": "https://github.com/verbb/verbb-base/issues?state=open",
+                "rss": "https://github.com/verbb/verbb-base/commits/v2.atom",
+                "source": "https://github.com/verbb/verbb-base"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/verbb",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-08-14T11:53:23+00:00"
+        },
+        {
+            "name": "verbb/wishlist",
+            "version": "3.0.16",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/verbb/wishlist.git",
+                "reference": "515373299b0cd6324840282eb8053dc909089a47"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/verbb/wishlist/zipball/515373299b0cd6324840282eb8053dc909089a47",
+                "reference": "515373299b0cd6324840282eb8053dc909089a47",
+                "shasum": ""
+            },
+            "require": {
+                "craftcms/cms": "^5.0.0",
+                "dompdf/dompdf": "^1.0.2 || ^2.0.4 || ^3.0",
+                "php": "^8.2",
+                "verbb/base": "^3.0.0"
+            },
+            "type": "craft-plugin",
+            "extra": {
+                "name": "Wishlist",
+                "class": "verbb\\wishlist\\Wishlist",
+                "handle": "wishlist",
+                "changelogUrl": "https://raw.githubusercontent.com/verbb/wishlist/craft-5/CHANGELOG.md"
+            },
+            "autoload": {
+                "psr-4": {
+                    "verbb\\wishlist\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "Verbb",
+                    "homepage": "https://verbb.io"
+                }
+            ],
+            "description": "Allow users to create lists to store favourite entries, save products in a wishlist and more.",
+            "keywords": [
+                "Craft",
+                "cms",
+                "craft-plugin",
+                "craftcms",
+                "wishlist"
+            ],
+            "support": {
+                "docs": "https://github.com/verbb/wishlist",
+                "email": "support@verbb.io",
+                "issues": "https://github.com/verbb/wishlist/issues?state=open",
+                "rss": "https://github.com/verbb/wishlist/commits/v2.atom",
+                "source": "https://github.com/verbb/wishlist"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/verbb",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-08-21T00:07:01+00:00"
+        },
+        {
             "name": "vlucas/phpdotenv",
             "version": "v5.7.0",
             "source": {
@@ -11397,7 +12029,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {},
+    "stability-flags": {
+        "clarknelson/craft-mailchimp": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {},
