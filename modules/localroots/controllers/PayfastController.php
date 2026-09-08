@@ -28,7 +28,37 @@ class PayfastController extends Controller
         $transaction = Commerce::getInstance()->getTransactions()->getTransactionByHash($hash);
 
         if ($transaction && strtoupper((string)($post['payment_status'] ?? '')) === 'COMPLETE') {
+            $order = $transaction->getOrder();
+            if ($order) {
+                Craft::$app->getModule('localroots')->transactionTracker->log(
+                    $order,
+                    'payfast',
+                    'webhook',
+                    (float)($post['amount_gross'] ?? $transaction->paymentAmount),
+                    'ZAR',
+                    'success',
+                    (string)($post['pf_payment_id'] ?? ''),
+                    null,
+                    $post
+                );
+            }
             Commerce::getInstance()->getPayments()->completePayment($transaction);
+        } elseif ($transaction) {
+            $order = $transaction->getOrder();
+            if ($order) {
+                Craft::$app->getModule('localroots')->transactionTracker->log(
+                    $order,
+                    'payfast',
+                    'webhook',
+                    (float)($post['amount_gross'] ?? $transaction->paymentAmount),
+                    'ZAR',
+                    'failed',
+                    (string)($post['pf_payment_id'] ?? ''),
+                    null,
+                    $post,
+                    'Payment status: ' . ($post['payment_status'] ?? 'unknown')
+                );
+            }
         }
 
         return $this->asRaw('OK');

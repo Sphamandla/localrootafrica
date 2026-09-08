@@ -11,6 +11,11 @@
 
 return [
     'localroots/payfast/notify' => 'localroots/payfast/notify',
+    'localroots/ozow/notify' => 'localroots/ozow/notify',
+    'localroots/yoco/notify' => 'localroots/yoco/notify',
+    'localroots/checkout/track-progress' => 'localroots/checkout/track-progress',
+    'localroots/checkout/track-attempt' => 'localroots/checkout/track-attempt',
+    'localroots/checkout/calculate-shipping' => 'localroots/checkout/calculate-shipping',
     'localroots/newsletter/subscribe' => 'localroots/newsletter/subscribe',
     'shop' => ['template' => '_pages/products/index'],
     'shop/page/<page:\d+>' => ['template' => '_pages/products/index'],

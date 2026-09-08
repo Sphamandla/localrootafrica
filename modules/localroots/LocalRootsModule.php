@@ -24,6 +24,7 @@ class LocalRootsModule extends Module
             'orderSync' => OrderSyncService::class,
             'courierGuy' => services\CourierGuyService::class,
             'shopFilter' => services\ShopFilterService::class,
+            'transactionTracker' => services\TransactionTracker::class,
         ]);
 
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {

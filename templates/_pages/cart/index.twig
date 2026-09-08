@@ -5,89 +5,12 @@
 {% block bodyClass %}{% include '_static/body-class-cart.twig' %}{% endblock %}
 
 {% block content %}
-<div id="page" class="main-container">
-<div id="main-content">
-<div id="sub-header" class="layout-full elementor-page-title"><div class="meta-header"></div></div>
-<div id="main" role="main" class="vamtam-main layout-full">
-<div class="page-wrapper">
-<article class="full page type-page status-publish hentry">
-<div class="page-content clearfix the-content-parent">
-<div class="elementor elementor-cart-page">
-<div class="vamtam-has-theme-widget-styles elementor-widget elementor-widget-woocommerce-cart">
-<div class="elementor-widget-container">
-<div class="woocommerce">
-<div class="e-cart__container">
-<div class="e-cart__column e-cart__column-start">
-<h5>My Bag</h5>
+<div id="localroots-cart-source" hidden>
+	{% include '_includes/vamtam/cart-form.twig' %}
+</div>
+{% include '_static/content-cart.twig' %}
+{% endblock %}
 
-{% if cart.lineItems|length %}
-<form class="woocommerce-cart-form" method="post">
-	{{ csrfInput() }}
-	{{ actionInput('commerce/cart/update-cart') }}
-	{{ redirectInput('cart') }}
-	<div class="e-shop-table e-cart-section">
-	<table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
-		<thead>
-			<tr>
-				<th rel="col" class="product-thumbnail"><span class="screen-reader-text">Thumbnail image</span></th>
-				<th rel="col" class="product-name">Product</th>
-				<th rel="col" class="product-price">Price</th>
-				<th rel="col" class="product-quantity">Quantity</th>
-				<th rel="col" class="product-subtotal">Subtotal</th>
-				<th rel="col" class="product-remove"><span class="screen-reader-text">Remove item</span></th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for item in cart.lineItems %}
-				{% include '_includes/vamtam/cart-line-item.twig' with { item: item } %}
-			{% endfor %}
-			<tr>
-				<td colspan="6" class="actions">
-					<button type="submit" class="button" name="update" value="Update cart">Update cart</button>
-				</td>
-			</tr>
-		</tbody>
-	</table>
-	</div>
-</form>
-{% else %}
-<div class="cart-empty woocommerce-info">Your bag is empty.</div>
-<p><a href="/shop" class="button wc-backward">Return to shop</a></p>
-{% endif %}
-
-</div>
-<div class="e-cart__column e-cart__column-end">
-<div class="e-cart__column-inner e-sticky-right-column">
-<div class="e-cart-totals e-cart-section">
-<div class="cart-collaterals">
-<div class="cart_totals">
-<table cellspacing="0" class="shop_table shop_table_responsive">
-	<tr class="cart-subtotal">
-		<th>Subtotal</th>
-		<td data-title="Subtotal">{% include '_includes/vamtam/price.twig' with { amount: cart.itemSubtotal } %}</td>
-	</tr>
-	<tr class="order-total">
-		<th>Total</th>
-		<td data-title="Total"><strong>{% include '_includes/vamtam/price.twig' with { amount: cart.totalPrice } %}</strong></td>
-	</tr>
-</table>
-<div class="wc-proceed-to-checkout">
-	<a href="/checkout" class="checkout-button button alt wc-forward">Proceed to checkout</a>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</article>
-</div>
-</div>
-</div>
-</div>
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/cart.js"></script>
 {% endblock %}

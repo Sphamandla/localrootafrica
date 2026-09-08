@@ -1,141 +1,36 @@
 {% extends '_layouts/vamtam' %}
 
 {% set cart = craft.commerce.carts.cart %}
-{% set gateways = craft.app.plugins.getPlugin('commerce').getGateways().getAllGateways()|filter(g => g.isFrontendEnabled) %}
 {% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.zipCode ?? null, cart.totalWeight) %}
 
 {% block bodyClass %}{% include '_static/body-class-checkout.twig' %}{% endblock %}
 
 {% block content %}
-<div id="page" class="main-container">
-<div id="main-content">
-<div id="main" role="main" class="vamtam-main layout-full">
-<div class="page-wrapper">
-<article class="full page type-page status-publish hentry">
-<div class="page-content clearfix the-content-parent">
-<div class="woocommerce checkout woocommerce-checkout">
-<h5>Checkout</h5>
-
-{% if not cart.lineItems|length %}
-<p class="woocommerce-info">Your bag is empty. <a href="/shop">Return to shop</a></p>
+{% if cart.lineItems|length %}
+<div id="localroots-checkout-source" hidden>
+	{% include '_includes/vamtam/checkout-commerce.twig' %}
+</div>
+<script type="application/json" id="localroots-checkout-config">
+{
+	"csrfName": {{ craft.app.config.general.csrfTokenName|json_encode|raw }},
+	"csrfToken": {{ craft.app.request.csrfToken|json_encode|raw }},
+	"updateCartAction": {{ actionUrl('commerce/cart/update-cart')|json_encode|raw }},
+	"trackProgressUrl": {{ url('localroots/checkout/track-progress')|json_encode|raw }},
+	"trackAttemptUrl": {{ url('localroots/checkout/track-attempt')|json_encode|raw }},
+	"calculateShippingUrl": {{ url('localroots/checkout/calculate-shipping')|json_encode|raw }},
+	"subtotal": {{ cart.itemSubtotal }},
+	"tax": {{ cart.totalTax }},
+	"shippingRate": {{ shippingRate }}
+}
+</script>
+{% include '_static/content-checkout.twig' %}
 {% else %}
-
-{% if not currentUser %}
-<div class="woocommerce-account-fields">
-	<h3>Create an account (optional)</h3>
-	<form method="post" accept-charset="UTF-8">
-		{{ csrfInput() }}
-		{{ actionInput('users/save-user') }}
-		{{ redirectInput('checkout') }}
-		<p class="form-row"><label for="register-email">Email</label><input type="email" id="register-email" name="email"></p>
-		<p class="form-row"><label for="register-password">Password</label><input type="password" id="register-password" name="password" minlength="6"></p>
-		<button type="submit" class="button">Register &amp; Continue</button>
-	</form>
-</div>
+<div id="page" class="main-container"><div id="main-content"><div id="main" role="main" class="vamtam-main layout-full"><div class="page-wrapper"><p class="woocommerce-info">Your bag is empty. <a href="{{ url('shop') }}">Return to shop</a></p></div></div></div></div>
 {% endif %}
+{% endblock %}
 
-<form method="post" class="checkout woocommerce-checkout">
-	{{ csrfInput() }}
-	{{ actionInput('commerce/cart/update-cart') }}
-	{{ redirectInput('checkout') }}
-
-	<div class="col2-set">
-		<div class="col-1">
-			<h3>Billing details</h3>
-			<p class="form-row form-row-first">
-				<label for="firstName">First name</label>
-				<input type="text" id="firstName" name="billingAddress[firstName]" value="{{ cart.billingAddress.firstName ?? currentUser.firstName ?? '' }}" required>
-			</p>
-			<p class="form-row form-row-last">
-				<label for="lastName">Last name</label>
-				<input type="text" id="lastName" name="billingAddress[lastName]" value="{{ cart.billingAddress.lastName ?? currentUser.lastName ?? '' }}" required>
-			</p>
-			<p class="form-row form-row-wide">
-				<label for="email">Email</label>
-				<input type="email" id="email" name="email" value="{{ cart.email ?? currentUser.email ?? '' }}" required>
-			</p>
-			<p class="form-row form-row-wide">
-				<label for="address1">Address</label>
-				<input type="text" id="address1" name="billingAddress[address1]" value="{{ cart.billingAddress.address1 ?? '' }}" required>
-			</p>
-			<p class="form-row form-row-first">
-				<label for="city">City</label>
-				<input type="text" id="city" name="billingAddress[city]" value="{{ cart.billingAddress.city ?? '' }}" required>
-			</p>
-			<p class="form-row form-row-last">
-				<label for="zipCode">Postal code</label>
-				<input type="text" id="zipCode" name="billingAddress[zipCode]" value="{{ cart.billingAddress.zipCode ?? '' }}" required>
-			</p>
-			<p class="form-row form-row-wide">
-				<label for="countryCode">Country</label>
-				<select id="countryCode" name="billingAddress[countryCode]" required>
-					<option value="ZA" selected>South Africa</option>
-				</select>
-			</p>
-			<button type="submit" class="button">Update details</button>
-		</div>
-	</div>
-</form>
-
-{% if cart.email and cart.billingAddress %}
-<div class="woocommerce-checkout-review-order">
-	<h3 id="order_review_heading">Your order</h3>
-	<table class="shop_table woocommerce-checkout-review-order-table">
-		<thead>
-			<tr>
-				<th>Product</th>
-				<th>Subtotal</th>
-			</tr>
-		</thead>
-		<tbody>
-			{% for item in cart.lineItems %}
-			<tr class="cart_item">
-				<td>{{ item.description }} &times; {{ item.qty }}</td>
-				<td>{% include '_includes/vamtam/price.twig' with { amount: item.total } %}</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-		<tfoot>
-			<tr class="cart-subtotal">
-				<th>Subtotal</th>
-				<td>{% include '_includes/vamtam/price.twig' with { amount: cart.itemSubtotal } %}</td>
-			</tr>
-			<tr class="shipping">
-				<th>Shipping (The Courier Guy)</th>
-				<td>{% include '_includes/vamtam/price.twig' with { amount: shippingRate } %}</td>
-			</tr>
-			<tr class="order-total">
-				<th>Total</th>
-				<td><strong>{% include '_includes/vamtam/price.twig' with { amount: cart.totalPrice + shippingRate } %}</strong></td>
-			</tr>
-		</tfoot>
-	</table>
-
-	<div id="payment" class="woocommerce-checkout-payment">
-		<ul class="wc_payment_methods payment_methods methods">
-			{% for gateway in gateways %}
-			<li class="wc_payment_method payment_method_{{ gateway.handle }}">
-				<form method="post">
-					{{ csrfInput() }}
-					{{ actionInput('commerce/payments/pay') }}
-					{{ hiddenInput('gatewayId', gateway.id) }}
-					{{ redirectInput('account') }}
-					<input id="payment_method_{{ gateway.handle }}" type="radio" class="input-radio" name="payment_method" value="{{ gateway.handle }}" {% if loop.first %}checked{% endif %} onclick="this.form.submit()">
-					<label for="payment_method_{{ gateway.handle }}">{{ gateway.name }}</label>
-				</form>
-			</li>
-			{% endfor %}
-		</ul>
-	</div>
-</div>
+{% block scripts %}
+{% if cart.lineItems|length %}
+<script src="{{ alias('@web') }}/js/checkout.js"></script>
 {% endif %}
-
-{% endif %}
-</div>
-</div>
-</article>
-</div>
-</div>
-</div>
-</div>
 {% endblock %}

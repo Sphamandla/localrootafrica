@@ -1,0 +1,96 @@
+{# Dynamic cart content — matches content-cart.twig structure #}
+{% set cart = craft.commerce.carts.cart %}
+
+<div class="e-cart__container">
+<div class="e-cart__column e-cart__column-start">
+<h5>My Bag</h5>
+
+{% if cart.lineItems|length %}
+<form class="woocommerce-cart-form localroots-cart-form" method="post" action="{{ url('cart') }}">
+	{{ csrfInput() }}
+	{{ actionInput('commerce/cart/update-cart') }}
+	{{ redirectInput('cart') }}
+	<div class="e-shop-table e-cart-section">
+	<table class="shop_table shop_table_responsive cart woocommerce-cart-form__contents" cellspacing="0">
+		<thead>
+			<tr>
+				<th rel="col" class="product-thumbnail"><span class="screen-reader-text">Thumbnail image</span></th>
+				<th rel="col" class="product-name">Product</th>
+				<th rel="col" class="product-price">Price</th>
+				<th rel="col" class="product-quantity">Quantity</th>
+				<th rel="col" class="product-subtotal">Subtotal</th>
+				<th rel="col" class="product-remove"><span class="screen-reader-text">Remove item</span></th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for item in cart.lineItems %}
+				{% include '_includes/vamtam/cart-line-item.twig' with { item: item } %}
+			{% endfor %}
+			<tr>
+				<td colspan="6" class="actions">
+					<button type="submit" class="button" name="update" value="Update cart">Update cart</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	</div>
+	<div class="coupon e-cart-section shop_table">
+		<div class="form-row coupon-col">
+			<div class="coupon-col-start">
+				<input type="text" name="couponCode" class="input-text" id="coupon_code" value="{{ cart.couponCode ?? '' }}" placeholder="Coupon code" />
+			</div>
+			<div class="coupon-col-end">
+				<button class="button e-apply-coupon" type="submit" name="applyCoupon" value="1">Apply coupon</button>
+			</div>
+		</div>
+	</div>
+</form>
+{% else %}
+<div class="cart-empty woocommerce-info">Your bag is empty.</div>
+<p><a href="{{ url('shop') }}" class="button wc-backward">Return to shop</a></p>
+{% endif %}
+
+</div>
+<div class="e-cart__column e-cart__column-end">
+<div class="e-cart__column-inner e-sticky-right-column">
+<div class="e-cart-totals e-cart-section">
+<div class="cart-collaterals">
+<div class="cart_totals">
+<table cellspacing="0" class="shop_table shop_table_responsive">
+	<tr class="cart-subtotal">
+		<th>Subtotal</th>
+		<td data-title="Subtotal">{% include '_includes/vamtam/price.twig' with { amount: cart.itemSubtotal } %}</td>
+	</tr>
+	<tr class="woocommerce-shipping-totals shipping">
+		<th>Shipment</th>
+		<td data-title="Shipment">
+			<ul id="shipping_method" class="woocommerce-shipping-methods">
+				<li>
+					<input type="radio" name="shipping_method_display" id="shipping_method_courier" value="courier" checked="checked" disabled />
+					<label for="shipping_method_courier">The Courier Guy — calculated at checkout</label>
+				</li>
+			</ul>
+		</td>
+	</tr>
+	{% if cart.totalTax > 0 %}
+	<tr class="tax-total">
+		<th>VAT</th>
+		<td>{% include '_includes/vamtam/price.twig' with { amount: cart.totalTax } %}</td>
+	</tr>
+	{% endif %}
+	<tr class="order-total">
+		<th>Total</th>
+		<td data-title="Total"><strong>{% include '_includes/vamtam/price.twig' with { amount: cart.totalPrice } %}</strong></td>
+	</tr>
+</table>
+{% if cart.lineItems|length %}
+<div class="wc-proceed-to-checkout">
+	<a href="{{ url('checkout') }}" class="checkout-button button alt wc-forward">Proceed to checkout</a>
+</div>
+{% endif %}
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
