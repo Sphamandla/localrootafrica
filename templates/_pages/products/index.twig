@@ -20,6 +20,7 @@
 {% set rangeStart = totalProducts ? ((currentPage - 1) * limit + 1) : 0 %}
 {% set rangeEnd = totalProducts ? min(currentPage * limit, totalProducts) : 0 %}
 
+{% block head %}{% include '_includes/vamtam/head-shop.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-shop.twig' %}{% endblock %}
 
 {% block content %}
@@ -44,6 +45,8 @@
 	"sort": {{ params.sort|json_encode|raw }},
 	"sortLabel": {{ sortLabel|json_encode|raw }},
 	"shopUrl": {{ url('shop')|json_encode|raw }},
+	"priceMin": {{ facets.minPrice|round }},
+	"priceMax": {{ facets.maxPrice|round }},
 	"sortUrls": {
 		"date-desc": {{ shopFilter.buildFilterUrl(params, { sort: 'date-desc', page: 1 })|json_encode|raw }},
 		"price-asc": {{ shopFilter.buildFilterUrl(params, { sort: 'price-asc', page: 1 })|json_encode|raw }},

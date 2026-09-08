@@ -1,39 +1,17 @@
-{# BeRocket-compatible shop filters — markup matches content-shop.twig #}
+{% import '_includes/vamtam/shop-filter-type-tree.twig' as typeTree %}
+{# BeRocket-compatible shop filters — markup matches reference shop #}
 <form id="localroots-shop-filters" class="localroots-shop-filters" method="get" action="{{ url('shop') }}">
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5132 bapf_wid_5131" data-wid="5131" data-id="5132">
 	<div class="bapf_sfilter"><div class="bapf_body"><button type="button" class="bapf_button bapf_reset localroots-clear-filters">Clear All</button></div></div>
 </div>
 
-{% if facets.types|length %}
+{% if facets.typeTree|default([])|length %}
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5130 bapf_wid_5131" data-wid="5131" data-id="5130">
 	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="product_cat" data-name="Product type" id="bapf_2">
 		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Product type<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body">
+		<div class="bapf_body" style="display:none;">
 			<ul>
-				{% for type in facets.types %}
-				<li>
-					<input data-name="{{ type.title }}" id="bapf_type_{{ loop.index }}" type="checkbox" name="types[]" value="{{ type.title }}"{% if type.title in params.types %} checked{% endif %}>
-					<label for="bapf_type_{{ loop.index }}">{{ type.title }} <span class="count">({{ type.count }})</span></label>
-				</li>
-				{% endfor %}
-			</ul>
-		</div>
-	</div>
-</div>
-{% endif %}
-
-{% if facets.categories|length %}
-<div class="berocket_single_filter_widget berocket_single_filter_widget_5130 bapf_wid_5131" data-wid="5131" data-id="5130">
-	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="product_cat" data-name="Categories" id="bapf_cat">
-		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Categories<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body">
-			<ul>
-				{% for category in facets.categories %}
-				<li>
-					<input data-name="{{ category.title }}" id="bapf_cat_{{ loop.index }}" type="checkbox" name="categories[]" value="{{ category.slug }}"{% if category.slug in params.categories %} checked{% endif %}>
-					<label for="bapf_cat_{{ loop.index }}">{{ category.title }} <span class="count">({{ category.count }})</span></label>
-				</li>
-				{% endfor %}
+				{{ typeTree.renderNodes(facets.typeTree, params, 'root') }}
 			</ul>
 		</div>
 	</div>
@@ -44,12 +22,12 @@
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5129 bapf_wid_5131" data-wid="5131" data-id="5129">
 	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="pa_size" data-name="Size" id="bapf_3">
 		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Size<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body">
+		<div class="bapf_body" style="display:none;">
 			<ul>
 				{% for size in facets.sizes %}
 				<li>
 					<input data-name="{{ size.title }}" id="bapf_size_{{ loop.index }}" type="checkbox" name="sizes[]" value="{{ size.title }}"{% if size.title in params.sizes %} checked{% endif %}>
-					<label for="bapf_size_{{ loop.index }}">{{ size.title }} <span class="count">({{ size.count }})</span></label>
+					<label for="bapf_size_{{ loop.index }}">{{ size.title }}</label>
 				</li>
 				{% endfor %}
 			</ul>
@@ -62,12 +40,12 @@
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5128 bapf_wid_5131" data-wid="5131" data-id="5128">
 	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="pa_color" data-name="Color" id="bapf_4">
 		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Color<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body">
+		<div class="bapf_body" style="display:none;">
 			<ul>
 				{% for color in facets.colors %}
 				<li>
 					<input data-name="{{ color.title }}" id="bapf_color_{{ loop.index }}" type="checkbox" name="colors[]" value="{{ color.title }}"{% if color.title in params.colors %} checked{% endif %}>
-					<label for="bapf_color_{{ loop.index }}">{{ color.title }} <span class="count">({{ color.count }})</span></label>
+					<label for="bapf_color_{{ loop.index }}">{{ color.title }}</label>
 				</li>
 				{% endfor %}
 			</ul>
@@ -80,12 +58,12 @@
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5319 bapf_wid_5131" data-wid="5131" data-id="5319">
 	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="pa_brand" data-name="Brand" id="bapf_5">
 		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Brand<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body">
+		<div class="bapf_body" style="display:none;">
 			<ul>
 				{% for brand in facets.brands %}
 				<li>
 					<input data-name="{{ brand.title }}" id="bapf_brand_{{ loop.index }}" type="checkbox" name="brands[]" value="{{ brand.title }}"{% if brand.title in params.brands %} checked{% endif %}>
-					<label for="bapf_brand_{{ loop.index }}">{{ brand.title }} <span class="count">({{ brand.count }})</span></label>
+					<label for="bapf_brand_{{ loop.index }}">{{ brand.title }}</label>
 				</li>
 				{% endfor %}
 			</ul>
@@ -95,29 +73,23 @@
 {% endif %}
 
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5135 bapf_wid_5131 bapf_mt_none" data-wid="5131" data-id="5135">
-	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-name="Price" id="bapf_price">
+	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps bapf_slidr" data-name="Price" id="bapf_price">
 		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Price<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body">
-			<div class="price-range">
-				<div class="price-inputs">
-					<span>R</span>
-					<input type="number" name="minPrice" value="{{ params.minPrice > 0 ? params.minPrice : facets.minPrice|round }}" min="0" class="price-min-input localroots-price-min">
-					<span>—</span>
-					<span>R</span>
-					<input type="number" name="maxPrice" value="{{ params.maxPrice > 0 ? params.maxPrice : facets.maxPrice|round }}" min="0" class="price-max-input localroots-price-max">
+		<div class="bapf_body" style="display:none;">
+			<div class="bapf_slidr_all">
+				<div class="bapf_slidr_main ui-slider ui-slider-horizontal ui-widget ui-widget-content ui-corner-all">
+					<div class="ui-slider-range ui-widget-header ui-corner-all"></div>
+					<span class="ui-slider-handle ui-state-default ui-corner-all"></span>
+					<span class="ui-slider-handle ui-state-default ui-corner-all"></span>
 				</div>
+				<div class="bapf_slidr_jqrui"></div>
+				<div class="bapf_slidr_nums">
+					<span class="bapf_from"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">R</span><span class="localroots-price-from">{{ params.minPrice > 0 ? params.minPrice|round : facets.minPrice|round }}</span></bdi></span></span>
+					<span class="bapf_to"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">R</span><span class="localroots-price-to">{{ params.maxPrice > 0 ? params.maxPrice|round : facets.maxPrice|round }}</span></bdi></span></span>
+				</div>
+				<input type="hidden" name="minPrice" class="localroots-price-min" value="{{ params.minPrice > 0 ? params.minPrice|round : facets.minPrice|round }}">
+				<input type="hidden" name="maxPrice" class="localroots-price-max" value="{{ params.maxPrice > 0 ? params.maxPrice|round : facets.maxPrice|round }}">
 			</div>
-		</div>
-	</div>
-</div>
-
-<div class="berocket_single_filter_widget berocket_single_filter_widget_5135 bapf_wid_5131 bapf_mt_none" data-wid="5131" data-id="5136">
-	<div class="bapf_sfilter bapf_ckbox" data-name="Stock" id="bapf_stock">
-		<div class="bapf_body">
-			<label class="stock-checkbox">
-				<input type="checkbox" name="inStock" value="1"{% if params.inStock %} checked{% endif %}>
-				<span>In Stock Only</span>
-			</label>
 		</div>
 	</div>
 </div>

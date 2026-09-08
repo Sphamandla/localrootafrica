@@ -1,22 +1,81 @@
 {% set variant = product.defaultVariant ?? product.variants.first() %}
-{% set isVariable = product.variants.all()|length > 1 %}
-{% set image = product.productImages.one() %}
-{% set imageUrl = image ? image.getUrl({ width: 866, height: 1299 }) : '/wp-content/uploads/2023/12/2-2-866x1299.jpg' %}
-{% set thumbUrl = image ? image.getUrl({ width: 683, height: 1024 }) : '/wp-content/uploads/2023/12/2-2-683x1024.jpg' %}
-{% set salePrice = variant ? variant.salePrice : 0 %}
-{% set regularPrice = variant ? variant.price : 0 %}
-{% set onSale = variant and variant.onPromotion and regularPrice > salePrice %}
+{% set variants = product.variants.all() %}
+{% set isVariable = variants|length > 1 %}
+{% set images = product.productImages.all() %}
+{% set primaryImage = images|first %}
+{% set imageUrl = primaryImage ? primaryImage.getUrl({ width: 866, height: 1299 }) : '/wp-content/uploads/2023/12/2-2-866x1299.jpg' %}
+{% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 683, height: 1024 }) : '/wp-content/uploads/2023/12/2-2-683x1024.jpg' %}
+{% set wishlistThumb = primaryImage ? primaryImage.getUrl({ width: 150, height: 150 }) : thumbUrl %}
+{% set prices = [] %}
+{% for v in variants %}
+	{% set prices = prices|merge([v.salePrice]) %}
+{% endfor %}
+{% set minPrice = prices|sort|first|default(0) %}
+{% set maxPrice = prices|sort|last|default(0) %}
+{% set onSale = false %}
+{% for v in variants %}
+	{% if v.onPromotion and v.price > v.salePrice %}
+		{% set onSale = true %}
+	{% endif %}
+{% endfor %}
+{% set isNew = product.dateCreated|date('U') > ('now'|date_modify('-30 days')|date('U')) %}
 {% set productTypeClass = isVariable ? 'product-type-variable' : 'product-type-simple' %}
+{% set stockClass = variant and variant.getIsAvailable() ? 'instock' : 'outofstock' %}
 
-<div data-elementor-type="loop-item" data-elementor-id="9231" class="elementor elementor-9231 e-loop-item e-loop-item-{{ product.id }} product type-product status-publish has-post-thumbnail instock taxable shipping-taxable purchasable {{ productTypeClass }}" data-elementor-post-type="elementor_library" data-custom-edit-handle="1">
+<div data-elementor-type="loop-item" data-elementor-id="9231" class="elementor elementor-9231 e-loop-item e-loop-item-{{ product.id }} product type-product status-publish has-post-thumbnail {{ stockClass }}{% if onSale %} sale{% endif %} taxable shipping-taxable purchasable {{ productTypeClass }}" data-elementor-post-type="elementor_library" data-custom-edit-handle="1">
 	<div class="elementor-element elementor-element-7eadb9dc e-con-full e-flex e-con e-parent" data-id="7eadb9dc" data-element_type="container" data-e-type="container">
+		{% if isNew or onSale %}
+		<div class="elementor-element elementor-element-21d74e28 e-flex e-con-boxed e-con e-child" data-id="21d74e28" data-element_type="container" data-e-type="container" data-settings="{&quot;position&quot;:&quot;absolute&quot;}">
+			<div class="e-con-inner">
+				{% if isNew %}
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-bd815a2 elementor-widget elementor-widget-shortcode" data-id="bd815a2" data-element_type="widget" data-e-type="widget" data-widget_type="shortcode.default">
+					<div class="elementor-widget-container">
+						<span class="vamtam-new vamtam-onsale">New!</span>
+						<div class="elementor-shortcode"></div>
+					</div>
+				</div>
+				{% endif %}
+				{% if onSale %}
+				<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-290166b8 elementor-widget elementor-widget-shortcode" data-id="290166b8" data-element_type="widget" data-e-type="widget" data-widget_type="shortcode.default">
+					<div class="elementor-widget-container">
+						<span class="onsale">Sale!</span>
+						<div class="elementor-shortcode"></div>
+					</div>
+				</div>
+				{% endif %}
+			</div>
+		</div>
+		{% endif %}
 		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-20f08ce9 vamtam-has-post-gallery elementor-widget elementor-widget-theme-post-featured-image elementor-widget-image" data-id="20f08ce9" data-element_type="widget" data-e-type="widget" data-widget_type="theme-post-featured-image.default">
 			<div class="elementor-widget-container">
 				<a href="{{ product.url }}">
 					<div class="vamtam-thumb-wrapper">
-						<img width="683" height="1024" src="{{ thumbUrl }}" class="attachment-large size-large" alt="{{ product.title }}" />
+						{% if images|length > 1 %}
+						<div class="vamtam-product-gallery swiper">
+							<div class="vamtam-gallery-wrapper swiper-wrapper">
+								{% for image in images %}
+								<div class="swiper-slide">
+									<img width="866" height="1299" src="{{ image.getUrl({ width: 866, height: 1299 }) }}" class="vamtam-gallery-img" alt="{{ product.title }}" decoding="async" />
+								</div>
+								{% endfor %}
+							</div>
+							<div class="swiper-button-prev"></div>
+							<div class="swiper-button-next"></div>
+						</div>
+						{% endif %}
+						<img width="683" height="1024" src="{{ thumbUrl }}" class="attachment-large size-large" alt="{{ product.title }}" decoding="async" />
 					</div>
 				</a>
+			</div>
+		</div>
+		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-2b6f9c0e elementor-absolute vamtam-show-on-hover elementor-widget elementor-widget-shortcode" data-id="2b6f9c0e" data-element_type="widget" data-e-type="widget" data-settings="{&quot;_position&quot;:&quot;absolute&quot;}" data-widget_type="shortcode.default">
+			<div class="elementor-widget-container">
+				<div class="elementor-shortcode">
+					<button type="button" class="vamtam-loading woosw-btn woosw-btn-{{ product.id }} woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn" data-id="{{ product.id }}" data-product_name="{{ product.title }}" data-product_image="{{ wishlistThumb }}" aria-label="Add to wishlist">
+						<span class="vamtam-loading woosw-btn-icon woosw-icon-5"></span>
+						<span class="vamtam-loading woosw-btn-text">Add to wishlist</span>
+					</button>
+				</div>
 			</div>
 		</div>
 		<div class="elementor-element elementor-element-36730231 vamtam-show-on-hover e-flex e-con-boxed e-con e-child" data-id="36730231" data-element_type="container" data-e-type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">
@@ -26,7 +85,11 @@
 						<div class="elementor-add-to-cart elementor-product-{{ isVariable ? 'variable' : 'simple' }}">
 							<div class="e-loop-add-to-cart-form-container">
 								{% if isVariable %}
-								<a href="{{ product.url }}" class="button product_type_variable add_to_cart_button" aria-label="Select options for &ldquo;{{ product.title }}&rdquo;">Select options</a>
+								<form class="cart e-loop-add-to-cart-form">
+									<div class="e-atc-qty-button-holder">
+										<a href="{{ product.url }}" class="button product_type_variable add_to_cart_button" aria-label="Select options for &ldquo;{{ product.title }}&rdquo;" rel="nofollow">Select options</a>
+									</div>
+								</form>
 								{% elseif variant %}
 								<form class="cart e-loop-add-to-cart-form" method="post">
 									{{ csrfInput() }}
@@ -52,7 +115,18 @@
 		</div>
 		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-650efc70 elementor-widget elementor-widget-woocommerce-product-price" data-id="650efc70" data-element_type="widget" data-e-type="widget" data-widget_type="woocommerce-product-price.default">
 			<div class="elementor-widget-container">
-				{% if onSale %}{% include '_includes/vamtam/price-sale.twig' with { saleAmount: salePrice, regularAmount: regularPrice } %}{% else %}<p class="price">{% include '_includes/vamtam/price.twig' with { amount: salePrice } %}</p>{% endif %}
+				{% if isVariable and minPrice != maxPrice %}
+				<p class="price">
+					<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ minPrice|number_format(0, '.', ',') }}</bdi></span>
+					<span aria-hidden="true">&ndash;</span>
+					<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ maxPrice|number_format(0, '.', ',') }}</bdi></span>
+					<span class="screen-reader-text">Price range: R{{ minPrice|number_format(0, '.', ',') }} through R{{ maxPrice|number_format(0, '.', ',') }}</span>
+				</p>
+				{% elseif onSale %}
+					{% include '_includes/vamtam/price-sale.twig' with { saleAmount: variant.salePrice, regularAmount: variant.price } %}
+				{% else %}
+				<p class="price">{% include '_includes/vamtam/price.twig' with { amount: minPrice } %}</p>
+				{% endif %}
 			</div>
 		</div>
 	</div>

@@ -1,0 +1,20 @@
+{% import '_includes/vamtam/shop-filter-type-tree.twig' as typeTree %}
+{# Recursive Product type filter tree — BeRocket markup #}
+{% macro renderNodes(nodes, params, prefix) %}
+{% for node in nodes %}
+<li>
+	{% if node.filter|default(null) %}
+	<input data-name="{{ node.title }}" id="bapf_2_{{ prefix }}_{{ loop.index }}" type="checkbox" name="types[]" value="{{ node.filter }}"{% if node.filter in params.types %} checked{% endif %}>
+	<label for="bapf_2_{{ prefix }}_{{ loop.index }}">{{ node.title }}</label>
+	{% else %}
+	<input data-name="{{ node.title }}" id="bapf_2_{{ prefix }}_{{ loop.index }}" type="checkbox" value="{{ node.title }}" disabled>
+	<label for="bapf_2_{{ prefix }}_{{ loop.index }}">{{ node.title }}</label>
+	{% endif %}
+	{% if node.children|default([])|length %}
+	<ul>
+		{{ _self.renderNodes(node.children, params, prefix ~ '_' ~ loop.index) }}
+	</ul>
+	{% endif %}
+</li>
+{% endfor %}
+{% endmacro %}

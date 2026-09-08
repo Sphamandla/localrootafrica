@@ -42,6 +42,57 @@ class ShopFilterService extends Component
         'Suit' => 'Suits',
     ];
 
+    /** Reference shop category tree — leaf `filter` values match TYPE_KEYWORDS labels. */
+    private const TYPE_TREE = [
+        [
+            'title' => 'Men',
+            'children' => [
+                [
+                    'title' => 'Accessories',
+                    'children' => [
+                        ['title' => 'Bags', 'filter' => 'Bags'],
+                    ],
+                ],
+                [
+                    'title' => 'Clothing',
+                    'children' => [
+                        ['title' => 'Blazers & Sport Coats', 'filter' => 'Blazers & Sport Coats'],
+                        ['title' => 'Jeans', 'filter' => 'Jeans'],
+                        ['title' => 'Polos', 'filter' => 'Polos'],
+                        ['title' => 'Shirts', 'filter' => 'Shirts'],
+                        ['title' => 'Suits', 'filter' => 'Suits'],
+                        ['title' => 'T-Shirts', 'filter' => 'T-Shirts'],
+                    ],
+                ],
+            ],
+        ],
+        [
+            'title' => 'Women',
+            'children' => [
+                [
+                    'title' => 'Accessories',
+                    'children' => [
+                        ['title' => 'Bags', 'filter' => 'Bags'],
+                    ],
+                ],
+                [
+                    'title' => 'Clothing',
+                    'children' => [
+                        ['title' => 'Denim', 'filter' => 'Jeans'],
+                        ['title' => 'Dresses', 'filter' => 'Dresses'],
+                        ['title' => 'Gowns', 'filter' => 'Gowns'],
+                        ['title' => 'Jackets & Coats', 'filter' => 'Jackets & Coats'],
+                        ['title' => 'Knitwear', 'filter' => 'Knitwear'],
+                        ['title' => 'Skirts', 'filter' => 'Skirts'],
+                        ['title' => 'Trousers', 'filter' => 'Trousers'],
+                    ],
+                ],
+            ],
+        ],
+    ];
+
+    private const SIZE_ORDER = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45', 'XS', 'S', 'M', 'L', 'XL'];
+
     public function getParams(): array
     {
         $request = Craft::$app->getRequest();
@@ -163,7 +214,7 @@ class ShopFilterService extends Component
         }
 
         $this->sortFacet($categories, 'title');
-        $this->sortFacet($sizes, 'title');
+        $this->sortSizes($sizes);
         $this->sortFacet($colors, 'title');
         $this->sortFacet($brands, 'title');
         $this->sortFacet($types, 'title');
@@ -174,9 +225,58 @@ class ShopFilterService extends Component
             'colors' => array_values($colors),
             'brands' => array_values($brands),
             'types' => array_values($types),
+            'typeTree' => $this->buildTypeTree($types),
             'minPrice' => $minPrice ?? 0,
             'maxPrice' => $maxPrice ?? 10000,
         ];
+    }
+
+    public function buildTypeTree(array $typeCounts): array
+    {
+        $counts = [];
+        foreach ($typeCounts as $row) {
+            $counts[$row['title']] = $row['count'];
+        }
+
+        return $this->applyTypeTreeCounts(self::TYPE_TREE, $counts);
+    }
+
+    private function applyTypeTreeCounts(array $nodes, array $counts): array
+    {
+        $result = [];
+
+        foreach ($nodes as $node) {
+            $children = isset($node['children'])
+                ? $this->applyTypeTreeCounts($node['children'], $counts)
+                : [];
+
+            $count = 0;
+            if (isset($node['filter'])) {
+                $count = $counts[$node['filter']] ?? 0;
+            } elseif ($children !== []) {
+                $count = array_sum(array_column($children, 'count'));
+            }
+
+            if ($count <= 0 && $children === []) {
+                continue;
+            }
+
+            $entry = [
+                'title' => $node['title'],
+                'count' => $count,
+            ];
+
+            if (isset($node['filter'])) {
+                $entry['filter'] = $node['filter'];
+            }
+            if ($children !== []) {
+                $entry['children'] = $children;
+            }
+
+            $result[] = $entry;
+        }
+
+        return $result;
     }
 
     public function extractColor(string $title): ?string
@@ -322,5 +422,20 @@ class ShopFilterService extends Component
     private function sortFacet(array &$facets, string $key): void
     {
         usort($facets, fn($a, $b) => strcasecmp($a[$key], $b[$key]));
+    }
+
+    private function sortSizes(array &$sizes): void
+    {
+        usort($sizes, function ($a, $b) {
+            $ia = array_search($a['title'], self::SIZE_ORDER, true);
+            $ib = array_search($b['title'], self::SIZE_ORDER, true);
+            $ia = $ia === false ? 999 : $ia;
+            $ib = $ib === false ? 999 : $ib;
+            if ($ia === $ib) {
+                return strcasecmp($a['title'], $b['title']);
+            }
+
+            return $ia <=> $ib;
+        });
     }
 }
