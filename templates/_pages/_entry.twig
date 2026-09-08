@@ -1,18 +1,42 @@
-{% set vamtamPages = ['about', 'contact', 'faq'] %}
+{% set vamtamPages = ['about', 'contact', 'terms-and-conditions', 'faq'] %}
 {% extends entry.slug in vamtamPages ? '_layouts/vamtam-alt' : '_layouts/main' %}
+
+{% block head %}
+{% if entry.slug == 'contact' %}
+{% include '_includes/vamtam/head-contact.twig' %}
+<style>
+.localroots-flash { max-width: 1200px; margin: 0 auto 1rem; padding: 0.75rem 1rem; font-size: 0.95rem; }
+.localroots-flash--notice { background: #eef6ee; color: #1e4620; border: 1px solid #c8e6c9; }
+.localroots-flash--error { background: #fdecea; color: #611a15; border: 1px solid #f5c6cb; }
+</style>
+{% elseif entry.slug == 'terms-and-conditions' %}
+{% include '_includes/vamtam/head-terms.twig' %}
+{% endif %}
+{% endblock %}
 
 {% block bodyClass %}
 {% if entry.slug == 'about' %}{% include '_static/body-class-about.twig' %}
 {% elseif entry.slug == 'contact' %}{% include '_static/body-class-contact.twig' %}
+{% elseif entry.slug == 'terms-and-conditions' %}{% include '_static/body-class-terms.twig' %}
 {% elseif entry.slug == 'faq' %}{% include '_static/body-class-faq.twig' %}
 {% endif %}
 {% endblock %}
 
 {% block content %}
+{% if entry.slug == 'contact' %}
+{% if craft.app.session.hasFlash('notice') %}
+<div class="localroots-flash localroots-flash--notice" role="status">{{ craft.app.session.getFlash('notice') }}</div>
+{% endif %}
+{% if craft.app.session.hasFlash('error') %}
+<div class="localroots-flash localroots-flash--error" role="alert">{{ craft.app.session.getFlash('error') }}</div>
+{% endif %}
+{% endif %}
 {% if entry.slug == 'about' %}
 {% include '_static/content-about.twig' %}
 {% elseif entry.slug == 'contact' %}
 {% include '_static/content-contact.twig' %}
+{% elseif entry.slug == 'terms-and-conditions' %}
+{% include '_static/content-terms.twig' %}
 {% elseif entry.slug == 'faq' %}
 {% include '_pages/faq/_content.twig' with { entry: entry } %}
 {% else %}

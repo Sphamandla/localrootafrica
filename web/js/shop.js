@@ -42,6 +42,7 @@
 		updatePagination(config);
 		updateCategoryHeader(config);
 		initFilterCollapse();
+		applyBrandFilterState(config);
 	}
 
 	function updateCategoryHeader(config) {
@@ -64,10 +65,47 @@
 		}).join('');
 	}
 
+	function applyBrandFilterState(config) {
+		if (!config.brandTitle) return;
+
+		const brandWidget = document.getElementById('bapf_5');
+		if (!brandWidget) return;
+
+		brandWidget.classList.add('bapf_ccolaps');
+		const body = brandWidget.querySelector('.bapf_body');
+		if (body) body.style.display = 'block';
+
+		const typeWidget = document.getElementById('bapf_2');
+		if (typeWidget) {
+			typeWidget.closest('.berocket_single_filter_widget')?.classList.add('bapf_fhide');
+		}
+	}
+
+	function buildFilterQueryString(form) {
+		const params = new URLSearchParams(new FormData(form));
+		params.delete('brands[]');
+		const qs = params.toString();
+		return qs ? '?' + qs : '';
+	}
+
 	function initFilters(form, config) {
 		if (!form) return;
 
 		form.querySelectorAll('input[type="checkbox"]').forEach(input => {
+			if (input.name === 'brands[]' && input.dataset.brandSlug) {
+				input.addEventListener('change', () => {
+					const suffix = buildFilterQueryString(form);
+					if (input.checked) {
+						window.location.href = '/brands/' + input.dataset.brandSlug + suffix;
+					} else if (config.brandSlug) {
+						window.location.href = '/shop' + suffix;
+					} else {
+						form.submit();
+					}
+				});
+				return;
+			}
+
 			input.addEventListener('change', () => form.submit());
 		});
 
@@ -234,6 +272,9 @@
 
 		if (config.categoryPath) {
 			url.searchParams.set('categoryPath', config.categoryPath);
+		}
+		if (config.brandSlug) {
+			url.searchParams.set('brandSlug', config.brandSlug);
 		}
 
 		const current = new URLSearchParams(window.location.search);

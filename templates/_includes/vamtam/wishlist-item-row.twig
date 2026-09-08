@@ -1,14 +1,14 @@
 {# Single wishlist table row — matches woosw-list markup from index.html?p=10 #}
 {% set product = product ?? item.element %}
-{% if not product %}
-{% else %}
+{% if product %}
 {% set variants = product.variants.all() %}
-{% set isVariable = variants|length > 1 and not (product.simplePurchase ?? false) %}
 {% set variant = product.defaultVariant ?? variants|first %}
+{% if variant %}
+{% set isVariable = variants|length > 1 and not (product.simplePurchase ?? false) %}
 {% set primaryImage = product.productImages.one() %}
 {% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 866, height: 1299 }) : '/wp-content/uploads/2024/02/4302405505_1_1_1-866x1299.jpg' %}
 {% set onSale = variant and variant.onPromotion and variant.price > variant.salePrice %}
-<tr class="woosw-item woosw-item-{{ product.id }}" data-id="{{ product.id }}" data-name="{{ product.title }}" data-note="">
+<tr class="woosw-item woosw-item-{{ product.id }}" data-id="{{ product.id }}" data-element-site-id="{{ product.siteId }}" data-name="{{ product.title }}" data-note="">
 	<td class="woosw-item--image"><a href="{{ product.url }}"><img decoding="async" width="866" height="1299" src="{{ thumbUrl }}" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="{{ product.title }}" /></a></td>
 	<td class="woosw-item--info">
 		<div class="woosw-item--name"><a href="{{ product.url }}">{{ product.title }}</a></div>
@@ -42,5 +42,7 @@
 			</p>
 		</div>
 	</td>
+	<td class="woosw-item--remove"><span role="button" tabindex="0" aria-label="Remove {{ product.title }} from wishlist"></span></td>
 </tr>
+{% endif %}
 {% endif %}

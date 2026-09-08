@@ -1,0 +1,7 @@
+{% set userList = craft.wishlist.getUserList() %}
+{% set wishlistProductIds = [] %}
+{% if userList.id %}
+	{% for item in craft.wishlist.items().listId(userList.id).all() %}
+		{% set wishlistProductIds = wishlistProductIds|merge([item.elementId]) %}
+	{% endfor %}
+{% endif %}

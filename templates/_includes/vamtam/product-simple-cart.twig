@@ -16,6 +16,6 @@
 
 	<button type="submit" class="single_add_to_cart_button button alt">Add to cart</button>
 
-	<button type="button" class="vamtam-loading woosw-btn woosw-btn-{{ product.id }} woosw-added woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn" data-id="{{ product.id }}" data-product_name="{{ product.title }}" data-product_image="{{ thumbUrl }}" aria-label="Browse wishlist"><span class="vamtam-loading woosw-btn-icon woosw-icon-8"></span><span class="vamtam-loading woosw-btn-text">Browse wishlist</span></button>
+	{% include '_includes/vamtam/wishlist-button.twig' with { product: product, thumbUrl: thumbUrl } %}
 </form>
 </div>

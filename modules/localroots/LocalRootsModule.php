@@ -33,6 +33,8 @@ class LocalRootsModule extends Module
             'transactionTracker' => services\TransactionTracker::class,
             'envCoupons' => services\EnvCouponService::class,
             'productReviews' => ProductReviewService::class,
+            'seo' => services\SeoService::class,
+            'schemaBuilder' => services\SeoSchemaBuilder::class,
         ]);
 
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {
@@ -42,6 +44,11 @@ class LocalRootsModule extends Module
         }
 
         parent::init();
+
+        if (!Craft::$app->getRequest()->getIsConsoleRequest()) {
+            $this->seo->register();
+            $this->registerLegacyBrandRedirects();
+        }
 
         if (Craft::$app->plugins->isPluginInstalled('commerce')) {
             $this->envCoupons->syncIfChanged();
@@ -127,5 +134,32 @@ class LocalRootsModule extends Module
                 }
             );
         }
+    }
+
+    private function registerLegacyBrandRedirects(): void
+    {
+        Event::on(
+            \craft\web\Application::class,
+            \craft\web\Application::EVENT_BEFORE_REQUEST,
+            function () {
+                $request = Craft::$app->getRequest();
+                if (!$request->getIsSiteRequest() || $request->getIsConsoleRequest() || $request->getIsActionRequest()) {
+                    return;
+                }
+
+                $filters = $request->getQueryParam('filters');
+                if (!$filters || !preg_match('/brand\[(\d+)\]/', (string)$filters, $matches)) {
+                    return;
+                }
+
+                $url = $this->shopFilter->getBrandUrlByLegacyId($matches[1]);
+                if (!$url) {
+                    return;
+                }
+
+                Craft::$app->getResponse()->redirect($url, 301)->send();
+                Craft::$app->end();
+            }
+        );
     }
 }

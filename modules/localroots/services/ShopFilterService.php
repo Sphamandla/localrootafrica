@@ -7,10 +7,37 @@ use craft\commerce\elements\Product;
 use craft\commerce\elements\Variant;
 use craft\elements\Category;
 use craft\elements\Tag;
+use craft\helpers\StringHelper;
 use Craft;
 
 class ShopFilterService extends Component
 {
+    /** WordPress pa_brand term IDs from the reference theme. */
+    public const LEGACY_BRAND_IDS = [
+        '113' => 'Alexander Mcqueen',
+        '114' => 'Balenciaga',
+        '115' => 'Balmain',
+        '116' => 'Bottega Veneta',
+        '117' => 'Brunello Cucinelli',
+        '118' => 'Burberry',
+        '119' => 'Dolce & Gabbana',
+        '120' => 'Dsquared2',
+        '121' => 'Etro',
+        '122' => 'Ferragamo',
+        '123' => 'GUCCI',
+        '124' => 'MONCLER',
+        '125' => 'NIKE',
+        '126' => 'OFF-WHITE',
+        '127' => 'Saint Laurent',
+        '128' => 'STELLA MCCARTNEY',
+        '129' => 'The Attico',
+        '130' => 'TOM FORD',
+        '131' => 'VALENTINO',
+        '132' => 'Mach & Mach',
+        '133' => 'MANOLO BLAHNIK',
+        '134' => 'MAX MARA',
+    ];
+
     private const COLOR_PATTERNS = [
         'Black', 'Navy', 'Brown', 'Sand', 'Grey', 'Gray', 'Green', 'Blue', 'White',
         'Red', 'Gold', 'Ice', 'Pistachio', 'Midnight', 'Sesame', 'Indigrey', 'Natural-Navy',
@@ -179,6 +206,110 @@ class ShopFilterService extends Component
         return $params;
     }
 
+    public function resolveBrandSlug(?string $slug): ?array
+    {
+        if (!$slug) {
+            return null;
+        }
+
+        $tag = Tag::find()->group('productTags')->slug($slug)->one();
+        if (!$tag && ctype_digit($slug)) {
+            $tag = $this->findBrandTagByLegacyId($slug);
+        }
+
+        if (!$tag) {
+            return null;
+        }
+
+        return [
+            'slug' => $tag->slug,
+            'title' => $tag->title,
+            'legacyId' => $this->legacyIdForTitle($tag->title),
+            'basePath' => 'brands/' . $tag->slug,
+            'breadcrumb' => [
+                ['title' => 'Home', 'url' => '/'],
+                ['title' => 'Shop', 'url' => null],
+            ],
+        ];
+    }
+
+    public function applyBrandScope(array $params, ?array $brandContext): array
+    {
+        if (!$brandContext) {
+            return $params;
+        }
+
+        if ($params['brands'] === []) {
+            $params['brands'] = [$brandContext['title']];
+        }
+
+        return $params;
+    }
+
+    public function getBrandUrl(?array $brandContext): string
+    {
+        $base = rtrim(Craft::$app->getSites()->getCurrentSite()->getBaseUrl(), '/');
+        if (!$brandContext) {
+            return $base . '/brands';
+        }
+
+        return $base . '/brands/' . $brandContext['slug'];
+    }
+
+    public function getBrandUrlByLegacyId(string $id): ?string
+    {
+        $title = self::LEGACY_BRAND_IDS[$id] ?? null;
+        if (!$title) {
+            return null;
+        }
+
+        $tag = Tag::find()->group('productTags')->title($title)->one();
+        $slug = $tag?->slug ?? StringHelper::slugify($title);
+        $base = rtrim(Craft::$app->getSites()->getCurrentSite()->getBaseUrl(), '/');
+
+        return $base . '/brands/' . $slug;
+    }
+
+    /**
+     * @return list<array{title: string, slug: string, count: int, url: string, legacyId: ?string}>
+     */
+    public function getAllBrands(): array
+    {
+        $brands = [];
+        foreach (Tag::find()->group('productTags')->orderBy('title')->all() as $tag) {
+            $brands[] = [
+                'title' => $tag->title,
+                'slug' => $tag->slug,
+                'count' => Product::find()->relatedTo($tag)->count(),
+                'url' => '/brands/' . $tag->slug,
+                'legacyId' => $this->legacyIdForTitle($tag->title),
+            ];
+        }
+
+        return $brands;
+    }
+
+    public function findBrandTagByLegacyId(string $id): ?Tag
+    {
+        $title = self::LEGACY_BRAND_IDS[$id] ?? null;
+        if (!$title) {
+            return null;
+        }
+
+        return Tag::find()->group('productTags')->title($title)->one();
+    }
+
+    public function legacyIdForTitle(string $title): ?string
+    {
+        foreach (self::LEGACY_BRAND_IDS as $id => $brandTitle) {
+            if (strcasecmp($brandTitle, $title) === 0) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
     public function getCategoryUrl(?array $categoryContext): string
     {
         $base = rtrim(Craft::$app->getSites()->getCurrentSite()->getBaseUrl(), '/');
@@ -216,7 +347,7 @@ class ShopFilterService extends Component
         ];
     }
 
-    public function getFacets(?array $categoryContext = null): array
+    public function getFacets(?array $categoryContext = null, ?array $brandContext = null): array
     {
         $scopeTypes = $categoryContext['types'] ?? [];
         $products = Product::find()->type('default')->status(null)->all();
@@ -224,6 +355,13 @@ class ShopFilterService extends Component
             $products = array_values(array_filter(
                 $products,
                 fn(Product $product) => ($type = $this->extractProductType($product->title)) && in_array($type, $scopeTypes, true)
+            ));
+        }
+        if ($brandContext) {
+            $brandTitle = $brandContext['title'];
+            $products = array_values(array_filter(
+                $products,
+                fn(Product $product) => in_array($brandTitle, array_map(fn(Tag $t) => $t->title, $product->productTags->all()), true)
             ));
         }
         $categories = [];
@@ -246,6 +384,7 @@ class ShopFilterService extends Component
             foreach ($product->productTags->all() as $tag) {
                 $brands[$tag->title] = [
                     'title' => $tag->title,
+                    'slug' => $tag->slug,
                     'count' => ($brands[$tag->title]['count'] ?? 0) + 1,
                 ];
             }
@@ -293,6 +432,18 @@ class ShopFilterService extends Component
                         'count' => $count,
                     ];
                 }
+            }
+        }
+
+        if ($brands === [] || $brandContext) {
+            $brands = [];
+            foreach (Tag::find()->group('productTags')->orderBy('title')->all() as $tag) {
+                $count = Product::find()->relatedTo($tag)->count();
+                $brands[$tag->title] = [
+                    'title' => $tag->title,
+                    'slug' => $tag->slug,
+                    'count' => $count,
+                ];
             }
         }
 
@@ -392,8 +543,12 @@ class ShopFilterService extends Component
     {
         $merged = array_merge($params, $overrides);
         $query = [];
+        $omitBrands = $basePath && str_starts_with($basePath, 'brands/');
 
         foreach (['categories', 'sizes', 'colors', 'brands', 'types'] as $key) {
+            if ($omitBrands && $key === 'brands') {
+                continue;
+            }
             foreach ($merged[$key] ?? [] as $value) {
                 $query[] = $key . '[]=' . rawurlencode($value);
             }

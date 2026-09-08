@@ -26,7 +26,7 @@
 		</div>
 		<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-5089929 elementor-absolute vamtam-show-on-hover elementor-widget elementor-widget-shortcode" data-id="5089929" data-element_type="widget" data-e-type="widget" data-settings="{&quot;_position&quot;:&quot;absolute&quot;}" data-widget_type="shortcode.default">
 			<div class="elementor-widget-container">
-				<div class="elementor-shortcode"><button type="button" class="vamtam-loading woosw-btn woosw-btn-{{ product.id }} woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn" data-id="{{ product.id }}" data-product_name="{{ product.title }}" data-product_image="{{ thumb150 }}" aria-label="Add to wishlist"><span class="vamtam-loading woosw-btn-icon woosw-icon-5"></span><span class="vamtam-loading woosw-btn-text">Add to wishlist</span></button></div>
+				<div class="elementor-shortcode">{% include '_includes/vamtam/wishlist-button.twig' with { product: product, thumbUrl: thumb150 } %}</div>
 			</div>
 		</div>
 		<div class="elementor-element elementor-element-67713315 vamtam-show-on-hover e-flex e-con-boxed e-con e-child" data-id="67713315" data-element_type="container" data-e-type="container" data-settings="{&quot;background_background&quot;:&quot;classic&quot;}">

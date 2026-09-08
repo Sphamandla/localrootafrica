@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en-US" class="no-js">
 <head>
-{% include '_static/head-alt.twig' %}
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 {% hook 'seomaticRender' %}
+{% include '_static/head-alt.twig' %}
 {% block head %}{% endblock %}
 </head>
 <body class="{% block bodyClass %}{% endblock %}">

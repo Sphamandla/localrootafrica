@@ -1,14 +1,19 @@
 {% extends '_layouts/vamtam-alt' %}
 
 {% set userList = craft.wishlist.getUserList() %}
-{% set wishlistItems = craft.wishlist.items().listId(userList.id).with(['element']).orderBy('dateCreated desc').all() %}
+{% set wishlistItems = userList.id
+	? craft.wishlist.items().listId(userList.id).with(['element']).orderBy('dateCreated desc').all()
+	: [] %}
 
 {% block head %}{% include '_includes/vamtam/head-wishlist.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-wishlist.twig' %}{% endblock %}
 
 {% block content %}
-{% if not currentUser %}
-    {% redirect '/login' %}
+{% if wishlistItems|length == 0 %}
+<style>
+.elementor-element-3991d2fd .vamtam-empty-wishlist-notice { display: block !important; }
+.elementor-element-3991d2fd table.woosw-items { display: none !important; }
+</style>
 {% endif %}
 
 <div id="localroots-wishlist-source" hidden>
@@ -16,6 +21,13 @@
 		{% include '_includes/vamtam/wishlist-items.twig' with { items: wishlistItems } %}
 	</tbody></table>
 </div>
+
+<script type="application/json" id="localroots-wishlist-config">{{ {
+	csrfName: craft.app.config.general.csrfTokenName,
+	csrfToken: craft.app.request.csrfToken,
+	listId: userList.id ?? null,
+	confirmMessage: 'This action cannot be undone. Are you sure?'
+}|json_encode|raw }}</script>
 
 {% include '_static/content-wishlist.twig' %}
 {% endblock %}

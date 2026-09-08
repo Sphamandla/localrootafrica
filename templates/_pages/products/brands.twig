@@ -1,0 +1,51 @@
+{% extends '_layouts/vamtam' %}
+
+{% set shopFilter = craft.app.getModule('localroots').shopFilter %}
+{% set brands = shopFilter.getAllBrands() %}
+
+{% block head %}{% include '_includes/vamtam/head-shop.twig' %}{% endblock %}
+{% block bodyClass %}{% include '_static/body-class-shop.twig' %}{% endblock %}
+
+{% block content %}
+<div id="localroots-brands-source" hidden>
+	<div class="localroots-brands-index">
+		<ul class="localroots-brands-list">
+			{% for brand in brands %}
+			<li>
+				<a href="{{ brand.url }}">{{ brand.title }}</a>
+				{% if brand.count %}<span class="count">({{ brand.count }})</span>{% endif %}
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+</div>
+
+<script type="application/json" id="localroots-shop-config">
+{
+	"categoryTitle": "Brands",
+	"categoryBreadcrumb": [
+		{"title": "Home", "url": "/"},
+		{"title": "Brands", "url": null}
+	]
+}
+</script>
+
+{% include '_static/content-shop.twig' %}
+{% endblock %}
+
+{% block scripts %}
+{% include '_includes/vamtam/scripts-shop.twig' %}
+<script src="{{ alias('@web') }}/js/shop.js"></script>
+<script>
+(function() {
+	const source = document.getElementById('localroots-brands-source');
+	const grid = document.querySelector('.elementor-element-e0ad6a8');
+	if (!source || !grid) return;
+	const widget = grid.closest('.elementor-element');
+	if (widget) {
+		widget.innerHTML = source.innerHTML;
+		source.remove();
+	}
+})();
+</script>
+{% endblock %}

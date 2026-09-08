@@ -4,6 +4,8 @@ namespace modules\localroots\controllers;
 
 use Craft;
 use craft\web\Controller;
+use verbb\wishlist\elements\Item;
+use verbb\wishlist\Wishlist as WishlistPlugin;
 use yii\web\Response;
 
 class ShopController extends Controller
@@ -13,15 +15,23 @@ class ShopController extends Controller
     public function actionLoadMore(): Response
     {
         $shopFilter = Craft::$app->getModule('localroots')->shopFilter;
-        $categoryPath = Craft::$app->getRequest()->getQueryParam('categoryPath');
+        $request = Craft::$app->getRequest();
+        $categoryPath = $request->getQueryParam('categoryPath');
+        $brandSlug = $request->getQueryParam('brandSlug');
         $categoryContext = $categoryPath ? $shopFilter->resolveCategoryPath($categoryPath) : null;
-        $params = $shopFilter->applyCategoryScope($shopFilter->getParams(), $categoryContext);
+        $brandContext = $brandSlug ? $shopFilter->resolveBrandSlug($brandSlug) : null;
+        $params = $shopFilter->applyBrandScope(
+            $shopFilter->applyCategoryScope($shopFilter->getParams(), $categoryContext),
+            $brandContext
+        );
         $result = $shopFilter->getProducts($params);
+        $wishlistProductIds = $this->getWishlistProductIds();
 
         $html = '';
         foreach ($result['products'] as $product) {
             $html .= Craft::$app->getView()->renderTemplate('_includes/vamtam/product-loop-item.twig', [
                 'product' => $product,
+                'wishlistProductIds' => $wishlistProductIds,
             ]);
         }
 
@@ -30,7 +40,9 @@ class ShopController extends Controller
         $page = $result['page'];
         $rangeStart = $total ? (($page - 1) * $limit + 1) : 0;
         $rangeEnd = $total ? min($page * $limit, $total) : 0;
-        $basePath = $categoryContext ? $categoryContext['basePath'] : 'shop';
+        $basePath = $brandContext
+            ? $brandContext['basePath']
+            : ($categoryContext ? $categoryContext['basePath'] : 'shop');
 
         return $this->asJson([
             'success' => true,
@@ -45,5 +57,25 @@ class ShopController extends Controller
                 ? $shopFilter->buildFilterUrl($params, ['page' => $page + 1], $basePath)
                 : null,
         ]);
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function getWishlistProductIds(): array
+    {
+        if (!class_exists(WishlistPlugin::class)) {
+            return [];
+        }
+
+        $list = WishlistPlugin::$plugin->getLists()->getUserList();
+        if (!$list?->id) {
+            return [];
+        }
+
+        return array_map('intval', Item::find()
+            ->listId($list->id)
+            ->select(['elementId'])
+            ->column());
     }
 }

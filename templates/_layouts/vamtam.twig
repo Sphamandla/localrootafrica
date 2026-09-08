@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en-US" class="no-js">
 <head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="csrf-token" content="{{ craft.app.request.csrfToken }}">
-{% include '_static/head.twig' %}
 {% hook 'seomaticRender' %}
+{% include '_static/head.twig' %}
 {% block head %}{% endblock %}
 </head>
 <body class="{% block bodyClass %}{% include '_static/body-class-home.twig' %}{% endblock %}">
 <a href="#" aria-hidden="true" rel="nofollow noopener" style="display: none !important; visibility: hidden !important"></a>
 <div id="top"></div>
+
+{% include '_includes/vamtam/wishlist-product-ids.twig' %}
 
 {% include '_static/header.twig' %}
 
@@ -31,6 +36,7 @@
 
 {% include '_static/scripts.twig' %}
 <script src="{{ alias('@web') }}/js/commerce-cart.js" defer></script>
+<script src="{{ alias('@web') }}/js/wishlist-toggle.js" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

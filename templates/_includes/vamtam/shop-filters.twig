@@ -6,7 +6,7 @@
 </div>
 
 {% if facets.typeTree|default([])|length %}
-<div class="berocket_single_filter_widget berocket_single_filter_widget_5130 bapf_wid_5131" data-wid="5131" data-id="5130">
+<div class="berocket_single_filter_widget berocket_single_filter_widget_5130 bapf_wid_5131{% if brandContext %} bapf_fhide{% endif %}" data-wid="5131" data-id="5130">
 	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="product_cat" data-name="Product type" id="bapf_2">
 		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Product type<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
 		<div class="bapf_body" style="display:none;">
@@ -56,14 +56,19 @@
 
 {% if facets.brands|length %}
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5319 bapf_wid_5131" data-wid="5131" data-id="5319">
-	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps" data-op="OR" data-taxonomy="pa_brand" data-name="Brand" id="bapf_5">
-		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Brand<i class="bapf_colaps_smb fa fa-chevron-down"></i></h3></div>
-		<div class="bapf_body" style="display:none;">
+	<div class="bapf_sfilter bapf_ckbox bapf_ocolaps{% if brandContext %} bapf_ccolaps{% endif %}" data-op="OR" data-taxonomy="pa_brand" data-name="Brand" id="bapf_5">
+		<div class="bapf_head bapf_colaps_togl"><h3 tabindex="0" class="bapf_hascolarr">Brand<i class="bapf_colaps_smb fa fa-chevron-{% if brandContext %}up{% else %}down{% endif %}"></i></h3></div>
+		<div class="bapf_body" style="display:{% if brandContext %}block{% else %}none{% endif %};">
 			<ul>
 				{% for brand in facets.brands %}
 				<li>
+					{% if brand.slug is defined %}
+					<input data-name="{{ brand.title }}" id="bapf_brand_{{ loop.index }}" type="checkbox" name="brands[]" value="{{ brand.title }}"{% if brandContext and brandContext.title == brand.title %} checked{% elseif brand.title in params.brands %} checked{% endif %} data-brand-slug="{{ brand.slug }}">
+					<label for="bapf_brand_{{ loop.index }}">{{ brand.title }}</label>
+					{% else %}
 					<input data-name="{{ brand.title }}" id="bapf_brand_{{ loop.index }}" type="checkbox" name="brands[]" value="{{ brand.title }}"{% if brand.title in params.brands %} checked{% endif %}>
 					<label for="bapf_brand_{{ loop.index }}">{{ brand.title }}</label>
+					{% endif %}
 				</li>
 				{% endfor %}
 			</ul>

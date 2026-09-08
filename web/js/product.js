@@ -89,6 +89,10 @@
 		replaceCarousel('.elementor-element-56fb727c .swiper-wrapper');
 		replaceCarousel('.elementor-element-35331e6 .swiper-wrapper');
 		initStickyColumn();
+
+		if (window.LocalrootsWishlist) {
+			window.LocalrootsWishlist.init(document);
+		}
 	}
 
 	if (document.readyState === 'loading') {

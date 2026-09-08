@@ -3,8 +3,10 @@
 namespace modules\localroots\console\controllers;
 
 use Craft;
+use craft\commerce\elements\Product;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\elements\Tag;
 use craft\fieldlayoutelements\CustomField;
 use craft\fieldlayoutelements\TitleField;
 use craft\fields\Lightswitch;
@@ -13,6 +15,7 @@ use craft\helpers\App;
 use craft\helpers\StringHelper;
 use craft\models\FieldLayout;
 use craft\models\FieldLayoutTab;
+use modules\localroots\services\ShopFilterService;
 use modules\localroots\services\TemplateExtractorService;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -40,6 +43,8 @@ class SeedController extends Controller
         $this->actionExtractTemplates();
         $this->actionPages($basePath);
         $this->actionContact($basePath);
+        $this->actionTerms($basePath);
+        $this->actionBrands();
         $this->actionFaq($basePath);
         $this->actionPress($basePath);
         $this->actionDeliveryAndReturns($basePath);
@@ -154,6 +159,103 @@ class SeedController extends Controller
         }
 
         $this->stdout("  Seeded Contact page\n");
+
+        return ExitCode::OK;
+    }
+
+    public function actionTerms(?string $basePath = null): int
+    {
+        $basePath = $basePath ?? App::env('TEMPLATE_HTML_PATH') ?: '/Users/test/www/localrootsafrica/innovecouture.vamtam.com';
+
+        $section = Craft::$app->entries->getSectionByHandle('pages');
+        if (!$section) {
+            $this->stderr("  Pages section not found.\n", Console::FG_YELLOW);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $entryType = $section->getEntryTypes()[0] ?? null;
+        if (!$entryType) {
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $file = rtrim($basePath, '/') . '/index.html?p=3.html';
+        $excerpt = 'Terms of Use for Innove Couture';
+        if (file_exists($file)) {
+            $html = file_get_contents($file);
+            if (preg_match('/data-widget_type="theme-post-excerpt\.default"[^>]*>\s*<div class="elementor-widget-container">\s*([^<]+)\s*<\/div>/i', $html, $m)) {
+                $excerpt = html_entity_decode(trim(strip_tags($m[1])), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            }
+        }
+
+        $entry = Entry::find()->section('pages')->slug('terms-and-conditions')->one();
+        if (!$entry) {
+            $entry = new Entry([
+                'sectionId' => $section->id,
+                'typeId' => $entryType->id,
+                'title' => 'Terms & conditions',
+                'slug' => 'terms-and-conditions',
+                'enabled' => true,
+            ]);
+        }
+
+        $entry->title = 'Terms & conditions';
+        $entry->setFieldValues(['pageBody' => $excerpt]);
+        if (!Craft::$app->elements->saveElement($entry)) {
+            $this->stderr("  Failed to save Terms & conditions entry.\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $this->stdout("  Seeded Terms & conditions page\n");
+
+        return ExitCode::OK;
+    }
+
+    public function actionBrands(): int
+    {
+        $group = Craft::$app->tags->getTagGroupByHandle('productTags');
+        if (!$group) {
+            $this->stderr("  Tag group productTags not found. Run setup first.\n", Console::FG_YELLOW);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $created = 0;
+        foreach (ShopFilterService::LEGACY_BRAND_IDS as $title) {
+            $existing = Tag::find()->group('productTags')->title($title)->one();
+            if ($existing) {
+                continue;
+            }
+
+            $tag = new Tag([
+                'groupId' => $group->id,
+                'title' => $title,
+            ]);
+            if (Craft::$app->elements->saveElement($tag)) {
+                $created++;
+            }
+        }
+
+        $tags = Tag::find()->group('productTags')->orderBy('title')->all();
+        if ($tags === []) {
+            $this->stdout("  No brand tags to assign.\n");
+            return ExitCode::OK;
+        }
+
+        $products = Product::find()->type('default')->status(null)->all();
+        $assigned = 0;
+        foreach ($products as $index => $product) {
+            $tag = $tags[$index % count($tags)];
+            $currentIds = array_map(fn(Tag $t) => $t->id, $product->productTags->all());
+            if (in_array($tag->id, $currentIds, true)) {
+                continue;
+            }
+
+            $product->setFieldValue('productTags', [$tag->id]);
+            if (Craft::$app->elements->saveElement($product)) {
+                $assigned++;
+            }
+        }
+
+        $this->stdout("  Seeded {$created} brand tags; assigned brands to {$assigned} products.\n");
 
         return ExitCode::OK;
     }

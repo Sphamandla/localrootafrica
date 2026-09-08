@@ -1,0 +1,7 @@
+{% set wishlistProductIds = wishlistProductIds ?? [] %}
+{% set inWishlist = product.id in wishlistProductIds %}
+{% set thumb = thumbUrl ?? (product.productImages.one() ? product.productImages.one().getUrl({ width: 150, height: 150, mode: 'crop' }) : '') %}
+<button type="button" class="vamtam-loading woosw-btn woosw-btn-{{ product.id }} woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn{% if inWishlist %} woosw-added woosw-btn-added{% endif %}" data-id="{{ product.id }}" data-element-site-id="{{ product.siteId }}" data-product_name="{{ product.title }}" data-product_image="{{ thumb }}" aria-label="{{ inWishlist ? 'Browse wishlist' : 'Add to wishlist' }}">
+	<span class="vamtam-loading woosw-btn-icon woosw-icon-{{ inWishlist ? '8' : '5' }}"></span>
+	<span class="vamtam-loading woosw-btn-text">{{ inWishlist ? 'Browse wishlist' : 'Add to wishlist' }}</span>
+</button>

@@ -26,6 +26,7 @@ class TemplateExtractorService extends Component
         'product-variant' => 'product/generation-blazer/index.html',
         'about' => 'about/index.html',
         'contact' => 'contact/index.html',
+        'terms' => 'index.html?p=3.html',
         'wishlist' => 'index.html?p=10.html',
         'sustainability' => 'index.html?p=4565.html',
         'press' => 'index.html?p=726.html',
@@ -35,7 +36,7 @@ class TemplateExtractorService extends Component
     ];
 
     /** Pages that use the alternate header (elementor-150) */
-    private array $altLayoutPages = ['about', 'contact', 'faq', 'wishlist', 'sustainability', 'press', 'press-detail', 'delivery-and-returns'];
+    private array $altLayoutPages = ['about', 'contact', 'terms', 'faq', 'wishlist', 'sustainability', 'press', 'press-detail', 'delivery-and-returns'];
 
     public function init(): void
     {
@@ -345,6 +346,8 @@ class TemplateExtractorService extends Component
             '../../2024/' => '/press/',
             '../../../2024/' => '/press/',
             '/%3Fp=92.html' => '/about',
+            '/%3Fp=728.html' => '/contact',
+            '/%3Fp=3.html' => '/terms-and-conditions',
             '/%3Fp=10.html' => '/wishlist',
             '/%3Fp=12444.html' => '/shop',
             '/%3Fp=155.html' => '/shop',
@@ -385,6 +388,14 @@ class TemplateExtractorService extends Component
 
         $html = str_replace(array_keys($replacements), array_values($replacements), $html);
         // Keep %3F in asset URLs — exported WP Rocket files use literal ? in filenames.
+        return $this->stripWprLazyRender($html);
+    }
+
+    private function stripWprLazyRender(string $html): string
+    {
+        $html = preg_replace('/\s*data-wpr-lazyrender(?:="[^"]*")?/i', '', $html) ?: $html;
+        $html = preg_replace('/<style id="rocket-lazyrender-inline-css">[\s\S]*?<\/style>/i', '', $html) ?: $html;
+
         return $html;
     }
 
@@ -394,7 +405,18 @@ class TemplateExtractorService extends Component
         $head = preg_replace('/<link[^>]+oembed[^>]*>/i', '', $head);
         $head = preg_replace('/<link[^>]+feed[^>]*>/i', '', $head);
         $head = preg_replace('/<meta name=[\'"]generator[\'"][^>]*>/i', '', $head);
-        return $head;
+        // SEO tags are handled by SEOmatic + localroots SeoService — strip demo theme values.
+        $head = preg_replace('/<title[^>]*>[\s\S]*?<\/title>/i', '', $head);
+        $head = preg_replace('/<meta[^>]+name=[\'"]robots[\'"][^>]*>/i', '', $head);
+        $head = preg_replace('/<link[^>]+rel=[\'"]canonical[\'"][^>]*>/i', '', $head);
+        $head = preg_replace('/<link[^>]+rel=[\'"]shortlink[\'"][^>]*>/i', '', $head);
+        $head = preg_replace('/<meta[^>]+property=[\'"]og:[^\'"]+[\'"][^>]*>/i', '', $head);
+        $head = preg_replace('/<meta[^>]+property=[\'"]article:[^\'"]+[\'"][^>]*>/i', '', $head);
+        $head = preg_replace('/<meta[^>]+name=[\'"]twitter:[^\'"]+[\'"][^>]*>/i', '', $head);
+        $head = preg_replace('/<link[^>]+EditURI[^>]*>/i', '', $head);
+        $head = preg_replace('/<script[^>]*googletagmanager[\s\S]*?<\/script>/i', '', $head);
+
+        return $this->stripWprLazyRender($head);
     }
 
     /**
