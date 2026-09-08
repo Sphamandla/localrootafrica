@@ -1,0 +1,22 @@
+{# Side cart content for Elementor menu cart widget #}
+{% set cart = craft.commerce.carts.cart %}
+
+{% if cart.lineItems|length %}
+<div class="woocommerce-cart-form__contents">
+	<div class="elementor-menu-cart__products woocommerce-mini-cart cart">
+		{% for item in cart.lineItems %}
+			{% include '_includes/vamtam/mini-cart-line-item.twig' with { item: item } %}
+		{% endfor %}
+	</div>
+</div>
+<div class="elementor-menu-cart__subtotal">
+	<strong>Subtotal</strong>
+	{% include '_includes/vamtam/price.twig' with { amount: cart.itemSubtotal } %}
+</div>
+<div class="elementor-menu-cart__footer-buttons">
+	<a href="{{ url('cart') }}" class="elementor-button elementor-button--view-cart elementor-size-md">View cart</a>
+	<a href="{{ url('checkout') }}" class="elementor-button elementor-button--checkout elementor-size-md">Checkout</a>
+</div>
+{% else %}
+<p class="woocommerce-mini-cart__empty-message">No products in the cart.</p>
+{% endif %}

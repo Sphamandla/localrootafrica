@@ -1,4 +1,4 @@
-dateModified: 1788876428
+dateModified: 1788888149
 email:
   fromEmail: admin@localroots.africa
   fromName: 'Local Roots Africa'
@@ -11,10 +11,6 @@ fs:
       path: '@webroot/uploads'
     type: craft\fs\Local
     url: '@web/uploads'
-graphql:
-  publicToken:
-    enabled: false
-    expiryDate: null
 meta:
   __names__:
     0e7959b4-7cec-4499-b2a1-f1ac3f4164a8: Favicon # Favicon
@@ -33,17 +29,22 @@ meta:
     68fc7f40-b380-4871-8249-609331fcf48e: Dummy # Dummy
     96d99d2a-38e8-456f-a2e1-3487b0b05cab: Products # Products
     99c37949-cba9-4110-b5a3-fbd8834689dc: Content # Content
+    426e2aba-140e-45cb-a3e1-6c8567ee2fc2: 'Simple purchase (no options)' # Simple purchase (no options)
     462ba2ec-8fa1-4f29-82ff-c740590fd07d: Body # Body
     542a0f2e-7f12-4af9-a4df-db6af3cc0456: 'Order Number' # Order Number
     912aabb1-fecb-4960-8bf0-e1c4b9a84052: Press # Press
     945a904f-bce5-4531-93c7-79698d606620: 'Product Tags' # Product Tags
+    967a8209-4748-4bb6-a203-e910a44be72b: 'FAQ Items' # FAQ Items
+    9060fbe5-87ae-4ffb-95b5-b6a7139b2e8d: 'Awaiting payment' # Awaiting payment
     11802c2b-3476-4997-bf59-3543084c0e64: Ozow # Ozow
     12673b94-3667-4415-9321-7c537ba9a185: 'Instagram URL' # Instagram URL
     54816b31-86da-403b-ae7f-9f54d30d6643: 'Order Status' # Order Status
     17139417-d6f7-47d4-a3e8-fb0ed9d211f0: New # New
     32300246-7065-4e64-9e65-57e400c5735b: 'Line Items' # Line Items
+    94376659-de21-437e-8203-9d5fd6fdf7c2: 'Cash on delivery' # Cash on delivery
     ab291bd6-8e36-41d8-aecc-bf6ff45c20d1: Featured # Featured
     acdbb89a-7773-4771-8fe9-b8592136e71e: 'Site Logo' # Site Logo
+    afae4c11-b33a-46ae-bc57-0de0a5c688fd: 'Direct bank transfer' # Direct bank transfer
     b7bef018-a476-49bc-a40c-5f672778e4ea: 'Short Description' # Short Description
     b5193905-1004-4487-b59a-23a45146ee6b: 'Default SEO Description' # Default SEO Description
     bc98ea82-68eb-48a3-9029-4005f46a5c7e: Press # Press
@@ -85,6 +86,34 @@ plugins:
     enabled: true
     licenseKey: YMPGT4Q77JV2WNACWILTV90Z
     schemaVersion: 3.2.0
+    settings:
+      blueskyPdsUrl: 'https://bsky.social'
+      defaultPlacement: end
+      linkedinClientId: null
+      linkedinClientSecret: null
+      linkedinEnableOrganizations: false
+      logRetentionDays: null
+      logRetentionRecords: null
+      loggingEnabled: true
+      mqttClientId: null
+      mqttHost: null
+      mqttPassword: null
+      mqttPort: null
+      mqttProtocolLevel: 3.1.1
+      mqttTlsCaFile: null
+      mqttTlsClientCertFile: null
+      mqttTlsClientKeyFile: null
+      mqttUseTls: false
+      mqttUsername: null
+      ntfyAccessToken: null
+      ntfyServerUrl: null
+      pushoverApplicationToken: null
+      scheduledToken: null
+      structureUid: 489a43c4-146f-4aaf-a412-1fb65c061661
+      testToPhoneNumber: null
+      twilioAccountSid: null
+      twilioAuthToken: null
+      twilioPhoneNumber: null
   seomatic:
     edition: standard
     enabled: true

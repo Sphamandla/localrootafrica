@@ -1,14 +1,15 @@
 {% extends '_layouts/vamtam' %}
 
+{% set variants = product.variants.all() %}
+{% set isVariable = variants|length > 1 and not (product.simplePurchase ?? false) %}
 {% set productHandle = 'product-' ~ product.slug %}
 {% set contentTemplate = craft.app.view.doesTemplateExist('_static/content-' ~ productHandle ~ '.twig')
 	? '_static/content-' ~ productHandle ~ '.twig'
-	: '_static/content-product.twig' %}
+	: (isVariable ? '_static/content-product.twig' : '_static/content-product-simple.twig') %}
 {% set bodyClassTemplate = craft.app.view.doesTemplateExist('_static/body-class-' ~ productHandle ~ '.twig')
 	? '_static/body-class-' ~ productHandle ~ '.twig'
-	: '_static/body-class-product.twig' %}
+	: (isVariable ? '_static/body-class-product.twig' : '_static/body-class-product-simple.twig') %}
 
-{% set variants = product.variants.all() %}
 {% set variant = product.defaultVariant ?? variants|first %}
 {% set images = product.productImages.all() %}
 {% set primaryImage = images|first %}
@@ -17,13 +18,21 @@
 {% set imageThumb = primaryImage ? primaryImage.getUrl({ width: 866, height: 1299 }) : fallbackImage %}
 {% set thumb150 = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : fallbackImage %}
 {% set salePrice = variant ? variant.salePrice : 0 %}
-{% set regularPrice = variant ? (variant.onPromotion ? variant.price : variant.salePrice) : 0 %}
+{% set regularPrice = variant ? variant.price : 0 %}
 {% set onSale = variant and variant.onPromotion and regularPrice > salePrice %}
+{% set priceValues = [] %}
+{% for v in variants %}
+	{% set priceValues = priceValues|merge([v.salePrice]) %}
+{% endfor %}
+{% set minPrice = priceValues|sort|first|default(0) %}
+{% set maxPrice = priceValues|sort|last|default(0) %}
 {% set shortDescription = product.productShortDescription ?? product.title %}
 {% set relatedProducts = craft.products()
+	.relatedTo(product.productCategories)
 	.id('not ' ~ product.id)
-	.limit(12)
+	.limit(4)
 	.all() %}
+{% set productSku = variant.sku ?? product.defaultSku ?? '' %}
 
 {% block head %}
 {% include '_includes/vamtam/head-product.twig' %}
@@ -33,6 +42,16 @@
 
 {% block content %}
 <div id="localroots-product-sources" hidden>
+	<div id="localroots-product-price-source">
+		{% include '_includes/vamtam/product-page-price.twig' with { product: product, variants: variants, variant: variant } %}
+	</div>
+	<div id="localroots-product-cart-source">
+		{% if isVariable %}
+		{% include '_includes/vamtam/product-variable-cart.twig' with { product: product, variants: variants } %}
+		{% else %}
+		{% include '_includes/vamtam/product-simple-cart.twig' with { product: product, variant: variant } %}
+		{% endif %}
+	</div>
 	<div id="localroots-related-source">
 		{% for related in relatedProducts %}
 			{% include '_includes/vamtam/product-related-item-13500.twig' with { product: related } %}
@@ -45,7 +64,29 @@
 	"title": {{ product.title|json_encode|raw }},
 	"id": {{ product.id }},
 	"onSale": {{ onSale ? 'true' : 'false' }},
+	"minPrice": {{ minPrice|round }},
+	"maxPrice": {{ maxPrice|round }},
+	"isVariable": {{ isVariable ? 'true' : 'false' }},
+	"cartWidgetId": {{ (isVariable ? '48216332' : '9f21477')|json_encode|raw }},
+	"galleryWidgetId": {{ (isVariable ? '12b6582' : '99c187b')|json_encode|raw }},
+	"stickyWidgetId": {{ (isVariable ? '478d184f' : 'ae78bb3')|json_encode|raw }},
+	"priceWidgetId": {{ (isVariable ? '7aef695f' : '55aa537')|json_encode|raw }},
+	"salePrice": {{ salePrice|round }},
+	"regularPrice": {{ regularPrice|round }},
 	"description": {{ shortDescription|json_encode|raw }},
+	"descriptionHtml": {{ (product.productShortDescription ?? '')|json_encode|raw }},
+	"additionalInfoHtml": {{ ''|json_encode|raw }},
+	"sku": {{ productSku|json_encode|raw }},
+	"categories": [
+		{% for cat in product.productCategories.all() %}
+		{{ cat.title|json_encode|raw }}{% if not loop.last %},{% endif %}
+		{% endfor %}
+	],
+	"tags": [
+		{% for tag in product.productTags.all() %}
+		{{ tag.title|json_encode|raw }}{% if not loop.last %},{% endif %}
+		{% endfor %}
+	],
 	"imageUrl": {{ imageUrl|json_encode|raw }},
 	"imageThumb": {{ imageThumb|json_encode|raw }},
 	"thumb150": {{ thumb150|json_encode|raw }},

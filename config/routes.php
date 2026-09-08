@@ -17,6 +17,7 @@ return [
     'localroots/checkout/track-attempt' => 'localroots/checkout/track-attempt',
     'localroots/checkout/calculate-shipping' => 'localroots/checkout/calculate-shipping',
     'localroots/newsletter/subscribe' => 'localroots/newsletter/subscribe',
+    'localroots/contact/submit' => 'localroots/contact/submit',
     'shop' => ['template' => '_pages/products/index'],
     'shop/page/<page:\d+>' => ['template' => '_pages/products/index'],
     'shop/<slug:{slug}>' => ['template' => '_pages/products/category'],
@@ -30,4 +31,6 @@ return [
     'about' => ['template' => '_pages/about'],
     'sustainability' => ['template' => '_pages/sustainability'],
     'press' => ['template' => '_pages/press/index'],
+    'contact' => ['template' => '_pages/contact'],
+    'faq' => ['template' => '_pages/faq/index'],
 ];

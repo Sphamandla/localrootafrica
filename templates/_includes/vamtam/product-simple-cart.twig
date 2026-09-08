@@ -1,0 +1,21 @@
+{# Simple product add-to-cart — matches elementor-10178 / p=13048 (no size selector) #}
+{% set variant = variant ?? product.defaultVariant ?? product.variants.one() %}
+{% set primaryImage = product.productImages.one() %}
+{% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : '/wp-content/uploads/2024/02/4302405505_1_1_1-150x150.jpg' %}
+
+<div class="elementor-add-to-cart elementor-product-simple">
+<form class="cart localroots-commerce-form" method="post" action="/actions/commerce/cart/update-cart">
+	{{ csrfInput() }}
+	{{ actionInput('commerce/cart/update-cart') }}
+	<input type="hidden" name="purchasableId" class="localroots-purchasable-id" value="{{ variant.id }}" />
+
+	<div class="quantity">
+		<label class="screen-reader-text" for="localroots-product-qty">{{ product.title }} quantity</label>
+		<input type="number" id="localroots-product-qty" class="input-text qty text" name="qty" value="1" aria-label="Product quantity" min="1" step="1" placeholder="" inputmode="numeric" autocomplete="off" />
+	</div>
+
+	<button type="submit" class="single_add_to_cart_button button alt">Add to cart</button>
+
+	<button type="button" class="vamtam-loading woosw-btn woosw-btn-{{ product.id }} woosw-added woosw-btn-has-icon woosw-btn-icon-text localroots-wishlist-btn" data-id="{{ product.id }}" data-product_name="{{ product.title }}" data-product_image="{{ thumbUrl }}" aria-label="Browse wishlist"><span class="vamtam-loading woosw-btn-icon woosw-icon-8"></span><span class="vamtam-loading woosw-btn-text">Browse wishlist</span></button>
+</form>
+</div>

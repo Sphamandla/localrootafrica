@@ -63,7 +63,7 @@ class OrderSyncService extends Component
         if ($entry->getFieldLayout()->getFieldByHandle('orderStatus')) {
             $status = 'incomplete';
             if ($order->isCompleted) {
-                $status = 'complete';
+                $status = $order->isPaid ? 'complete' : 'pending';
             } elseif ($order->isPaid) {
                 $status = 'paid';
             } elseif ($order->getTotalQty() > 0) {

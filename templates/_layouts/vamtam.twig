@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en-US" class="no-js">
 <head>
+<meta name="csrf-token" content="{{ craft.app.request.csrfToken }}">
 {% include '_static/head.twig' %}
 {% hook 'seomaticRender' %}
 {% block head %}{% endblock %}
@@ -11,11 +12,25 @@
 
 {% include '_static/header.twig' %}
 
+{% set cart = craft.commerce.carts.cart %}
+<div id="localroots-mini-cart-source" hidden>{% include '_includes/vamtam/mini-cart.twig' %}</div>
+<script type="application/json" id="localroots-cart-config">
+{
+	"totalQty": {{ cart.totalQty|default(0) }},
+	"totalPrice": {{ cart.totalPrice|default(0) }},
+	"csrfName": {{ craft.app.config.general.csrfTokenName|json_encode|raw }},
+	"csrfToken": {{ craft.app.request.csrfToken|json_encode|raw }},
+	"updateCartUrl": "/actions/commerce/cart/update-cart",
+	"miniCartUrl": "/actions/localroots/cart/mini-cart"
+}
+</script>
+
 {% block content %}{% endblock %}
 
 {% include '_static/footer.twig' %}
 
 {% include '_static/scripts.twig' %}
+<script src="{{ alias('@web') }}/js/commerce-cart.js" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

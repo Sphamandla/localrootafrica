@@ -3,7 +3,7 @@ billingAddressCondition:
   elementType: null
   fieldContext: global
 handle: yoco
-isFrontendEnabled: '1'
+isFrontendEnabled: false
 name: Yoco
 orderCondition:
   class: craft\commerce\elements\conditions\orders\GatewayOrderCondition

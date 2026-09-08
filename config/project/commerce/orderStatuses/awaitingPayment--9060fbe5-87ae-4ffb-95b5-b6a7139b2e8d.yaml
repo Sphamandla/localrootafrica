@@ -1,0 +1,7 @@
+color: orange
+default: false
+description: 'Order placed via Cash/EFT and awaiting bank payment.'
+handle: awaitingPayment
+name: 'Awaiting payment'
+sortOrder: 99
+store: 68e72579-42b0-4808-9e4a-25a5c2e695f1 # Primary

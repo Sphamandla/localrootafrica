@@ -1,0 +1,15 @@
+{% extends '_layouts/vamtam-alt' %}
+
+{% set entry = craft.entries().section('pages').slug('faq').one() %}
+
+{% block bodyClass %}{% include '_static/body-class-faq.twig' %}{% endblock %}
+
+{% block content %}
+{% if entry %}
+{% include '_pages/faq/_content.twig' with { entry: entry } %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/faq.js"></script>
+{% endblock %}

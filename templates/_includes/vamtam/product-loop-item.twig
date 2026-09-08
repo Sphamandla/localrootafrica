@@ -91,14 +91,19 @@
 									</div>
 								</form>
 								{% elseif variant %}
-								<form class="cart e-loop-add-to-cart-form" method="post">
+								<form class="cart e-loop-add-to-cart-form" method="post" action="/actions/commerce/cart/update-cart">
 									{{ csrfInput() }}
 									{{ actionInput('commerce/cart/update-cart') }}
-									{{ redirectInput(craft.app.request.pathInfo) }}
 									{{ hiddenInput('purchasableId', variant.id) }}
 									{{ hiddenInput('qty', 1) }}
 									<div class="e-atc-qty-button-holder">
-										<button type="submit" class="button product_type_simple add_to_cart_button" aria-label="Add &ldquo;{{ product.title }}&rdquo; to your cart">Add to cart</button>
+										<button type="submit" class="button product_type_simple add_to_cart_button ajax_add_to_cart" aria-label="Add &ldquo;{{ product.title }}&rdquo; to your cart">Add to cart</button>
+									</div>
+								</form>
+								{% else %}
+								<form class="cart e-loop-add-to-cart-form">
+									<div class="e-atc-qty-button-holder">
+										<a href="{{ product.url }}" class="button product_type_variable add_to_cart_button" aria-label="View &ldquo;{{ product.title }}&rdquo;" rel="nofollow">Select options</a>
 									</div>
 								</form>
 								{% endif %}

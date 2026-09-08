@@ -66,8 +66,11 @@ class ImportController extends Controller
         $basePath = rtrim($basePath, '/');
         $productsVolume = Craft::$app->getVolumes()->getVolumeByHandle('products');
 
-        /** @var array<string, array{price: float, image: string, sku: string}> */
-        $catalog = [
+        /** @var array<string, array{price: float, image: string, sku: string, forceImage?: bool}> */
+        $catalog = $this->_parseProductCatalogFromHtml($basePath . '/default-shop/index.html');
+
+        // Manual overrides for products that need specific assets/prices.
+        $catalog = array_merge($catalog, [
             'cotton-grey-overshirt-with-stripes' => [
                 'price' => 1250,
                 'image' => 'wp-content/uploads/2024/02/2421320800_2_1_1.jpg',
@@ -79,52 +82,52 @@ class ImportController extends Controller
                 'sku' => 'LR-12588',
                 'forceImage' => true,
             ],
-        ];
+        ]);
 
         $sizes = ['XS', 'S', 'M', 'L', 'XL'];
         $repaired = 0;
 
-        foreach ($catalog as $slug => $config) {
-            $product = Product::find()->slug($slug)->one();
-            if (!$product) {
-                $this->stderr("  Product not found: {$slug}\n", Console::FG_YELLOW);
-                continue;
-            }
+        foreach (Product::find()->type('default')->status(null)->all() as $product) {
+            $slug = $product->slug;
+            $config = $catalog[$slug] ?? [
+                'price' => 1450,
+                'image' => '',
+                'sku' => 'LR-' . $product->id,
+            ];
 
             $changed = false;
 
-            if (empty($product->productImages->all())) {
-                $asset = $this->_importAsset($basePath . '/' . $config['image'], $productsVolume);
-                if (!$asset) {
-                    $local = Craft::getAlias('@webroot/uploads/products/' . basename($config['image']));
-                    $asset = $this->_importAsset($local, $productsVolume);
-                }
-                if ($asset) {
-                    $product->setFieldValue('productImages', [$asset->id]);
-                    Craft::$app->getElements()->saveElement($product);
-                    $changed = true;
-                    $this->stdout("  {$slug}: attached image\n");
-                }
-            } elseif (($config['forceImage'] ?? false) === true) {
-                $asset = $this->_importAsset($basePath . '/' . $config['image'], $productsVolume);
-                if (!$asset) {
-                    $local = Craft::getAlias('@webroot/uploads/products/' . basename($config['image']));
-                    $asset = $this->_importAsset($local, $productsVolume);
-                }
-                if ($asset) {
-                    $product->setFieldValue('productImages', [$asset->id]);
-                    Craft::$app->getElements()->saveElement($product);
-                    $changed = true;
-                    $this->stdout("  {$slug}: replaced image\n");
+            if (empty($product->productImages->all()) || ($config['forceImage'] ?? false)) {
+                $imagePath = $config['image'] ?? '';
+                if ($imagePath !== '') {
+                    $candidates = [
+                        $basePath . '/' . $imagePath,
+                        Craft::getAlias('@webroot/' . $imagePath),
+                        Craft::getAlias('@webroot/uploads/products/' . basename($imagePath)),
+                    ];
+                    $asset = null;
+                    foreach ($candidates as $candidate) {
+                        $asset = $this->_importAsset($candidate, $productsVolume);
+                        if ($asset) {
+                            break;
+                        }
+                    }
+                    if ($asset) {
+                        $product->setFieldValue('productImages', [$asset->id]);
+                        Craft::$app->getElements()->saveElement($product);
+                        $changed = true;
+                        $this->stdout("  {$slug}: attached image\n");
+                    }
                 }
             }
 
-            if (count($product->variants) === 0) {
+            if (count($product->getVariants()) === 0) {
+                $skuBase = $config['sku'] ?? ('LR-' . $product->id);
                 foreach ($sizes as $i => $size) {
                     $variant = new Variant();
                     $variant->productId = $product->id;
                     $variant->title = $size;
-                    $variant->sku = $config['sku'] . '-' . strtolower($size);
+                    $variant->sku = $skuBase . '-' . strtolower($size);
                     $variant->price = $config['price'];
                     $variant->basePrice = $config['price'];
                     $variant->hasUnlimitedStock = true;
@@ -134,6 +137,17 @@ class ImportController extends Controller
                 }
                 $changed = true;
                 $this->stdout("  {$slug}: created " . count($sizes) . " variants @ R{$config['price']}\n");
+            } else {
+                $defaultVariant = $product->getDefaultVariant();
+                if ($defaultVariant && (float)$defaultVariant->price < 500 && $config['price'] >= 500) {
+                    foreach ($product->getVariants()->all() as $variant) {
+                        $variant->price = $config['price'];
+                        $variant->basePrice = $config['price'];
+                        Craft::$app->getElements()->saveElement($variant);
+                    }
+                    $changed = true;
+                    $this->stdout("  {$slug}: updated variant prices to R{$config['price']}\n");
+                }
             }
 
             if ($changed) {
@@ -143,6 +157,61 @@ class ImportController extends Controller
 
         $this->stdout("Repaired {$repaired} product(s).\n", Console::FG_GREEN);
         return ExitCode::OK;
+    }
+
+    /**
+     * @return array<string, array{price: float, image: string, sku: string}>
+     */
+    private function _parseProductCatalogFromHtml(string $htmlFile): array
+    {
+        if (!file_exists($htmlFile)) {
+            return [];
+        }
+
+        $html = file_get_contents($htmlFile);
+        $items = preg_split('/(?=<div data-elementor-type="loop-item")/', $html);
+        $catalog = [];
+
+        foreach ($items as $item) {
+            if (!str_contains($item, 'data-product_name')) {
+                continue;
+            }
+
+            if (!preg_match('/data-product_name="([^"]+)"/', $item, $nameMatch)) {
+                continue;
+            }
+
+            $title = html_entity_decode(strip_tags($nameMatch[1]));
+            $slug = StringHelper::slugify($title);
+            if ($slug === '' || isset($catalog[$slug])) {
+                continue;
+            }
+
+            preg_match('/data-product_sku="([^"]*)"/', $item, $skuMatch);
+            if (preg_match_all('/class="price">(.*?)<\/p>/s', $item, $priceMatches) && $priceMatches[1]) {
+                $priceHtml = end($priceMatches[1]);
+            } else {
+                $priceHtml = '';
+            }
+            if (preg_match_all('#wp-content/uploads/[^"\']+\.jpg#', $item, $imageMatches) && $imageMatches[0]) {
+                $imagePath = $this->_pickBestProductImagePath($imageMatches[0]);
+            } else {
+                $imagePath = '';
+            }
+
+            $price = $this->_extractPrice($priceHtml);
+            if ($price < 500) {
+                $price *= 10;
+            }
+
+            $catalog[$slug] = [
+                'price' => $price,
+                'image' => $imagePath,
+                'sku' => $skuMatch[1] ?: ('LR-' . md5($slug)),
+            ];
+        }
+
+        return $catalog;
     }
 
     private function _importProducts(string $htmlFile, string $basePath): int
@@ -386,10 +455,39 @@ class ImportController extends Controller
         if (preg_match('/<ins[^>]*>.*?(\d+(?:\.\d+)?)/s', $html, $m)) {
             return (float)$m[1];
         }
-        if (preg_match('/(\d+(?:\.\d+)?)/', strip_tags($html), $m)) {
+        if (preg_match('/(\d+(?:\.\d+)?)/', strip_tags(html_entity_decode($html)), $m)) {
             return (float)$m[1];
         }
         return 99.00;
+    }
+
+    /**
+     * @param list<string> $paths
+     */
+    private function _pickBestProductImagePath(array $paths): string
+    {
+        $best = $paths[0];
+        $bestScore = 0;
+
+        foreach ($paths as $path) {
+            if (str_contains($path, '-150x150') || str_contains($path, '-64x96')) {
+                continue;
+            }
+
+            $score = 1;
+            if (preg_match('#-(\d+)x(\d+)\.jpg$#', $path, $match)) {
+                $score = (int)$match[1] * (int)$match[2];
+            } elseif (!str_contains($path, '-150x') && !str_contains($path, '-200x')) {
+                $score = 1000000;
+            }
+
+            if ($score > $bestScore) {
+                $bestScore = $score;
+                $best = $path;
+            }
+        }
+
+        return preg_replace('#-\d+x\d+(?=\.jpg$)#', '', $best) ?? $best;
     }
 
     private function _extractMainContent(string $html): string

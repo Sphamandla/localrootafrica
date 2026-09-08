@@ -1,3 +1,4 @@
+{% if actionUrl is defined and actionUrl and fields is defined %}
 <form id="payfast-form" method="POST" action="{{ actionUrl }}">
     {% for key, value in fields %}
         <input type="hidden" name="{{ key }}" value="{{ value }}">
@@ -6,3 +7,6 @@
     <button type="submit" class="btn">Continue to PayFast</button>
 </form>
 <script>document.getElementById('payfast-form').submit();</script>
+{% else %}
+<p>You will be redirected to PayFast to complete your payment.</p>
+{% endif %}

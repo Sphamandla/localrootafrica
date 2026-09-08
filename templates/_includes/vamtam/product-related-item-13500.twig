@@ -36,10 +36,9 @@
 						<div class="elementor-add-to-cart elementor-product-variable">
 							<div class="e-loop-add-to-cart-form-container">
 								{% if variant %}
-								<form class="cart e-loop-add-to-cart-form" method="post">
+								<form class="cart e-loop-add-to-cart-form" method="post" action="/actions/commerce/cart/update-cart">
 									{{ csrfInput() }}
 									{{ actionInput('commerce/cart/update-cart') }}
-									{{ redirectInput(craft.app.request.pathInfo) }}
 									{{ hiddenInput('purchasableId', variant.id) }}
 									{{ hiddenInput('qty', 1) }}
 									<div class="e-atc-qty-button-holder">

@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ craft.app.request.csrfToken }}">
     {% hook 'seomaticRender' %}
     {% if not seomatic.meta %}
         <title>{% if title is defined %}{{ title }} – {% endif %}{{ siteSettings.siteName ?? 'Local Roots Africa' }}</title>

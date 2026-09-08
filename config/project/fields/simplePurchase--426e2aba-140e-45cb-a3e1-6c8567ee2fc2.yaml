@@ -1,0 +1,13 @@
+columnSuffix: null
+handle: simplePurchase
+instructions: null
+name: 'Simple purchase (no options)'
+searchable: false
+settings:
+  default: false
+  offLabel: null
+  onLabel: null
+  showLabelsInCards: false
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Lightswitch

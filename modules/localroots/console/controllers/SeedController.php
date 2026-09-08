@@ -4,8 +4,14 @@ namespace modules\localroots\console\controllers;
 
 use Craft;
 use craft\elements\Entry;
+use craft\fieldlayoutelements\CustomField;
+use craft\fieldlayoutelements\TitleField;
+use craft\fields\Lightswitch;
+use craft\fields\Table;
 use craft\helpers\App;
 use craft\helpers\StringHelper;
+use craft\models\FieldLayout;
+use craft\models\FieldLayoutTab;
 use modules\localroots\services\TemplateExtractorService;
 use yii\console\Controller;
 use yii\console\ExitCode;
@@ -32,6 +38,8 @@ class SeedController extends Controller
 
         $this->actionExtractTemplates();
         $this->actionPages($basePath);
+        $this->actionContact($basePath);
+        $this->actionFaq($basePath);
         $this->actionPress($basePath);
 
         $this->stdout("Running product import...\n");
@@ -56,6 +64,7 @@ class SeedController extends Controller
         $pages = [
             ['slug' => 'about', 'title' => 'About Us', 'file' => 'about/index.html'],
             ['slug' => 'sustainability', 'title' => 'Sustainability', 'file' => 'sustainability/index.html'],
+            ['slug' => 'contact', 'title' => 'Contact', 'file' => 'contact/index.html'],
         ];
 
         $section = Craft::$app->entries->getSectionByHandle('pages');
@@ -95,6 +104,279 @@ class SeedController extends Controller
             $entry->setFieldValues(['pageBody' => $body ?: $page['title']]);
             Craft::$app->elements->saveElement($entry);
             $this->stdout("  Created page: {$page['slug']}\n");
+        }
+
+        return ExitCode::OK;
+    }
+
+    public function actionContact(?string $basePath = null): int
+    {
+        $basePath = $basePath ?? App::env('TEMPLATE_HTML_PATH') ?: '/Users/test/www/localrootsafrica/innovecouture.vamtam.com';
+
+        $section = Craft::$app->entries->getSectionByHandle('pages');
+        if (!$section) {
+            $this->stderr("  Pages section not found.\n", Console::FG_YELLOW);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $entryType = $section->getEntryTypes()[0] ?? null;
+        if (!$entryType) {
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $file = rtrim($basePath, '/') . '/contact/index.html';
+        $excerpt = 'We’re here to help';
+        if (file_exists($file)) {
+            $html = file_get_contents($file);
+            if (preg_match('/<div class="elementor-widget-container">\s*([^<]+)\s*<\/div>\s*<\/div>\s*<div class="elementor-element elementor-element-b287bac/i', $html, $m)) {
+                $excerpt = html_entity_decode(trim(strip_tags($m[1])), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            }
+        }
+
+        $entry = Entry::find()->section('pages')->slug('contact')->one();
+        if (!$entry) {
+            $entry = new Entry([
+                'sectionId' => $section->id,
+                'typeId' => $entryType->id,
+                'title' => 'Contact',
+                'slug' => 'contact',
+                'enabled' => true,
+            ]);
+        }
+
+        $entry->title = 'Contact';
+        $entry->setFieldValues(['pageBody' => $excerpt]);
+        if (!Craft::$app->elements->saveElement($entry)) {
+            $this->stderr("  Failed to save Contact entry.\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $this->stdout("  Seeded Contact page\n");
+
+        return ExitCode::OK;
+    }
+
+    public function actionFaq(?string $basePath = null): int
+    {
+        $basePath = $basePath ?? App::env('TEMPLATE_HTML_PATH') ?: '/Users/test/www/localrootsafrica/innovecouture.vamtam.com';
+        $this->_ensureFaqField();
+
+        $section = Craft::$app->entries->getSectionByHandle('pages');
+        if (!$section) {
+            $this->stderr("  Pages section not found.\n", Console::FG_YELLOW);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $entryType = $section->getEntryTypes()[0] ?? null;
+        if (!$entryType) {
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $file = rtrim($basePath, '/') . '/faq/index.html';
+        if (!file_exists($file)) {
+            $this->stderr("  FAQ reference file not found: {$file}\n", Console::FG_YELLOW);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $html = file_get_contents($file);
+        $faqItems = $this->_parseFaqItems($html);
+
+        $entry = Entry::find()->section('pages')->slug('faq')->one();
+        if (!$entry) {
+            $entry = new Entry([
+                'sectionId' => $section->id,
+                'typeId' => $entryType->id,
+                'title' => 'FAQ',
+                'slug' => 'faq',
+                'enabled' => true,
+            ]);
+        }
+
+        $entry->setFieldValues(['faqItems' => $faqItems]);
+        if (!Craft::$app->elements->saveElement($entry)) {
+            $this->stderr("  Failed to save FAQ entry.\n", Console::FG_RED);
+            return ExitCode::UNSPECIFIED_ERROR;
+        }
+
+        $this->stdout('  Seeded FAQ with ' . count($faqItems) . " items\n");
+        return ExitCode::OK;
+    }
+
+    private function _ensureFaqField(): void
+    {
+        $fieldsService = Craft::$app->getFields();
+        if ($fieldsService->getFieldByHandle('faqItems')) {
+            return;
+        }
+
+        $field = $fieldsService->createField([
+            'type' => Table::class,
+            'name' => 'FAQ Items',
+            'handle' => 'faqItems',
+            'settings' => [
+                'columns' => [
+                    'col1' => [
+                        'heading' => 'Section',
+                        'handle' => 'section',
+                        'width' => '25%',
+                        'type' => 'singleline',
+                    ],
+                    'col2' => [
+                        'heading' => 'Question',
+                        'handle' => 'question',
+                        'width' => '35%',
+                        'type' => 'singleline',
+                    ],
+                    'col3' => [
+                        'heading' => 'Answer',
+                        'handle' => 'answer',
+                        'width' => '40%',
+                        'type' => 'multiline',
+                    ],
+                ],
+            ],
+        ]);
+        $fieldsService->saveField($field);
+        $this->stdout("  Created field: faqItems\n");
+
+        $section = Craft::$app->entries->getSectionByHandle('pages');
+        if (!$section) {
+            return;
+        }
+
+        $entryType = $section->getEntryTypes()[0] ?? null;
+        if (!$entryType) {
+            return;
+        }
+
+        $layout = $entryType->getFieldLayout() ?? new FieldLayout(['type' => Entry::class]);
+        $tabs = $layout->getTabs();
+        $tab = $tabs[0] ?? new FieldLayoutTab(['name' => 'Content', 'layout' => $layout]);
+        $elements = $tab->getElements();
+        $hasField = false;
+        foreach ($elements as $element) {
+            if ($element instanceof CustomField && $element->fieldUid === $field->uid) {
+                $hasField = true;
+                break;
+            }
+        }
+
+        if (!$hasField) {
+            $elements[] = Craft::$app->getFields()->createLayoutElement([
+                'type' => CustomField::class,
+                'fieldUid' => $field->uid,
+            ]);
+            $tab->setElements($elements);
+            $layout->setTabs([$tab]);
+            $entryType->setFieldLayout($layout);
+            Craft::$app->entries->saveEntryType($entryType);
+            $this->stdout("  Added faqItems to pages entry type\n");
+        }
+    }
+
+    /**
+     * @return list<array{section: string, question: string, answer: string}>
+     */
+    private function _parseFaqItems(string $html): array
+    {
+        $items = [];
+        $sectionTitles = [
+            'Most common questions',
+            'My order',
+            'Delivery',
+            'Payment',
+            'Campaigns & offers',
+        ];
+
+        if (!preg_match('/<aside[^>]*elementor-element-0e166f0[\s\S]*?<\/aside>/i', $html, $asideMatch)) {
+            return $items;
+        }
+
+        $aside = $asideMatch[0];
+        $parts = preg_split(
+            '/<h2 class="elementor-heading-title elementor-size-default">(.*?)<\/h2>/i',
+            $aside,
+            -1,
+            PREG_SPLIT_DELIM_CAPTURE
+        );
+
+        $currentSection = '';
+        for ($i = 1; $i < count($parts); $i += 2) {
+            $heading = html_entity_decode(trim(strip_tags($parts[$i])), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $block = $parts[$i + 1] ?? '';
+
+            if (!in_array($heading, $sectionTitles, true)) {
+                continue;
+            }
+            $currentSection = $heading;
+
+            if (!preg_match_all(
+                '/<a class="elementor-toggle-title"[^>]*>(.*?)<\/a>\s*<\/div>\s*<div[^>]*class="elementor-tab-content[^"]*"[^>]*>(.*?)<\/div>\s*<\/div>/is',
+                $block,
+                $matches,
+                PREG_SET_ORDER
+            )) {
+                continue;
+            }
+
+            foreach ($matches as $match) {
+                $question = html_entity_decode(trim(strip_tags($match[1])), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $answer = trim($match[2]);
+                $answer = preg_replace('#https://innovecouture\.vamtam\.com/#', '/', $answer);
+                $answer = preg_replace('#\.\./index\.html%3Fp=8\.html#', '/account', $answer);
+                $answer = preg_replace('#index\.html%3Fp=8\.html#', '/account', $answer);
+                $answer = preg_replace('#\.\./track-order/#', '/track-order/', $answer);
+
+                if ($question !== '' && $answer !== '') {
+                    $items[] = [
+                        'section' => $currentSection,
+                        'question' => $question,
+                        'answer' => $answer,
+                    ];
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    public function actionSimplePurchaseField(): int
+    {
+        $fieldsService = Craft::$app->getFields();
+        if (!$fieldsService->getFieldByHandle('simplePurchase')) {
+            $field = $fieldsService->createField([
+                'type' => Lightswitch::class,
+                'name' => 'Simple purchase (no options)',
+                'handle' => 'simplePurchase',
+            ]);
+            $fieldsService->saveField($field);
+            $this->stdout("  Created field: simplePurchase\n");
+
+            $productType = \craft\commerce\Plugin::getInstance()->getProductTypes()->getProductTypeByHandle('default');
+            if ($productType) {
+                $layout = $productType->getFieldLayout() ?? new FieldLayout(['type' => \craft\commerce\elements\Product::class]);
+                $tabs = $layout->getTabs();
+                $tab = $tabs[0] ?? new FieldLayoutTab(['name' => 'Product', 'layout' => $layout]);
+                $elements = $tab->getElements();
+                $elements[] = Craft::$app->getFields()->createLayoutElement([
+                    'type' => CustomField::class,
+                    'fieldUid' => $field->uid,
+                ]);
+                $tab->setElements($elements);
+                $layout->setTabs([$tab]);
+                $productType->setFieldLayout($layout);
+                \craft\commerce\Plugin::getInstance()->getProductTypes()->saveProductType($productType);
+            }
+        }
+
+        $simpleSlugs = ['waterproof-windbreaker-jacket'];
+        foreach ($simpleSlugs as $slug) {
+            $product = \craft\commerce\elements\Product::find()->slug($slug)->one();
+            if ($product && !$product->simplePurchase) {
+                $product->setFieldValue('simplePurchase', true);
+                Craft::$app->elements->saveElement($product);
+                $this->stdout("  Marked {$slug} as simple purchase\n");
+            }
         }
 
         return ExitCode::OK;

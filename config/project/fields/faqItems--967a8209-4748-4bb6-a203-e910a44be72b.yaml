@@ -1,0 +1,63 @@
+columnSuffix: null
+handle: faqItems
+instructions: null
+name: 'FAQ Items'
+searchable: false
+settings:
+  addRowLabel: 'Add a row'
+  columns:
+    __assoc__:
+      -
+        - col1
+        -
+          __assoc__:
+            -
+              - heading
+              - Section
+            -
+              - handle
+              - section
+            -
+              - width
+              - 25%
+            -
+              - type
+              - singleline
+      -
+        - col2
+        -
+          __assoc__:
+            -
+              - heading
+              - Question
+            -
+              - handle
+              - question
+            -
+              - width
+              - 35%
+            -
+              - type
+              - singleline
+      -
+        - col3
+        -
+          __assoc__:
+            -
+              - heading
+              - Answer
+            -
+              - handle
+              - answer
+            -
+              - width
+              - 40%
+            -
+              - type
+              - multiline
+  maxRows: null
+  minRows: null
+  staticRows: false
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Table

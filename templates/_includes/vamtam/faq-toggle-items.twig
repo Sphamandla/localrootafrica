@@ -1,0 +1,13 @@
+{# Renders Elementor toggle items for FAQ sections #}
+{% for item in items %}
+<div class="elementor-toggle-item">
+	<div id="elementor-tab-title-{{ loop.index }}" class="elementor-tab-title" data-tab="{{ loop.index }}" role="button" aria-controls="elementor-tab-content-{{ loop.index }}" aria-expanded="false">
+		<span class="elementor-toggle-icon elementor-toggle-icon-right" aria-hidden="true">
+			<span class="elementor-toggle-icon-closed"><i class="vamtamtheme- vamtam-theme-arrow-down"></i></span>
+			<span class="elementor-toggle-icon-opened"><i class="elementor-toggle-icon-opened vamtamtheme- vamtam-theme-arrow-top"></i></span>
+		</span>
+		<a class="elementor-toggle-title" tabindex="0">{{ item.question }}</a>
+	</div>
+	<div id="elementor-tab-content-{{ loop.index }}" class="elementor-tab-content elementor-clearfix" data-tab="{{ loop.index }}" role="region" aria-labelledby="elementor-tab-title-{{ loop.index }}">{{ item.answer|raw }}</div>
+</div>
+{% endfor %}

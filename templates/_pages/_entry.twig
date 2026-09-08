@@ -1,6 +1,24 @@
-{% extends '_layouts/main' %}
+{% set vamtamPages = ['about', 'sustainability', 'contact', 'faq'] %}
+{% extends entry.slug in vamtamPages ? '_layouts/vamtam-alt' : '_layouts/main' %}
+
+{% block bodyClass %}
+{% if entry.slug == 'about' %}{% include '_static/body-class-about.twig' %}
+{% elseif entry.slug == 'sustainability' %}{% include '_static/body-class-sustainability.twig' %}
+{% elseif entry.slug == 'contact' %}{% include '_static/body-class-contact.twig' %}
+{% elseif entry.slug == 'faq' %}{% include '_static/body-class-faq.twig' %}
+{% endif %}
+{% endblock %}
 
 {% block content %}
+{% if entry.slug == 'about' %}
+{% include '_static/content-about.twig' %}
+{% elseif entry.slug == 'sustainability' %}
+{% include '_static/content-sustainability.twig' %}
+{% elseif entry.slug == 'contact' %}
+{% include '_static/content-contact.twig' %}
+{% elseif entry.slug == 'faq' %}
+{% include '_pages/faq/_content.twig' with { entry: entry } %}
+{% else %}
 <div class="container section">
     {% if entry.pageHeroImage|length %}
     <div class="hero" style="height: 40vh; min-height: 300px; margin-bottom: 40px; background-image: linear-gradient(to top, rgba(0,0,0,0.4), transparent), url('{{ entry.pageHeroImage.one().url }}');">
@@ -16,4 +34,11 @@
         {{ entry.pageBody|nl2br }}
     </div>
 </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if entry.slug == 'faq' %}
+<script src="{{ alias('@web') }}/js/faq.js"></script>
+{% endif %}
 {% endblock %}

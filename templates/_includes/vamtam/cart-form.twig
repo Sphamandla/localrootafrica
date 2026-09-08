@@ -1,11 +1,14 @@
-{# Dynamic cart content — matches content-cart.twig structure #}
+{# Dynamic cart content — matches innovecouture cart widget structure #}
 {% set cart = craft.commerce.carts.cart %}
 
+<div class="woocommerce-notices-wrapper"></div>
+<div class="vamtam-free-shipping-progress-bar bar-placeholder"></div>
+
+{% if cart.lineItems|length %}
 <div class="e-cart__container">
 <div class="e-cart__column e-cart__column-start">
 <h5>My Bag</h5>
 
-{% if cart.lineItems|length %}
 <form class="woocommerce-cart-form localroots-cart-form" method="post" action="{{ url('cart') }}">
 	{{ csrfInput() }}
 	{{ actionInput('commerce/cart/update-cart') }}
@@ -34,6 +37,7 @@
 		</tbody>
 	</table>
 	</div>
+	<div class="e-clear"></div>
 	<div class="coupon e-cart-section shop_table">
 		<div class="form-row coupon-col">
 			<div class="coupon-col-start">
@@ -45,10 +49,6 @@
 		</div>
 	</div>
 </form>
-{% else %}
-<div class="cart-empty woocommerce-info">Your bag is empty.</div>
-<p><a href="{{ url('shop') }}" class="button wc-backward">Return to shop</a></p>
-{% endif %}
 
 </div>
 <div class="e-cart__column e-cart__column-end">
@@ -75,7 +75,7 @@
 	{% if cart.totalTax > 0 %}
 	<tr class="tax-total">
 		<th>VAT</th>
-		<td>{% include '_includes/vamtam/price.twig' with { amount: cart.totalTax } %}</td>
+		<td data-title="VAT">{% include '_includes/vamtam/price.twig' with { amount: cart.totalTax } %}</td>
 	</tr>
 	{% endif %}
 	<tr class="order-total">
@@ -83,14 +83,15 @@
 		<td data-title="Total"><strong>{% include '_includes/vamtam/price.twig' with { amount: cart.totalPrice } %}</strong></td>
 	</tr>
 </table>
-{% if cart.lineItems|length %}
 <div class="wc-proceed-to-checkout">
-	<a href="{{ url('checkout') }}" class="checkout-button button alt wc-forward">Proceed to checkout</a>
+	<a href="{{ url('checkout') }}" class="checkout-button button alt wc-forward">Proceed to Checkout</a>
 </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+{% else %}
+{% include '_includes/vamtam/cart-empty.twig' %}
 {% endif %}
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>

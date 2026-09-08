@@ -15,16 +15,28 @@
 	cloned.id = '';
 	source.remove();
 
-	woocommerce.innerHTML = cloned.innerHTML;
+	woocommerce.innerHTML = '<div class="woocommerce-notices-wrapper"></div><div class="woocommerce-notices-wrapper"></div>' + cloned.innerHTML;
 
 	const form = document.querySelector('.localroots-checkout-form');
 	if (!form) return;
 
+	woocommerce.classList.add('localroots-checkout-ready');
+
 	fixBreadcrumbLinks();
 	initShippingToggle();
+	initShippingMethods(config);
+	initPaymentMethods();
 	initShippingCalculator(config);
+	initCouponForm(config);
 	initCheckoutTracking(form, config);
 	initPlaceOrder(form, config);
+
+	if (config.couponCode) {
+		const couponAnchor = document.querySelector('.e-coupon-anchor');
+		const couponNudge = document.querySelector('.e-show-coupon-form');
+		if (couponAnchor) couponAnchor.style.display = 'block';
+		if (couponNudge) couponNudge.closest('.e-coupon-box')?.querySelector('.e-woocommerce-coupon-nudge')?.classList.add('coupon-visible');
+	}
 
 	function fixBreadcrumbLinks() {
 		document.querySelectorAll('.elementor-element-364ab03 a, .elementor-element-93197dd a').forEach(a => {
@@ -36,10 +48,44 @@
 
 	function initShippingToggle() {
 		const checkbox = document.getElementById('ship-to-different-address-checkbox');
-		const fields = document.getElementById('shipping-address-fields');
+		const fields = document.querySelector('.shipping_address');
 		if (!checkbox || !fields) return;
 		checkbox.addEventListener('change', () => {
 			fields.style.display = checkbox.checked ? 'block' : 'none';
+		});
+	}
+
+	function initPaymentMethods() {
+		const radios = document.querySelectorAll('.localroots-gateway-radio');
+		if (!radios.length) return;
+
+		const showBox = (handle) => {
+			document.querySelectorAll('.payment_box').forEach(box => {
+				box.style.display = 'none';
+			});
+			if (handle) {
+				const active = document.querySelector('.payment_box.payment_method_' + handle);
+				if (active) active.style.display = 'block';
+			}
+		};
+
+		radios.forEach(radio => {
+			radio.addEventListener('change', () => {
+				if (!radio.checked) return;
+				const handle = radio.id.replace('payment_method_', '');
+				showBox(handle);
+			});
+		});
+	}
+
+	function initShippingMethods(config) {
+		config.courierRate = config.shippingRate;
+		document.querySelectorAll('.localroots-shipping-method').forEach(radio => {
+			radio.addEventListener('change', () => {
+				if (!radio.checked) return;
+				config.shippingRate = radio.value === 'local_pickup' ? 0 : config.courierRate;
+				updateOrderTotal(config.subtotal + config.tax - (config.discount || 0) + config.shippingRate);
+			});
 		});
 	}
 
@@ -54,6 +100,88 @@
 				timer = setTimeout(() => recalculateShipping(config), 400);
 			});
 		});
+	}
+
+	function initCouponForm(config) {
+		const toggle = document.querySelector('.e-show-coupon-form');
+		const anchor = document.querySelector('.e-coupon-anchor');
+		const applyBtn = document.querySelector('.localroots-apply-coupon');
+		const messageEl = document.querySelector('.localroots-coupon-message');
+		const couponInput = document.getElementById('coupon_code');
+
+		if (toggle && anchor) {
+			toggle.addEventListener('click', (e) => {
+				e.preventDefault();
+				anchor.style.display = anchor.style.display === 'none' ? 'block' : 'none';
+			});
+		}
+
+		if (!applyBtn || !couponInput) return;
+
+		applyBtn.addEventListener('click', () => applyCoupon(config, couponInput.value, messageEl));
+		couponInput.addEventListener('keydown', (e) => {
+			if (e.key === 'Enter') {
+				e.preventDefault();
+				applyCoupon(config, couponInput.value, messageEl);
+			}
+		});
+	}
+
+	function applyCoupon(config, code, messageEl) {
+		const body = new FormData();
+		body.append(config.csrfName, config.csrfToken);
+		body.append('couponCode', code.trim());
+
+		applyCouponRequest(config, body, messageEl);
+	}
+
+	function applyCouponRequest(config, body, messageEl) {
+		fetch(config.applyCouponUrl, { method: 'POST', body, credentials: 'same-origin' })
+			.then(r => r.json())
+			.then(data => {
+				if (messageEl) {
+					messageEl.style.display = 'block';
+					messageEl.textContent = data.success
+						? 'Coupon applied successfully.'
+						: (data.message || 'Could not apply coupon.');
+					messageEl.style.color = data.success ? '#2e7d32' : '#c62828';
+				}
+
+				if (data.success) {
+					config.discount = data.totalDiscount;
+					config.total = data.total + config.shippingRate;
+					updateDiscountRow(data.totalDiscount, data.couponCode, data.totalDiscountFormatted);
+					updateOrderTotal(config.total);
+				} else {
+					updateDiscountRow(0, '', '');
+				}
+			});
+	}
+
+	function updateDiscountRow(amount, code, formatted) {
+		let row = document.querySelector('.cart-discount');
+		if (amount > 0) {
+			if (!row) {
+				const taxRow = document.querySelector('.tax-total');
+				const subtotalRow = document.querySelector('.cart-subtotal');
+				row = document.createElement('tr');
+				row.className = 'cart-discount';
+				row.innerHTML = '<th>Discount</th><td></td>';
+				(taxRow || subtotalRow)?.after(row);
+			}
+			row.querySelector('th').textContent = code ? 'Discount (' + code + ')' : 'Discount';
+			row.querySelector('td').innerHTML = '-<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>' + Math.round(amount).toLocaleString() + '</bdi></span>';
+			row.style.display = '';
+		} else if (row) {
+			row.remove();
+		}
+	}
+
+	function updateOrderTotal(total) {
+		const totalEl = document.getElementById('localroots-order-total');
+		if (totalEl) {
+			totalEl.innerHTML = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>' + Math.round(total).toLocaleString() + '</bdi></span>';
+		}
 	}
 
 	function recalculateShipping(config) {
@@ -73,11 +201,11 @@
 			.then(data => {
 				if (!data.success) return;
 				const costEl = document.getElementById('localroots-shipping-cost');
-				const totalEl = document.getElementById('localroots-order-total');
 				if (costEl) costEl.textContent = data.formatted;
-				if (totalEl) {
-					const total = config.subtotal + config.tax + data.cost;
-					totalEl.innerHTML = '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>' + Math.round(total).toLocaleString() + '</bdi></span>';
+				config.courierRate = data.cost;
+				if (document.getElementById('shipping_method_0_courier_guy')?.checked) {
+					config.shippingRate = data.cost;
+					updateOrderTotal(config.subtotal + config.tax - (config.discount || 0) + data.cost);
 				}
 			});
 	}
@@ -135,6 +263,14 @@
 
 			try {
 				await fetch(config.updateCartAction, { method: 'POST', body: updateBody, credentials: 'same-origin' });
+
+				const metaBody = new FormData();
+				metaBody.append(config.csrfName, config.csrfToken);
+				metaBody.append('message', document.getElementById('order_comments')?.value || '');
+				const shippingMethod = document.querySelector('.localroots-shipping-method:checked')?.value || 'courier_guy';
+				metaBody.append('shippingMethod', shippingMethod);
+				await fetch(config.saveCartMetaUrl, { method: 'POST', body: metaBody, credentials: 'same-origin' });
+
 				form.submit();
 			} catch (err) {
 				btn.disabled = false;

@@ -14,6 +14,7 @@ use craft\fields\Lightswitch;
 use craft\fields\Matrix;
 use craft\fields\Number;
 use craft\fields\PlainText;
+use craft\fields\Table;
 use craft\fields\Tags;
 use craft\models\CategoryGroup;
 use craft\models\FieldLayout;
@@ -23,6 +24,8 @@ use craft\models\Section_SiteSettings;
 use craft\models\TagGroup;
 use craft\models\Volume;
 use craft\models\VolumeFolder;
+use modules\localroots\gateways\CashEftGateway;
+use modules\localroots\gateways\CashOnDeliveryGateway;
 use modules\localroots\gateways\OzowGateway;
 use modules\localroots\gateways\PayfastGateway;
 use modules\localroots\gateways\YocoGateway;
@@ -104,6 +107,13 @@ class SetupController extends Controller
             ['handle' => 'defaultSeoDescription', 'name' => 'Default SEO Description', 'type' => PlainText::class, 'settings' => ['multiline' => true]],
             ['handle' => 'pageHeroImage', 'name' => 'Hero Image', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image']]],
             ['handle' => 'pageBody', 'name' => 'Body', 'type' => PlainText::class, 'settings' => ['multiline' => true, 'initialRows' => 8]],
+            ['handle' => 'faqItems', 'name' => 'FAQ Items', 'type' => Table::class, 'settings' => [
+                'columns' => [
+                    'col1' => ['heading' => 'Section', 'handle' => 'section', 'width' => '25%', 'type' => 'singleline'],
+                    'col2' => ['heading' => 'Question', 'handle' => 'question', 'width' => '35%', 'type' => 'singleline'],
+                    'col3' => ['heading' => 'Answer', 'handle' => 'answer', 'width' => '40%', 'type' => 'multiline'],
+                ],
+            ]],
             ['handle' => 'promoTitle', 'name' => 'Promo Title', 'type' => PlainText::class],
             ['handle' => 'promoSubtitle', 'name' => 'Promo Subtitle', 'type' => PlainText::class],
             ['handle' => 'promoImage', 'name' => 'Promo Image', 'type' => Assets::class, 'settings' => ['allowedKinds' => ['image']]],
@@ -120,6 +130,7 @@ class SetupController extends Controller
             ['handle' => 'paymentStatus', 'name' => 'Payment Status', 'type' => PlainText::class],
             ['handle' => 'orderStatus', 'name' => 'Order Status', 'type' => PlainText::class],
             ['handle' => 'featuredProduct', 'name' => 'Featured', 'type' => Lightswitch::class],
+            ['handle' => 'simplePurchase', 'name' => 'Simple purchase (no options)', 'type' => Lightswitch::class],
         ];
 
         foreach ($fieldDefs as $def) {
@@ -214,7 +225,7 @@ class SetupController extends Controller
                 'type' => Section::TYPE_STRUCTURE,
                 'uriFormat' => '{slug}',
                 'template' => '_pages/_entry',
-                'fields' => ['pageHeroImage', 'pageBody'],
+                'fields' => ['pageHeroImage', 'pageBody', 'faqItems'],
             ],
             'promotions' => [
                 'name' => 'Promotions',
@@ -305,7 +316,7 @@ class SetupController extends Controller
             $layout = new FieldLayout(['type' => \craft\commerce\elements\Product::class]);
             $tab = new FieldLayoutTab(['name' => 'Product', 'layout' => $layout]);
             $elements = [];
-            foreach (['productImages', 'productShortDescription', 'productCategories', 'productTags', 'featuredProduct'] as $fh) {
+            foreach (['productImages', 'productShortDescription', 'productCategories', 'productTags', 'featuredProduct', 'simplePurchase'] as $fh) {
                 $field = $fieldsService->getFieldByHandle($fh);
                 if ($field) {
                     $elements[] = Craft::$app->getFields()->createLayoutElement([
@@ -336,20 +347,51 @@ class SetupController extends Controller
         }
 
         $gateways = $commerce->getGateways();
+        $orderStatuses = $commerce->getOrderStatuses();
+        if (!$orderStatuses->getOrderStatusByHandle('awaitingPayment')) {
+            $store = $commerce->getStores()->getPrimaryStore();
+            $status = new \craft\commerce\models\OrderStatus([
+                'storeId' => $store?->id,
+                'name' => 'Awaiting payment',
+                'handle' => 'awaitingPayment',
+                'color' => 'orange',
+                'description' => 'Order placed via Cash/EFT and awaiting bank payment.',
+                'default' => false,
+            ]);
+            $orderStatuses->saveOrderStatus($status);
+            $this->stdout("  Created order status: awaitingPayment\n");
+        }
+
         foreach ([
-            ['name' => 'PayFast', 'handle' => 'payfast', 'class' => PayfastGateway::class],
-            ['name' => 'Ozow', 'handle' => 'ozow', 'class' => OzowGateway::class],
-            ['name' => 'Yoco', 'handle' => 'yoco', 'class' => YocoGateway::class],
+            ['name' => 'Direct bank transfer', 'handle' => 'cash-eft', 'class' => CashEftGateway::class, 'paymentType' => 'authorize', 'isFrontendEnabled' => true],
+            ['name' => 'Cash on delivery', 'handle' => 'cash-on-delivery', 'class' => CashOnDeliveryGateway::class, 'paymentType' => 'authorize', 'isFrontendEnabled' => true],
+            ['name' => 'PayFast', 'handle' => 'payfast', 'class' => PayfastGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => false],
+            ['name' => 'Ozow', 'handle' => 'ozow', 'class' => OzowGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => false],
+            ['name' => 'Yoco', 'handle' => 'yoco', 'class' => YocoGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => false],
         ] as $gw) {
-            if ($gateways->getGatewayByHandle($gw['handle'])) {
+            $existing = $gateways->getGatewayByHandle($gw['handle']);
+            if ($existing) {
+                $changed = false;
+                if ($existing->name !== $gw['name']) {
+                    $existing->name = $gw['name'];
+                    $changed = true;
+                }
+                if ($existing->isFrontendEnabled !== $gw['isFrontendEnabled']) {
+                    $existing->isFrontendEnabled = $gw['isFrontendEnabled'];
+                    $changed = true;
+                }
+                if ($changed) {
+                    $gateways->saveGateway($existing);
+                    $this->stdout("  Updated gateway: {$gw['handle']}\n");
+                }
                 continue;
             }
             $gateway = $gateways->createGateway([
                 'name' => $gw['name'],
                 'handle' => $gw['handle'],
                 'type' => $gw['class'],
-                'paymentType' => 'purchase',
-                'isFrontendEnabled' => true,
+                'paymentType' => $gw['paymentType'],
+                'isFrontendEnabled' => $gw['isFrontendEnabled'],
             ]);
             $gateways->saveGateway($gateway);
             $this->stdout("  Created gateway: {$gw['handle']}\n");

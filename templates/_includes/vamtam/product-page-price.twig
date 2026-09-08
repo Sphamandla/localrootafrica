@@ -1,0 +1,28 @@
+{% set variants = variants ?? product.variants.all() %}
+{% set variant = variant ?? product.defaultVariant ?? variants|first %}
+{% set prices = [] %}
+{% for v in variants %}
+	{% set prices = prices|merge([v.salePrice]) %}
+{% endfor %}
+{% set minPrice = prices|sort|first|default(0) %}
+{% set maxPrice = prices|sort|last|default(0) %}
+{% set isVariable = variants|length > 1 %}
+{% set onSale = false %}
+{% for v in variants %}
+	{% if v.onPromotion and v.price > v.salePrice %}
+		{% set onSale = true %}
+	{% endif %}
+{% endfor %}
+
+{% if isVariable and minPrice != maxPrice %}
+<p class="price">
+	<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ minPrice|number_format(0, '.', ',') }}</bdi></span>
+	<span aria-hidden="true">&ndash;</span>
+	<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ maxPrice|number_format(0, '.', ',') }}</bdi></span>
+	<span class="screen-reader-text">Price range: R{{ minPrice|number_format(0, '.', ',') }} through R{{ maxPrice|number_format(0, '.', ',') }}</span>
+</p>
+{% elseif onSale and variant %}
+	{% include '_includes/vamtam/price-sale.twig' with { saleAmount: variant.salePrice, regularAmount: variant.price } %}
+{% else %}
+<p class="price">{% include '_includes/vamtam/price.twig' with { amount: minPrice } %}</p>
+{% endif %}

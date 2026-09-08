@@ -1,0 +1,21 @@
+{# Side cart line item matching Elementor menu cart markup #}
+{% set product = item.purchasable.product ?? null %}
+{% set imageUrl = product and product.productImages|length ? product.productImages.one().getUrl({ width: 140, height: 210 }) : '/wp-content/uploads/2024/02/UntitledSession4852_1500x-866x1299.jpg' %}
+{% set productUrl = product ? product.url : '#' %}
+
+<div class="elementor-menu-cart__product woocommerce-cart-form__cart-item cart_item" data-line-item-id="{{ item.id }}">
+	<div class="elementor-menu-cart__product-image product-thumbnail">
+		<a href="{{ productUrl }}"><img decoding="async" width="70" height="105" src="{{ imageUrl }}" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="{{ item.description }}" /></a>
+	</div>
+	<div class="elementor-menu-cart__product-name product-name">
+		<a href="{{ productUrl }}">{{ item.description }}</a>
+	</div>
+	<div class="elementor-menu-cart__product-price product-price">
+		<span class="quantity">{{ item.qty }} &times; {% include '_includes/vamtam/price.twig' with { amount: item.price } %}</span>
+	</div>
+	<div class="elementor-menu-cart__product-remove product-remove">
+		<a href="#" class="remove remove_from_cart_button localroots-mini-cart-remove" data-line-item-id="{{ item.id }}" aria-label="Remove {{ item.description }} from cart">
+			<i class="vamtam-remove-product"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 19" width="17px"><g fill="#BFBDBB" fill-rule="nonzero"><path d="M16.227 3.03h-5l-.433-1.87c-.086-.37-.394-.63-.749-.63h-3.09c-.355 0-.664.26-.75.632L5.771 3.03H.773c-.427 0-.773.373-.773.833v.834c0 .46.346.833.773.833h15.454c.427 0 .773-.373.773-.833v-.834c0-.46-.346-.833-.773-.833ZM15 6.53H3v9.75a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 15 16.28V6.53Z"/></g></svg></i>
+		</a>
+	</div>
+</div>

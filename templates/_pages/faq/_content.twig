@@ -1,0 +1,24 @@
+{% set faqSections = {
+	'Most common questions': '6b1c4b5',
+	'My order': 'b281555',
+	'Delivery': '44c811d',
+	'Payment': '92b3ba3',
+	'Campaigns & offers': '1a4fe88'
+} %}
+{% set faqRows = entry.faqItems ?? [] %}
+
+<div id="localroots-faq-sources" hidden>
+	{% for sectionTitle, widgetId in faqSections %}
+	{% set sectionItems = [] %}
+	{% for row in faqRows %}
+		{% if row.section == sectionTitle %}
+			{% set sectionItems = sectionItems|merge([{ question: row.question, answer: row.answer }]) %}
+		{% endif %}
+	{% endfor %}
+	<div data-widget-id="{{ widgetId }}" data-section="{{ sectionTitle }}">
+		{% include '_includes/vamtam/faq-toggle-items.twig' with { items: sectionItems } %}
+	</div>
+	{% endfor %}
+</div>
+
+{% include '_static/content-faq.twig' %}

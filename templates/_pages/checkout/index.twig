@@ -3,6 +3,10 @@
 {% set cart = craft.commerce.carts.cart %}
 {% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.zipCode ?? null, cart.totalWeight) %}
 
+{% block head %}
+{% include '_includes/vamtam/head-checkout.twig' %}
+{% endblock %}
+
 {% block bodyClass %}{% include '_static/body-class-checkout.twig' %}{% endblock %}
 
 {% block content %}
@@ -18,9 +22,14 @@
 	"trackProgressUrl": {{ url('localroots/checkout/track-progress')|json_encode|raw }},
 	"trackAttemptUrl": {{ url('localroots/checkout/track-attempt')|json_encode|raw }},
 	"calculateShippingUrl": {{ url('localroots/checkout/calculate-shipping')|json_encode|raw }},
+	"applyCouponUrl": {{ url('localroots/checkout/apply-coupon')|json_encode|raw }},
+	"saveCartMetaUrl": {{ url('localroots/checkout/save-cart-meta')|json_encode|raw }},
 	"subtotal": {{ cart.itemSubtotal }},
 	"tax": {{ cart.totalTax }},
-	"shippingRate": {{ shippingRate }}
+	"discount": {{ cart.totalDiscount }},
+	"shippingRate": {{ shippingRate }},
+	"total": {{ cart.totalPrice + shippingRate }},
+	"couponCode": {{ (cart.couponCode ?? '')|json_encode|raw }}
 }
 </script>
 {% include '_static/content-checkout.twig' %}

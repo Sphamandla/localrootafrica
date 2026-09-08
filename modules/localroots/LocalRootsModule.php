@@ -4,11 +4,15 @@ namespace modules\localroots;
 
 use Craft;
 use craft\commerce\elements\Order;
-use craft\commerce\events\OrderEvent;
+use craft\commerce\records\Transaction as TransactionRecord;
+use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
+use modules\localroots\gateways\CashEftGateway;
+use modules\localroots\gateways\CashOnDeliveryGateway;
 use modules\localroots\gateways\OzowGateway;
 use modules\localroots\gateways\PayfastGateway;
 use modules\localroots\gateways\YocoGateway;
+use modules\localroots\services\CashEftEmailService;
 use modules\localroots\services\OrderSyncService;
 use modules\localroots\services\PayfastService;
 use yii\base\Event;
@@ -22,9 +26,11 @@ class LocalRootsModule extends Module
         $this->setComponents([
             'payfast' => PayfastService::class,
             'orderSync' => OrderSyncService::class,
+            'cashEftEmail' => CashEftEmailService::class,
             'courierGuy' => services\CourierGuyService::class,
             'shopFilter' => services\ShopFilterService::class,
             'transactionTracker' => services\TransactionTracker::class,
+            'envCoupons' => services\EnvCouponService::class,
         ]);
 
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {
@@ -36,6 +42,8 @@ class LocalRootsModule extends Module
         parent::init();
 
         if (Craft::$app->plugins->isPluginInstalled('commerce')) {
+            $this->envCoupons->syncIfChanged();
+
             Event::on(
                 \craft\commerce\services\Gateways::class,
                 \craft\commerce\services\Gateways::EVENT_REGISTER_GATEWAY_TYPES,
@@ -43,15 +51,64 @@ class LocalRootsModule extends Module
                     $event->types[] = PayfastGateway::class;
                     $event->types[] = OzowGateway::class;
                     $event->types[] = YocoGateway::class;
+                    $event->types[] = CashEftGateway::class;
+                    $event->types[] = CashOnDeliveryGateway::class;
+                }
+            );
+
+            Event::on(
+                Order::class,
+                Order::EVENT_AFTER_ORDER_AUTHORIZED,
+                function (Event $event) {
+                    /** @var Order $order */
+                    $order = $event->sender;
+                    $gateway = $order->getGateway();
+                    if (!$gateway || !in_array($gateway->handle, ['cash-eft', 'cash-on-delivery'], true)) {
+                        return;
+                    }
+
+                    $module = $this;
+                    $status = \craft\commerce\Plugin::getInstance()->getOrderStatuses()->getOrderStatusByHandle('awaitingPayment');
+                    if ($status) {
+                        $order->orderStatusId = $status->id;
+                        Craft::$app->getElements()->saveElement($order, false);
+                    }
+
+                    if ($gateway->handle === 'cash-eft') {
+                        $module->cashEftEmail->sendPendingConfirmation($order);
+                    }
+                }
+            );
+
+            Event::on(
+                Order::class,
+                Order::EVENT_AFTER_ORDER_PAID,
+                function (Event $event) {
+                    /** @var Order $order */
+                    $order = $event->sender;
+                    if (!$order->isCompleted) {
+                        return;
+                    }
+
+                    $transactions = \craft\commerce\Plugin::getInstance()->getTransactions()->getAllTransactionsByOrderId($order->id);
+                    foreach ($transactions as $transaction) {
+                        $gateway = $transaction->getGateway();
+                        if ($gateway && in_array($gateway->handle, ['cash-eft', 'cash-on-delivery'], true) && $transaction->type === TransactionRecord::TYPE_CAPTURE) {
+                            $this->cashEftEmail->sendPaymentConfirmed($order);
+                            break;
+                        }
+                    }
                 }
             );
 
             Event::on(
                 Order::class,
                 Order::EVENT_AFTER_SAVE,
-                function (OrderEvent $event) {
+                function (ModelEvent $event) {
+                    /** @var Order $order */
+                    $order = $event->sender;
                     if (!$event->isNew) {
-                        Craft::$app->getModule('localroots')->orderSync->syncOrder($event->order);
+                        Craft::$app->getModule('localroots')->orderSync->syncOrder($order);
                     }
                 }
             );
@@ -59,8 +116,10 @@ class LocalRootsModule extends Module
             Event::on(
                 Order::class,
                 Order::EVENT_AFTER_COMPLETE_ORDER,
-                function (OrderEvent $event) {
-                    Craft::$app->getModule('localroots')->orderSync->syncOrder($event->order);
+                function (Event $event) {
+                    /** @var Order $order */
+                    $order = $event->sender;
+                    Craft::$app->getModule('localroots')->orderSync->syncOrder($order);
                 }
             );
         }

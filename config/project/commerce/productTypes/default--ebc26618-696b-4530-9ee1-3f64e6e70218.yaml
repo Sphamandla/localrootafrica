@@ -113,6 +113,23 @@ productFieldLayouts:
             userCondition: null
             warning: null
             width: 100
+          -
+            dateAdded: null
+            editCondition: null
+            elementCondition: null
+            elementEditCondition: null
+            fieldUid: 426e2aba-140e-45cb-a3e1-6c8567ee2fc2 # Simple purchase (no options)
+            handle: null
+            instructions: null
+            label: null
+            oldFieldUid: null
+            required: false
+            tip: null
+            type: craft\fieldlayoutelements\CustomField
+            uid: 7397e732-85f3-4de1-8b4d-974558441308
+            userCondition: null
+            warning: null
+            width: 100
         name: Product
         uid: 5ff70bbc-d91f-49d8-abde-eea6fdd0dde1
         userCondition: null
@@ -133,11 +150,11 @@ productFieldLayouts:
             tip: null
             translatable: false
             type: craft\commerce\fieldlayoutelements\VariantsField
-            uid: 5f6b492d-fa66-4cf5-942e-cbf3ddd264c4
+            uid: 269ada79-a03c-4e6c-9a8e-3d07ff0c853d
             userCondition: null
             warning: null
         name: Variants
-        uid: cf76d8e6-92fa-4cc7-b337-51a9d1df7b35
+        uid: 0af030f0-8933-4c8f-a7f9-e810dcb8f6f6
         userCondition: null
     thumbFieldKey: null
 productTitleFormat: ''

@@ -1,0 +1,18 @@
+billingAddressCondition:
+  class: craft\commerce\elements\conditions\addresses\GatewayAddressCondition
+  elementType: null
+  fieldContext: global
+handle: cash-eft
+isFrontendEnabled: '1'
+name: 'Direct bank transfer'
+orderCondition:
+  class: craft\commerce\elements\conditions\orders\GatewayOrderCondition
+  elementType: craft\commerce\elements\Order
+  fieldContext: global
+paymentType: authorize
+shippingAddressCondition:
+  class: craft\commerce\elements\conditions\addresses\GatewayAddressCondition
+  elementType: null
+  fieldContext: global
+sortOrder: 99
+type: modules\localroots\gateways\CashEftGateway

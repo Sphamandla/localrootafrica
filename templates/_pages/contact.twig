@@ -1,0 +1,23 @@
+{% extends '_layouts/vamtam-alt' %}
+
+{% set entry = craft.entries().section('pages').slug('contact').one() %}
+
+{% block bodyClass %}{% include '_static/body-class-contact.twig' %}{% endblock %}
+
+{% block head %}
+<style>
+.localroots-flash { max-width: 1200px; margin: 0 auto 1rem; padding: 0.75rem 1rem; font-size: 0.95rem; }
+.localroots-flash--notice { background: #eef6ee; color: #1e4620; border: 1px solid #c8e6c9; }
+.localroots-flash--error { background: #fdecea; color: #611a15; border: 1px solid #f5c6cb; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if craft.app.session.hasFlash('notice') %}
+<div class="localroots-flash localroots-flash--notice" role="status">{{ craft.app.session.getFlash('notice') }}</div>
+{% endif %}
+{% if craft.app.session.hasFlash('error') %}
+<div class="localroots-flash localroots-flash--error" role="alert">{{ craft.app.session.getFlash('error') }}</div>
+{% endif %}
+{% include '_static/content-contact.twig' %}
+{% endblock %}

@@ -2,7 +2,11 @@
 
 {% set cart = craft.commerce.carts.cart %}
 
-{% block bodyClass %}{% include '_static/body-class-cart.twig' %}{% endblock %}
+{% block head %}
+{% include '_includes/vamtam/head-cart.twig' %}
+{% endblock %}
+
+{% block bodyClass %}{% include '_static/body-class-cart.twig' %}{% if not cart.lineItems|length %} vamtam-wc-cart-empty{% endif %}{% endblock %}
 
 {% block content %}
 <div id="localroots-cart-source" hidden>

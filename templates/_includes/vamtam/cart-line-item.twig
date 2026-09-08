@@ -3,7 +3,7 @@
 {% set imageUrl = product and product.productImages|length ? product.productImages.one().getUrl({ width: 866, height: 1299 }) : '/wp-content/uploads/2024/02/UntitledSession4852_1500x-866x1299.jpg' %}
 {% set productUrl = product ? product.url : '#' %}
 
-<tr class="woocommerce-cart-form__cart-item cart_item">
+<tr class="woocommerce-cart-form__cart-item cart_item" data-line-item-id="{{ item.id }}">
 	<td class="product-thumbnail">
 		<a href="{{ productUrl }}"><img fetchpriority="high" decoding="async" width="866" height="1299" src="{{ imageUrl }}" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="{{ item.description }}" /></a>
 	</td>
@@ -16,20 +16,15 @@
 	<td class="product-quantity" data-title="Quantity">
 		<div class="quantity">
 			<label class="screen-reader-text" for="quantity_{{ item.id }}">{{ item.description }} quantity</label>
-			<input type="number" id="quantity_{{ item.id }}" class="input-text qty text" name="lineItems[{{ item.id }}][qty]" value="{{ item.qty }}" aria-label="Product quantity" min="0" step="1" placeholder="" inputmode="numeric" autocomplete="off" />
+			<input type="number" id="quantity_{{ item.id }}" class="input-text qty text localroots-cart-qty" name="lineItems[{{ item.id }}][qty]" value="{{ item.qty }}" aria-label="Product quantity" min="0" step="1" placeholder="" inputmode="numeric" autocomplete="off" data-line-item-id="{{ item.id }}" />
 		</div>
 	</td>
 	<td class="product-subtotal" data-title="Subtotal">
 		{% include '_includes/vamtam/price.twig' with { amount: item.total } %}
 	</td>
 	<td class="product-remove">
-		<form method="post" style="display:inline">
-			{{ csrfInput() }}
-			{{ actionInput('commerce/cart/remove-line-item') }}
-			{{ hiddenInput('lineItemId', item.id) }}
-			<button type="submit" class="remove" aria-label="Remove {{ item.description }} from cart" style="background:none;border:none;padding:0;cursor:pointer">
-				<i class="vamtam-remove-product"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 19" width="17px"><g fill="#BFBDBB" fill-rule="nonzero"><path d="M16.227 3.03h-5l-.433-1.87c-.086-.37-.394-.63-.749-.63h-3.09c-.355 0-.664.26-.75.632L5.771 3.03H.773c-.427 0-.773.373-.773.833v.834c0 .46.346.833.773.833h15.454c.427 0 .773-.373.773-.833v-.834c0-.46-.346-.833-.773-.833ZM15 6.53H3v9.75a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 15 16.28V6.53Z"/></g></svg></i>
-			</button>
-		</form>
+		<button type="button" class="remove localroots-remove-item" data-line-item-id="{{ item.id }}" aria-label="Remove {{ item.description }} from cart" style="background:none;border:none;padding:0;cursor:pointer">
+			<i class="vamtam-remove-product"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 17 19" width="17px"><g fill="#BFBDBB" fill-rule="nonzero"><path d="M16.227 3.03h-5l-.433-1.87c-.086-.37-.394-.63-.749-.63h-3.09c-.355 0-.664.26-.75.632L5.771 3.03H.773c-.427 0-.773.373-.773.833v.834c0 .46.346.833.773.833h15.454c.427 0 .773-.373.773-.833v-.834c0-.46-.346-.833-.773-.833ZM15 6.53H3v9.75a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 15 16.28V6.53Z"/></g></svg></i>
+		</button>
 	</td>
 </tr>

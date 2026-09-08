@@ -1,9 +1,19 @@
-{# Dynamic checkout — matches content-checkout.twig Commerce structure #}
+{# Dynamic checkout — Vamtam Elementor markup matching content-checkout.twig #}
 {% set cart = craft.commerce.carts.cart %}
-{% set gateways = craft.app.plugins.getPlugin('commerce').getGateways().getAllGateways()|filter(g => g.isFrontendEnabled) %}
+{% set commerceGateways = craft.app.plugins.getPlugin('commerce').getGateways() %}
+{% set bankGateway = commerceGateways.getGatewayByHandle('cash-eft') %}
+{% set codGateway = commerceGateways.getGatewayByHandle('cash-on-delivery') %}
+{% set gateways = [] %}
+{% if bankGateway and bankGateway.isFrontendEnabled %}
+	{% set gateways = gateways|merge([bankGateway]) %}
+{% endif %}
+{% if codGateway and codGateway.isFrontendEnabled %}
+	{% set gateways = gateways|merge([codGateway]) %}
+{% endif %}
 {% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.zipCode ?? null, cart.totalWeight) %}
 {% set billing = cart.billingAddress %}
 {% set shipping = cart.shippingAddress %}
+{% set shipDifferent = shipping and shipping.address1 and billing and shipping.address1 != billing.address1 %}
 
 <form name="checkout" method="post" class="checkout woocommerce-checkout localroots-checkout-form" action="{{ actionUrl('commerce/payments/pay') }}" enctype="multipart/form-data" aria-label="Checkout">
 	{{ csrfInput() }}
@@ -14,6 +24,7 @@
 
 {% if not currentUser %}
 <div class="e-woocommerce-login-section">
+	<div class="elementor-woocommerce-login-messages"></div>
 	<div class="woocommerce-form-login-toggle e-checkout-secondary-title">
 		Returning customer? <a href="{{ url('login') }}" class="e-show-login">Click here to login</a>
 	</div>
@@ -24,87 +35,122 @@
 <div class="col-1">
 <div class="woocommerce-billing-fields">
 	<h3>Billing Details</h3>
-	<p class="form-row form-row-first">
-		<label for="billing_first_name">First name <span class="required">*</span></label>
-		<input type="text" class="input-text" name="billingAddress[firstName]" id="billing_first_name" value="{{ billing.firstName ?? currentUser.firstName ?? '' }}" required />
-	</p>
-	<p class="form-row form-row-last">
-		<label for="billing_last_name">Last name <span class="required">*</span></label>
-		<input type="text" class="input-text" name="billingAddress[lastName]" id="billing_last_name" value="{{ billing.lastName ?? currentUser.lastName ?? '' }}" required />
-	</p>
-	<p class="form-row form-row-wide">
-		<label for="billing_email">Email address <span class="required">*</span></label>
-		<input type="email" class="input-text" name="email" id="billing_email" value="{{ cart.email ?? currentUser.email ?? '' }}" required />
-	</p>
-	<p class="form-row form-row-wide">
-		<label for="billing_address_1">Street address <span class="required">*</span></label>
-		<input type="text" class="input-text" name="billingAddress[address1]" id="billing_address_1" value="{{ billing.address1 ?? '' }}" required />
-	</p>
-	<p class="form-row form-row-wide">
-		<label for="billing_address_2">Apartment, suite, unit, etc.</label>
-		<input type="text" class="input-text" name="billingAddress[address2]" id="billing_address_2" value="{{ billing.address2 ?? '' }}" />
-	</p>
-	<p class="form-row form-row-first">
-		<label for="billing_city">Town / City <span class="required">*</span></label>
-		<input type="text" class="input-text" name="billingAddress[city]" id="billing_city" value="{{ billing.city ?? '' }}" required />
-	</p>
-	<p class="form-row form-row-last">
-		<label for="billing_postcode">Postcode / ZIP <span class="required">*</span></label>
-		<input type="text" class="input-text" name="billingAddress[zipCode]" id="billing_postcode" value="{{ billing.zipCode ?? '' }}" required />
-	</p>
-	<p class="form-row form-row-wide">
-		<label for="billing_country">Country / Region <span class="required">*</span></label>
-		<select name="billingAddress[countryCode]" id="billing_country" class="country_to_state country_select" required>
-			<option value="ZA" selected>South Africa</option>
-		</select>
-	</p>
-	<p class="form-row form-row-wide">
-		<label for="billing_phone">Phone <span class="required">*</span></label>
-		<input type="tel" class="input-text" name="billingAddress[phone]" id="billing_phone" value="{{ billing.phone ?? '' }}" required />
-	</p>
-</div>
-</div>
-<div class="col-2">
-<div class="woocommerce-shipping-fields">
-	<h3>Shipping Details</h3>
-	<p class="form-row form-row-wide">
-		<label><input type="checkbox" id="ship-to-different-address-checkbox" name="shipToDifferentAddress" value="1" {% if shipping and shipping.address1 != billing.address1 %}checked{% endif %} /> Ship to a different address?</label>
-	</p>
-	<div class="shipping_address" id="shipping-address-fields" style="{% if not shipping or shipping.address1 == billing.address1 %}display:none{% endif %}">
-		<p class="form-row form-row-first">
-			<label for="shipping_first_name">First name</label>
-			<input type="text" class="input-text" name="shippingAddress[firstName]" id="shipping_first_name" value="{{ shipping.firstName ?? billing.firstName ?? '' }}" />
+	<div class="woocommerce-billing-fields__field-wrapper">
+		<p class="form-row form-row-first validate-required" id="billing_first_name_field">
+			<label for="billing_first_name" class="required_field">First Name&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[firstName]" id="billing_first_name" placeholder="First Name" value="{{ billing.firstName ?? currentUser.firstName ?? '' }}" required autocomplete="given-name" /></span>
 		</p>
-		<p class="form-row form-row-last">
-			<label for="shipping_last_name">Last name</label>
-			<input type="text" class="input-text" name="shippingAddress[lastName]" id="shipping_last_name" value="{{ shipping.lastName ?? billing.lastName ?? '' }}" />
+		<p class="form-row form-row-last validate-required" id="billing_last_name_field">
+			<label for="billing_last_name" class="required_field">Last Name&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[lastName]" id="billing_last_name" placeholder="Last Name" value="{{ billing.lastName ?? currentUser.lastName ?? '' }}" required autocomplete="family-name" /></span>
 		</p>
-		<p class="form-row form-row-wide">
-			<label for="shipping_address_1">Street address</label>
-			<input type="text" class="input-text" name="shippingAddress[address1]" id="shipping_address_1" value="{{ shipping.address1 ?? billing.address1 ?? '' }}" />
+		<p class="form-row form-row-wide" id="billing_company_field">
+			<label for="billing_company">Company Name&nbsp;<span class="optional">(optional)</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[organization]" id="billing_company" placeholder="Company Name" value="{{ billing.organization ?? '' }}" autocomplete="organization" /></span>
 		</p>
-		<p class="form-row form-row-first">
-			<label for="shipping_city">Town / City</label>
-			<input type="text" class="input-text" name="shippingAddress[city]" id="shipping_city" value="{{ shipping.city ?? billing.city ?? '' }}" />
+		<p class="form-row form-row-wide address-field update_totals_on_change elementor-field-group validate-required" id="billing_country_field">
+			<label for="billing_country" class="required_field">Country / Region&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper elementor-select-wrapper">
+				<select name="billingAddress[countryCode]" id="billing_country" class="country_to_state country_select elementor-field-textual" required autocomplete="country">
+					<option value="ZA" selected>South Africa</option>
+				</select>
+			</span>
 		</p>
-		<p class="form-row form-row-last">
-			<label for="shipping_postcode">Postcode / ZIP</label>
-			<input type="text" class="input-text" name="shippingAddress[zipCode]" id="shipping_postcode" value="{{ shipping.zipCode ?? billing.zipCode ?? '' }}" />
+		<p class="form-row form-row-wide address-field validate-required" id="billing_address_1_field">
+			<label for="billing_address_1" class="required_field">Street address&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[address1]" id="billing_address_1" placeholder="House number and street name" value="{{ billing.address1 ?? '' }}" required autocomplete="address-line1" /></span>
 		</p>
-		<p class="form-row form-row-wide">
-			<label for="shipping_country">Country / Region</label>
-			<select name="shippingAddress[countryCode]" id="shipping_country" class="country_to_state country_select">
-				<option value="ZA" selected>South Africa</option>
-			</select>
+		<p class="form-row form-row-wide address-field" id="billing_address_2_field">
+			<label for="billing_address_2" class="screen-reader-text">Apartment, suite, unit, etc.&nbsp;<span class="optional">(optional)</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[address2]" id="billing_address_2" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ billing.address2 ?? '' }}" autocomplete="address-line2" /></span>
+		</p>
+		<p class="form-row form-row-wide address-field validate-required" id="billing_city_field">
+			<label for="billing_city" class="required_field">Town / City&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[city]" id="billing_city" value="{{ billing.city ?? '' }}" required autocomplete="address-level2" /></span>
+		</p>
+		<p class="form-row form-row-wide address-field validate-required validate-postcode" id="billing_postcode_field">
+			<label for="billing_postcode" class="required_field">Postcode / ZIP&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="billingAddress[zipCode]" id="billing_postcode" value="{{ billing.zipCode ?? '' }}" required autocomplete="postal-code" /></span>
+		</p>
+		<p class="form-row form-row-wide validate-required validate-phone" id="billing_phone_field">
+			<label for="billing_phone" class="required_field">Phone&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="billingAddress[phone]" id="billing_phone" placeholder="Phone" value="{{ billing.phone ?? '' }}" required autocomplete="tel" /></span>
+		</p>
+		<p class="form-row form-row-wide validate-required validate-email" id="billing_email_field">
+			<label for="billing_email" class="required_field">Email Address&nbsp;<span class="required" aria-hidden="true">*</span></label>
+			<span class="woocommerce-input-wrapper"><input type="email" class="input-text" name="email" id="billing_email" placeholder="Email Address" value="{{ cart.email ?? currentUser.email ?? '' }}" required autocomplete="email" /></span>
 		</p>
 	</div>
 </div>
-<div class="woocommerce-additional-fields">
-	<h3>Additional information</h3>
-	<p class="form-row notes">
-		<label for="order_comments">Order notes</label>
-		<textarea name="note" class="input-text" id="order_comments" placeholder="Notes about your order, e.g. special notes for delivery.">{{ cart.note ?? '' }}</textarea>
+
+{% if not currentUser %}
+<div class="woocommerce-account-fields">
+	<p class="form-row form-row-wide create-account">
+		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+			<input class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" id="createaccount" type="checkbox" name="createaccount" value="1" disabled />
+			<span>Create an account?</span>
+		</label>
 	</p>
+</div>
+{% endif %}
+</div>
+
+<div class="col-2">
+<div class="woocommerce-shipping-fields">
+	<h3 id="ship-to-different-address">
+		<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+			<input id="ship-to-different-address-checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" type="checkbox" name="shipToDifferentAddress" value="1"{% if shipDifferent %} checked="checked"{% endif %} />
+			<span>Ship to a different address?</span>
+		</label>
+	</h3>
+	<div class="shipping_address"{% if not shipDifferent %} style="display:none"{% endif %}>
+		<div class="woocommerce-shipping-fields__field-wrapper">
+			<p class="form-row form-row-first validate-required" id="shipping_first_name_field">
+				<label for="shipping_first_name" class="required_field">First Name&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[firstName]" id="shipping_first_name" placeholder="First Name" value="{{ shipping.firstName ?? billing.firstName ?? '' }}" autocomplete="shipping given-name" /></span>
+			</p>
+			<p class="form-row form-row-last validate-required" id="shipping_last_name_field">
+				<label for="shipping_last_name" class="required_field">Last Name&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[lastName]" id="shipping_last_name" placeholder="Last Name" value="{{ shipping.lastName ?? billing.lastName ?? '' }}" autocomplete="shipping family-name" /></span>
+			</p>
+			<p class="form-row form-row-wide address-field update_totals_on_change elementor-field-group validate-required" id="shipping_country_field">
+				<label for="shipping_country" class="required_field">Country / Region&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper elementor-select-wrapper">
+					<select name="shippingAddress[countryCode]" id="shipping_country" class="country_to_state country_select elementor-field-textual" autocomplete="shipping country">
+						<option value="ZA" selected>South Africa</option>
+					</select>
+				</span>
+			</p>
+			<p class="form-row form-row-wide address-field validate-required" id="shipping_address_1_field">
+				<label for="shipping_address_1" class="required_field">Street address&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[address1]" id="shipping_address_1" placeholder="House number and street name" value="{{ shipping.address1 ?? billing.address1 ?? '' }}" autocomplete="shipping address-line1" /></span>
+			</p>
+			<p class="form-row form-row-wide address-field" id="shipping_address_2_field">
+				<label for="shipping_address_2" class="screen-reader-text">Apartment, suite, unit, etc.&nbsp;<span class="optional">(optional)</span></label>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[address2]" id="shipping_address_2" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ shipping.address2 ?? billing.address2 ?? '' }}" autocomplete="shipping address-line2" /></span>
+			</p>
+			<p class="form-row form-row-wide address-field validate-required" id="shipping_city_field">
+				<label for="shipping_city" class="required_field">Town / City&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[city]" id="shipping_city" value="{{ shipping.city ?? billing.city ?? '' }}" autocomplete="shipping address-level2" /></span>
+			</p>
+			<p class="form-row form-row-wide address-field validate-required validate-postcode" id="shipping_postcode_field">
+				<label for="shipping_postcode" class="required_field">Postcode / ZIP&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper"><input type="text" class="input-text" name="shippingAddress[zipCode]" id="shipping_postcode" value="{{ shipping.zipCode ?? billing.zipCode ?? '' }}" autocomplete="shipping postal-code" /></span>
+			</p>
+			<p class="form-row form-row-wide validate-required validate-phone validate-tel" id="shipping_phone_field">
+				<label for="shipping_phone" class="required_field">Phone&nbsp;<span class="required" aria-hidden="true">*</span></label>
+				<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="shippingAddress[phone]" id="shipping_phone" value="{{ shipping.phone ?? billing.phone ?? '' }}" autocomplete="tel" /></span>
+			</p>
+		</div>
+	</div>
+</div>
+<div class="woocommerce-additional-fields">
+	<div class="woocommerce-additional-fields__field-wrapper">
+		<p class="form-row notes" id="order_comments_field">
+			<label for="order_comments">Order notes&nbsp;<span class="optional">(optional)</span></label>
+			<span class="woocommerce-input-wrapper"><textarea name="message" class="input-text" id="order_comments" placeholder="Notes about your order, e.g. special notes for delivery." rows="2" cols="5">{{ cart.message ?? '' }}</textarea></span>
+		</p>
+	</div>
 </div>
 </div>
 </div>
@@ -141,13 +187,22 @@
 					<td data-title="Shipment">
 						<ul id="shipping_method" class="woocommerce-shipping-methods">
 							<li>
-								<input type="radio" name="shipping_method_display" id="shipping_method_courier_guy" value="courier_guy" checked="checked" disabled />
-								<label for="shipping_method_courier_guy">The Courier Guy — <span id="localroots-shipping-cost">{% include '_includes/vamtam/price.twig' with { amount: shippingRate } %}</span></label>
+								<input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_courier_guy" value="courier_guy" class="shipping_method localroots-shipping-method" checked="checked" />
+								<label for="shipping_method_0_courier_guy">The Courier Guy — <span id="localroots-shipping-cost">{% include '_includes/vamtam/price.twig' with { amount: shippingRate } %}</span></label>
+							</li>
+							<li>
+								<input type="radio" name="shipping_method[0]" data-index="0" id="shipping_method_0_local_pickup" value="local_pickup" class="shipping_method localroots-shipping-method" />
+								<label for="shipping_method_0_local_pickup">Local pickup: {% include '_includes/vamtam/price.twig' with { amount: 0 } %}</label>
 							</li>
 						</ul>
-						<p class="shipping-note">Shipping only available within South Africa</p>
 					</td>
 				</tr>
+				{% if cart.totalDiscount > 0 %}
+				<tr class="cart-discount">
+					<th>Discount{% if cart.couponCode %} ({{ cart.couponCode }}){% endif %}</th>
+					<td>-{% include '_includes/vamtam/price.twig' with { amount: cart.totalDiscount } %}</td>
+				</tr>
+				{% endif %}
 				{% if cart.totalTax > 0 %}
 				<tr class="tax-total">
 					<th>VAT</th>
@@ -163,24 +218,51 @@
 	</div>
 </div>
 
+<div class="e-coupon-box">
+	<p class="e-woocommerce-coupon-nudge e-checkout-secondary-title">Have a coupon? <a href="#" class="e-show-coupon-form">Click here to enter your coupon code</a></p>
+	<div class="e-coupon-anchor" style="display:none">
+		<label class="e-coupon-anchor-description">If you have a coupon code, please apply it below.</label>
+		<div class="form-row">
+			<div class="coupon-container-grid">
+				<div class="col coupon-col-1">
+					<input type="text" name="couponCode" class="input-text" placeholder="Coupon code" id="coupon_code" value="{{ cart.couponCode ?? '' }}" />
+				</div>
+				<div class="col coupon-col-2">
+					<button class="woocommerce-button button e-apply-coupon localroots-apply-coupon" type="button">Apply</button>
+				</div>
+			</div>
+		</div>
+		<p class="localroots-coupon-message" style="display:none"></p>
+		<div class="clear"></div>
+	</div>
+</div>
+
 <div class="e-checkout__order_review-2">
 	<div id="payment" class="woocommerce-checkout-payment">
-		<ul class="wc_payment_methods payment_methods methods">
+		<ul class="wc_payment_methods payment_methods methods" aria-label="Payment methods">
 			{% for gateway in gateways %}
 			<li class="wc_payment_method payment_method_{{ gateway.handle }}">
 				<input id="payment_method_{{ gateway.handle }}" type="radio" class="input-radio localroots-gateway-radio" name="gatewayId" value="{{ gateway.id }}" data-order_button_text="Place order"{% if loop.first %} checked="checked"{% endif %} />
 				<label for="payment_method_{{ gateway.handle }}">{{ gateway.name }}</label>
+				<div class="payment_box payment_method_{{ gateway.handle }}"{% if not loop.first %} style="display:none"{% endif %}>
+					{{ gateway.getPaymentFormHtml({})|raw }}
+				</div>
 			</li>
 			{% endfor %}
 		</ul>
 		<div class="form-row place-order">
-			<p class="form-row validate-required">
-				<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
-					<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms" id="terms" required />
-					<span class="woocommerce-terms-and-conditions-checkbox-text">I have read and agree to the website <a href="#" target="_blank">terms and conditions</a></span>
-				</label>
-			</p>
-			<button type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="Place order">Place order</button>
+			<noscript>
+				Since your browser does not support JavaScript, or it is disabled, please ensure you click the <em>Update Totals</em> button before placing your order.
+			</noscript>
+			<div class="woocommerce-terms-and-conditions-wrapper">
+				<p class="form-row validate-required">
+					<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
+						<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms" id="terms" required />
+						<span class="woocommerce-terms-and-conditions-checkbox-text">I have read and agree to the website <a href="/about" class="woocommerce-terms-and-conditions-link" target="_blank">terms and conditions</a></span>&nbsp;<abbr class="required" title="required">*</abbr>
+					</label>
+				</p>
+			</div>
+			<button type="submit" class="button alt" name="woocommerce_checkout_place_order" id="place_order" value="Place order" data-value="Place order">Place order</button>
 		</div>
 	</div>
 </div>
