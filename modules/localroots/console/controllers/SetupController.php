@@ -8,8 +8,11 @@ use craft\commerce\models\ProductType;
 use craft\elements\GlobalSet;
 use craft\fieldlayoutelements\CustomField;
 use craft\fieldlayoutelements\TitleField;
+use craft\commerce\fields\Products as ProductsField;
 use craft\fields\Assets;
 use craft\fields\Categories;
+use craft\fields\Dropdown;
+use craft\fields\Email;
 use craft\fields\Lightswitch;
 use craft\fields\Matrix;
 use craft\fields\Number;
@@ -131,6 +134,32 @@ class SetupController extends Controller
             ['handle' => 'orderStatus', 'name' => 'Order Status', 'type' => PlainText::class],
             ['handle' => 'featuredProduct', 'name' => 'Featured', 'type' => Lightswitch::class],
             ['handle' => 'simplePurchase', 'name' => 'Simple purchase (no options)', 'type' => Lightswitch::class],
+            ['handle' => 'reviewBody', 'name' => 'Review Body', 'type' => PlainText::class, 'settings' => ['multiline' => true, 'initialRows' => 4]],
+            ['handle' => 'reviewRating', 'name' => 'Rating', 'type' => Number::class, 'settings' => ['decimals' => 0, 'min' => 1, 'max' => 5]],
+            ['handle' => 'reviewProduct', 'name' => 'Product', 'type' => ProductsField::class, 'settings' => ['sources' => ['*'], 'limit' => 1]],
+            ['handle' => 'reviewOrderNumber', 'name' => 'Order Number', 'type' => PlainText::class],
+            ['handle' => 'reviewAuthorName', 'name' => 'Author Name', 'type' => PlainText::class],
+            ['handle' => 'reviewAuthorEmail', 'name' => 'Author Email', 'type' => Email::class],
+            ['handle' => 'reviewVerifiedPurchase', 'name' => 'Verified Purchase', 'type' => Lightswitch::class],
+            ['handle' => 'reviewStatus', 'name' => 'Review Status', 'type' => Dropdown::class, 'settings' => [
+                'options' => [
+                    ['label' => 'Pending', 'value' => 'pending', 'default' => ''],
+                    ['label' => 'Approved', 'value' => 'approved', 'default' => '1'],
+                    ['label' => 'Rejected', 'value' => 'rejected', 'default' => ''],
+                ],
+            ]],
+            ['handle' => 'questionBody', 'name' => 'Question', 'type' => PlainText::class, 'settings' => ['multiline' => true, 'initialRows' => 3]],
+            ['handle' => 'answerBody', 'name' => 'Answer', 'type' => PlainText::class, 'settings' => ['multiline' => true, 'initialRows' => 4]],
+            ['handle' => 'questionProduct', 'name' => 'Product', 'type' => ProductsField::class, 'settings' => ['sources' => ['*'], 'limit' => 1]],
+            ['handle' => 'questionAuthorName', 'name' => 'Author Name', 'type' => PlainText::class],
+            ['handle' => 'questionAuthorEmail', 'name' => 'Author Email', 'type' => Email::class],
+            ['handle' => 'questionStatus', 'name' => 'Question Status', 'type' => Dropdown::class, 'settings' => [
+                'options' => [
+                    ['label' => 'Pending', 'value' => 'pending', 'default' => '1'],
+                    ['label' => 'Answered', 'value' => 'answered', 'default' => ''],
+                    ['label' => 'Rejected', 'value' => 'rejected', 'default' => ''],
+                ],
+            ]],
         ];
 
         foreach ($fieldDefs as $def) {
@@ -247,6 +276,40 @@ class SetupController extends Controller
                 'uriFormat' => 'press/{slug}',
                 'template' => '_pages/press/_entry',
                 'fields' => ['pageHeroImage', 'pageBody'],
+            ],
+            'deliveryAndReturns' => [
+                'name' => 'Delivery and Returns',
+                'type' => Section::TYPE_SINGLE,
+                'uriFormat' => 'delivery-and-returns',
+                'template' => '_pages/delivery-and-returns',
+                'fields' => ['pageBody'],
+            ],
+            'sustainability' => [
+                'name' => 'Sustainability',
+                'type' => Section::TYPE_SINGLE,
+                'uriFormat' => 'sustainability',
+                'template' => '_pages/sustainability',
+                'fields' => ['pageBody'],
+            ],
+            'productReviews' => [
+                'name' => 'Product Reviews',
+                'type' => Section::TYPE_CHANNEL,
+                'uriFormat' => null,
+                'template' => null,
+                'fields' => [
+                    'reviewBody', 'reviewRating', 'reviewProduct', 'reviewOrderNumber',
+                    'reviewAuthorName', 'reviewAuthorEmail', 'reviewVerifiedPurchase', 'reviewStatus',
+                ],
+            ],
+            'productQuestions' => [
+                'name' => 'Product Questions',
+                'type' => Section::TYPE_CHANNEL,
+                'uriFormat' => null,
+                'template' => null,
+                'fields' => [
+                    'questionBody', 'answerBody', 'questionProduct',
+                    'questionAuthorName', 'questionAuthorEmail', 'questionStatus',
+                ],
             ],
         ];
 
@@ -408,6 +471,7 @@ class SetupController extends Controller
     {
         $settings = Craft::$app->getProjectConfig()->get('users') ?? [];
         $settings['allowPublicRegistration'] = true;
+        $settings['requireEmailVerification'] = false;
         $settings['validateOnPublicRegistration'] = true;
         $settings['defaultGroup'] = null;
         Craft::$app->getProjectConfig()->set('users', $settings);

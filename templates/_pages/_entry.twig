@@ -1,9 +1,8 @@
-{% set vamtamPages = ['about', 'sustainability', 'contact', 'faq'] %}
+{% set vamtamPages = ['about', 'contact', 'faq'] %}
 {% extends entry.slug in vamtamPages ? '_layouts/vamtam-alt' : '_layouts/main' %}
 
 {% block bodyClass %}
 {% if entry.slug == 'about' %}{% include '_static/body-class-about.twig' %}
-{% elseif entry.slug == 'sustainability' %}{% include '_static/body-class-sustainability.twig' %}
 {% elseif entry.slug == 'contact' %}{% include '_static/body-class-contact.twig' %}
 {% elseif entry.slug == 'faq' %}{% include '_static/body-class-faq.twig' %}
 {% endif %}
@@ -12,8 +11,6 @@
 {% block content %}
 {% if entry.slug == 'about' %}
 {% include '_static/content-about.twig' %}
-{% elseif entry.slug == 'sustainability' %}
-{% include '_static/content-sustainability.twig' %}
 {% elseif entry.slug == 'contact' %}
 {% include '_static/content-contact.twig' %}
 {% elseif entry.slug == 'faq' %}

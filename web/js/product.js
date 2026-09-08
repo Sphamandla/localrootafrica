@@ -84,6 +84,7 @@
 		}
 		hydrateGallery(productData);
 		hydrateProductMeta(productData);
+		hydrateReviewsAndQA(productData);
 		initProductGallery();
 		replaceCarousel('.elementor-element-56fb727c .swiper-wrapper');
 		replaceCarousel('.elementor-element-35331e6 .swiper-wrapper');
@@ -163,6 +164,119 @@
 		if (gallery) {
 			gallery.style.opacity = '1';
 			gallery.classList.add('woocommerce-product-gallery--with-images');
+		}
+	}
+
+	function hydrateReviewsAndQA(data) {
+		const reviewsSource = document.getElementById('localroots-product-reviews-source');
+		const qaSource = document.getElementById('localroots-product-qa-source');
+		const reviewCount = data.reviewCount || 0;
+		const reviewAverage = data.reviewAverage || 0;
+		const reviewWidth = data.reviewWidth || 0;
+		const reviewLabel = reviewCount === 1 ? 'review' : 'reviews';
+
+		document.querySelectorAll('.woocommerce-product-rating .star-rating').forEach(function(el) {
+			if (reviewCount > 0) {
+				el.setAttribute('aria-label', 'Rated ' + reviewAverage + ' out of 5');
+				const inner = el.querySelector('span');
+				if (inner) {
+					inner.style.width = reviewWidth + '%';
+					inner.innerHTML = 'Rated <strong class="rating">' + reviewAverage + '</strong> out of 5 based on <span class="rating">' + reviewCount + '</span> customer rating' + (reviewCount === 1 ? '' : 's');
+				}
+			} else {
+				el.style.display = 'none';
+			}
+		});
+
+		document.querySelectorAll('.woocommerce-review-link .count').forEach(function(el) {
+			el.textContent = String(reviewCount);
+		});
+		document.querySelectorAll('.woocommerce-review-link').forEach(function(el) {
+			const countEl = el.querySelector('.count');
+			if (countEl && countEl.nextSibling) {
+				countEl.nextSibling.textContent = ' ' + reviewLabel;
+			}
+		});
+
+		const reviewsTab = document.querySelector('#tab-title-reviews a, .reviews_tab a');
+		if (reviewsTab) {
+			reviewsTab.textContent = 'Reviews (' + reviewCount + ')';
+		}
+
+		const reviewsTitle = document.querySelector('.woocommerce-Reviews-title');
+		if (reviewsTitle) {
+			const countText = reviewCount === 1 ? '1 review' : reviewCount + ' reviews';
+			reviewsTitle.innerHTML = countText + ' for <span>' + (data.title || '') + '</span>';
+		}
+
+		if (reviewsSource) {
+			const comments = document.querySelector('#tab-reviews #comments, #reviews #comments');
+			const listSource = reviewsSource.querySelector('#localroots-review-list');
+			const formSource = reviewsSource.querySelector('#localroots-review-form');
+
+			if (comments && listSource) {
+				const existingList = comments.querySelector('.commentlist, .woocommerce-noreviews');
+				if (existingList) {
+					existingList.replaceWith(listSource.cloneNode(true));
+				} else {
+					comments.insertBefore(listSource.cloneNode(true), comments.firstChild);
+				}
+			}
+
+			const reviewsPanel = document.querySelector('#tab-reviews .woocommerce-Reviews, #reviews.woocommerce-Reviews');
+			if (reviewsPanel && formSource) {
+				const oldForm = reviewsPanel.querySelector('.woocommerce-verification-required, .localroots-review-form, #review_form_wrapper');
+				if (oldForm) {
+					oldForm.replaceWith(formSource.cloneNode(true));
+				} else {
+					reviewsPanel.appendChild(formSource.cloneNode(true));
+				}
+			}
+		}
+
+		if (qaSource) {
+			const qaTab = document.querySelector('#tab-ask');
+			const formSource = qaSource.querySelector('#localroots-qa-form');
+			const listSource = qaSource.querySelector('#localroots-qa-list');
+
+			if (qaTab) {
+				const oldStaticForm = qaTab.querySelector('#ets-qus-form');
+				const loginPrompt = qaTab.childNodes;
+				Array.from(qaTab.childNodes).forEach(function(node) {
+					if (node.nodeType === 3 && node.textContent.trim().indexOf('login') !== -1) {
+						node.remove();
+					}
+				});
+				if (oldStaticForm) {
+					oldStaticForm.replaceWith(formSource ? formSource.cloneNode(true) : document.createElement('div'));
+				} else if (formSource) {
+					qaTab.insertBefore(formSource.cloneNode(true), qaTab.firstChild);
+				}
+
+				const qaListing = qaTab.querySelector('#qa-tab-qa-listing');
+				if (qaListing && listSource) {
+					const oldListing = qaListing.querySelector('.ets-qa-listing, .localroots-no-questions');
+					const loadMore = qaListing.querySelector('#ets-load-more');
+					if (oldListing) {
+						oldListing.replaceWith(listSource.cloneNode(true));
+					} else {
+						qaListing.insertBefore(listSource.cloneNode(true), qaListing.firstChild);
+					}
+					if (loadMore) {
+						loadMore.style.display = 'none';
+					}
+				}
+			}
+		}
+
+		if (reviewsSource) reviewsSource.remove();
+		if (qaSource) qaSource.remove();
+
+		if (data.reviewToken && window.location.hash !== '#tab-reviews') {
+			const reviewsTabLink = document.querySelector('#tab-title-reviews a');
+			if (reviewsTabLink) {
+				reviewsTabLink.click();
+			}
 		}
 	}
 

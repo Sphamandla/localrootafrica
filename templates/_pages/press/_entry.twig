@@ -1,7 +1,36 @@
 {% extends '_layouts/vamtam-alt' %}
 
+{% set hero = entry.pageHeroImage.one() %}
+{% set relatedEntries = craft.entries()
+	.section('press')
+	.id('not ' ~ entry.id)
+	.id('> ' ~ entry.id)
+	.orderBy('id asc')
+	.limit(3)
+	.all() %}
+
+{% block head %}{% include '_includes/vamtam/head-press-detail.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-press-detail.twig' %}{% endblock %}
 
 {% block content %}
+<div id="localroots-press-entry-source" hidden>
+	<time data-press-date>{{ entry.postDate|date('F j, Y') }}</time>
+	<h1 data-press-title>{{ entry.title }}</h1>
+	{% if hero %}
+	<img data-press-hero width="973" height="1194" src="{{ hero.getUrl({ width: 973 }) }}" alt="{{ entry.title }}" />
+	{% endif %}
+	<div data-press-body>{{ entry.pageBody|raw }}</div>
+</div>
+
+<div id="localroots-press-related-source" hidden>
+	{% for related in relatedEntries %}
+		{% include '_includes/vamtam/press-loop-item.twig' with { entry: related, carousel: true } %}
+	{% endfor %}
+</div>
+
 {% include '_static/content-press-detail.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/press.js"></script>
 {% endblock %}

@@ -1,47 +1,49 @@
 {% extends '_layouts/vamtam' %}
 
-{% block bodyClass %}{% include '_static/body-class-account.twig' %}{% endblock %}
+{% set endpoint = craft.app.request.getSegment(2)|default('') %}
+{% if endpoint matches '/^\\d+$/' %}
+	{% set endpoint = 'orders' %}
+{% endif %}
+{% set guestView = endpoint == 'lost-password' ? 'lost-password' : 'auth' %}
+
+{% block head %}
+{% include '_includes/vamtam/head-account.twig' %}
+{% endblock %}
+
+{% block bodyClass %}{% include '_static/body-class-account.twig' %}{% if currentUser %} logged-in{% endif %}{% endblock %}
 
 {% block content %}
-{% if currentUser %}
-<div id="page" class="main-container">
-<div id="main-content">
-<div id="main" role="main" class="vamtam-main layout-full">
-<div class="page-wrapper">
-<div class="woocommerce">
-    <h2>My Account</h2>
-    <p>Welcome, {{ currentUser.fullName ?? currentUser.email }}.</p>
-    {% set orders = craft.orders.customer(currentUser).isCompleted(true).orderBy('dateOrdered desc').all() %}
-    {% if orders|length %}
-    <table class="shop_table">
-        <thead><tr><th>Order</th><th>Date</th><th>Total</th><th>Status</th></tr></thead>
-        <tbody>
-        {% for order in orders %}
-        <tr>
-            <td>{{ order.reference }}</td>
-            <td>{{ order.dateOrdered|date('M j, Y') }}</td>
-            <td>{% include '_includes/vamtam/price.twig' with { amount: order.totalPrice } %}</td>
-            <td>{% if order.isPaid %}Paid{% else %}Pending{% endif %}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}
-    <p>No orders yet.</p>
-    {% endif %}
-    <p><a href="/wishlist">View Wishlist</a></p>
-    <form method="post">
-        {{ csrfInput() }}
-        {{ actionInput('users/logout') }}
-        {{ redirectInput('/') }}
-        <button type="submit" class="button">Log out</button>
-    </form>
-</div>
-</div>
-</div>
-</div>
-</div>
-{% else %}
-{% include '_static/content-account.twig' %}
+{% if craft.app.session.hasFlash('notice') %}
+<div class="localroots-flash localroots-flash--notice" role="status" style="max-width:1280px;margin:0 auto 1rem;padding:0.75rem 1rem;background:#eef6ee;color:#1e4620;border:1px solid #c8e6c9;">{{ craft.app.session.getFlash('notice') }}</div>
 {% endif %}
+{% if craft.app.session.hasFlash('error') %}
+<div class="localroots-flash localroots-flash--error" role="alert" style="max-width:1280px;margin:0 auto 1rem;padding:0.75rem 1rem;background:#fdecea;color:#611a15;border:1px solid #f5c6cb;">{{ craft.app.session.getFlash('error') }}</div>
+{% endif %}
+{% if craft.app.session.hasFlash('success') %}
+<div class="localroots-flash localroots-flash--notice" role="status" style="max-width:1280px;margin:0 auto 1rem;padding:0.75rem 1rem;background:#eef6ee;color:#1e4620;border:1px solid #c8e6c9;">{{ craft.app.session.getFlash('success') }}</div>
+{% endif %}
+
+<div id="localroots-account-source" hidden>
+	{% if currentUser %}
+		{% include '_includes/vamtam/account-logged-in.twig' with { endpoint: endpoint ?: 'dashboard' } %}
+	{% elseif guestView == 'lost-password' %}
+		{% include '_includes/vamtam/account-lost-password.twig' %}
+	{% else %}
+		{% include '_includes/vamtam/account-guest-forms.twig' %}
+	{% endif %}
+</div>
+
+<script type="application/json" id="localroots-account-config">
+{
+	"endpoint": {{ (endpoint ?: 'dashboard')|json_encode|raw }},
+	"guestView": {{ guestView|json_encode|raw }},
+	"registerTab": {{ (craft.app.request.getQueryParam('tab') == 'register') ? 'true' : 'false' }},
+	"isLoggedIn": {{ currentUser ? 'true' : 'false' }}
+}
+</script>
+
+{% include '_static/content-account.twig' %}
+<script src="{{ alias('@web') }}/js/account.js"></script>
 {% endblock %}
+
+{% block scripts %}{% endblock %}

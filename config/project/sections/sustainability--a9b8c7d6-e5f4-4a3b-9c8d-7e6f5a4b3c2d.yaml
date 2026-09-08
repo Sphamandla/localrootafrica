@@ -1,0 +1,21 @@
+defaultPlacement: end
+enableVersioning: true
+entryTypes:
+  -
+    uid: f1a2b3c4-d5e6-4f78-9abc-def012345678 # Sustainability
+handle: sustainability
+maxAuthors: 1
+minAuthors: 1
+name: Sustainability
+previewTargets:
+  -
+    label: 'Primary entry page'
+    urlFormat: '{url}'
+propagationMethod: all
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: true
+    template: _pages/sustainability
+    uriFormat: sustainability
+type: single

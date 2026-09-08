@@ -376,7 +376,6 @@ class ImportController extends Controller
             ['slug' => 'home', 'title' => 'Home', 'file' => 'default-shop/index.html', 'template' => '_pages/home'],
             ['slug' => 'about', 'title' => 'About', 'file' => 'about/index.html'],
             ['slug' => 'contact', 'title' => 'Contact', 'file' => 'contact/index.html'],
-            ['slug' => 'delivery-and-returns', 'title' => 'Delivery and Returns', 'file' => 'delivery-and-returns.html'],
             ['slug' => 'faq', 'title' => 'FAQ', 'file' => 'faq/index.html'],
         ];
 

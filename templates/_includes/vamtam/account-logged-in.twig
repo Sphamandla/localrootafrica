@@ -1,0 +1,210 @@
+{# Logged-in My Account — Elementor horizontal tabs layout #}
+{% set endpoint = endpoint|default('dashboard') %}
+{% set tabClasses = {
+	'dashboard': 'e-my-account-tab__dashboard',
+	'orders': 'e-my-account-tab__orders',
+	'downloads': 'e-my-account-tab__downloads',
+	'edit-address': 'e-my-account-tab__edit-address',
+	'edit-account': 'e-my-account-tab__edit-account',
+	'wishlist': 'e-my-account-tab__dashboard',
+} %}
+{% set activeTab = tabClasses[endpoint] ?? 'e-my-account-tab__dashboard' %}
+{% set orderRef = craft.app.request.getSegment(3) %}
+{% if endpoint == 'orders' and orderRef %}
+	{% set viewOrder = craft.orders.reference(orderRef).customer(currentUser).one() ?? craft.orders.id(orderRef).customer(currentUser).one() %}
+{% endif %}
+{% set orders = craft.orders.customer(currentUser).isCompleted(true).orderBy('dateOrdered desc').all() %}
+{% set displayName = currentUser.fullName ?: currentUser.username ?: currentUser.email %}
+
+<div class="e-my-account-tab {{ activeTab }}">
+	<div class="woocommerce">
+		<div class="woocommerce-notices-wrapper"></div>
+
+		<div class="e-wc-account-tabs-nav">
+			<nav class="woocommerce-MyAccount-navigation" aria-label="Account pages">
+				<ul>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--dashboard{% if endpoint == 'dashboard' %} is-active{% endif %}">
+						<a href="/account">Dashboard</a>
+					</li>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--orders{% if endpoint == 'orders' %} is-active{% endif %}">
+						<a href="/account/orders">Orders</a>
+					</li>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--downloads{% if endpoint == 'downloads' %} is-active{% endif %}">
+						<a href="/account/downloads">Downloads</a>
+					</li>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--edit-address{% if endpoint == 'edit-address' %} is-active{% endif %}">
+						<a href="/account/edit-address">Addresses</a>
+					</li>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--edit-account{% if endpoint == 'edit-account' %} is-active{% endif %}">
+						<a href="/account/edit-account">Account details</a>
+					</li>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--wishlist{% if endpoint == 'wishlist' %} is-active{% endif %}">
+						<a href="/wishlist">Wishlist</a>
+					</li>
+					<li class="woocommerce-MyAccount-navigation-link woocommerce-MyAccount-navigation-link--customer-logout">
+						<form method="post" class="localroots-logout-form">
+							{{ csrfInput() }}
+							{{ actionInput('users/logout') }}
+							{{ redirectInput('/') }}
+							<button type="submit" class="localroots-logout-link">Log out</button>
+						</form>
+					</li>
+				</ul>
+			</nav>
+		</div>
+
+		<div class="woocommerce-MyAccount-content">
+			<div class="woocommerce-MyAccount-content-wrapper">
+
+				{% if endpoint == 'dashboard' %}
+				<p>Hello <strong>{{ displayName }}</strong> (not <strong>{{ displayName }}</strong>?
+					<form method="post" class="localroots-logout-form localroots-logout-form--inline">
+						{{ csrfInput() }}
+						{{ actionInput('users/logout') }}
+						{{ redirectInput('/') }}
+						<button type="submit" class="localroots-logout-link">Log out</button>
+					</form>)</p>
+				<p>From your account dashboard you can view your <a href="/account/orders">recent orders</a>, manage your <a href="/account/edit-address">shipping and billing addresses</a>, and <a href="/account/edit-account">edit your password and account details</a>.</p>
+
+				{% elseif endpoint == 'orders' %}
+				{% if orderRef is defined and orderRef and viewOrder is defined and viewOrder %}
+				<p>Order <mark class="order-number">#{{ viewOrder.reference ?? viewOrder.id }}</mark> was placed on <mark class="order-date">{{ viewOrder.dateOrdered|date('F j, Y') }}</mark> and is currently <mark class="order-status">{% if viewOrder.isPaid %}Completed{% else %}Awaiting payment{% endif %}</mark>.</p>
+				<h2>Order details</h2>
+				<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
+					<thead>
+						<tr>
+							<th class="woocommerce-table__product-name product-name">Product</th>
+							<th class="woocommerce-table__product-table product-total">Total</th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for lineItem in viewOrder.lineItems %}
+						<tr class="woocommerce-table__line-item order_item">
+							<td class="woocommerce-table__product-name product-name">
+								{{ lineItem.description }} <strong class="product-quantity">&times;&nbsp;{{ lineItem.qty }}</strong>
+							</td>
+							<td class="woocommerce-table__product-total product-total">{% include '_includes/vamtam/price.twig' with { amount: lineItem.total } %}</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+					<tfoot>
+						<tr>
+							<th scope="row">Total:</th>
+							<td>{% include '_includes/vamtam/price.twig' with { amount: viewOrder.totalPrice } %}</td>
+						</tr>
+					</tfoot>
+				</table>
+				<p><a href="/account/orders" class="woocommerce-button button">&larr; Back to orders</a></p>
+				{% elseif orders|length %}
+				<table class="woocommerce-orders-table woocommerce-MyAccount-orders shop_table shop_table_responsive my_account_orders account-orders-table">
+					<thead>
+						<tr>
+							<th scope="col" class="woocommerce-orders-table__header woocommerce-orders-table__header-order-number"><span class="nobr">Order</span></th>
+							<th scope="col" class="woocommerce-orders-table__header woocommerce-orders-table__header-order-date"><span class="nobr">Date</span></th>
+							<th scope="col" class="woocommerce-orders-table__header woocommerce-orders-table__header-order-status"><span class="nobr">Status</span></th>
+							<th scope="col" class="woocommerce-orders-table__header woocommerce-orders-table__header-order-total"><span class="nobr">Total</span></th>
+							<th scope="col" class="woocommerce-orders-table__header woocommerce-orders-table__header-order-actions"><span class="nobr">Actions</span></th>
+						</tr>
+					</thead>
+					<tbody>
+						{% for order in orders %}
+						<tr class="woocommerce-orders-table__row woocommerce-orders-table__row--status-{{ order.isPaid ? 'completed' : 'pending' }} order">
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-order-number" data-title="Order">
+								<a href="/account/orders/{{ order.reference ?? order.id }}">#{{ order.reference ?? order.id }}</a>
+							</td>
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-order-date" data-title="Date">
+								<time datetime="{{ order.dateOrdered|date('c') }}">{{ order.dateOrdered|date('F j, Y') }}</time>
+							</td>
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-order-status" data-title="Status">
+								{% if order.isPaid %}Completed{% else %}Awaiting payment{% endif %}
+							</td>
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-order-total" data-title="Total">
+								{% include '_includes/vamtam/price.twig' with { amount: order.totalPrice } %} for {{ order.totalQty }} item{{ order.totalQty == 1 ? '' : 's' }}
+							</td>
+							<td class="woocommerce-orders-table__cell woocommerce-orders-table__cell-order-actions" data-title="Actions">
+								<a href="/account/orders/{{ order.reference ?? order.id }}" class="woocommerce-button button view">View</a>
+							</td>
+						</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+				{% else %}
+				<div class="woocommerce-message woocommerce-message--info woocommerce-Info">No order has been made yet. <a class="woocommerce-Button button" href="/shop">Browse products</a></div>
+				{% endif %}
+
+				{% elseif endpoint == 'downloads' %}
+				<div class="woocommerce-message woocommerce-message--info woocommerce-Info">No downloads available yet.</div>
+
+				{% elseif endpoint == 'edit-address' %}
+				<p>The following addresses will be used on the checkout page by default.</p>
+				<div class="u-columns woocommerce-Addresses col2-set addresses">
+					<div class="woocommerce-Address u-column1 col-1 address">
+						<header class="woocommerce-Address-title title"><h3>Billing address</h3></header>
+						<address>
+							{% set billing = currentUser.primaryBillingAddress ?? null %}
+							{% if billing %}
+								{{ billing.fullName }}<br>
+								{{ billing.addressLine1 }}{% if billing.addressLine2 %}, {{ billing.addressLine2 }}{% endif %}<br>
+								{{ billing.city }}{% if billing.state %} {{ billing.state }}{% endif %} {{ billing.zipCode }}<br>
+								{{ billing.countryId }}
+							{% else %}
+								You have not set up this type of address yet.
+							{% endif %}
+						</address>
+					</div>
+					<div class="woocommerce-Address u-column2 col-2 address">
+						<header class="woocommerce-Address-title title"><h3>Shipping address</h3></header>
+						<address>
+							{% set shipping = currentUser.primaryShippingAddress ?? null %}
+							{% if shipping %}
+								{{ shipping.fullName }}<br>
+								{{ shipping.addressLine1 }}{% if shipping.addressLine2 %}, {{ shipping.addressLine2 }}{% endif %}<br>
+								{{ shipping.city }}{% if shipping.state %} {{ shipping.state }}{% endif %} {{ shipping.zipCode }}<br>
+								{{ shipping.countryId }}
+							{% else %}
+								You have not set up this type of address yet.
+							{% endif %}
+						</address>
+					</div>
+				</div>
+
+				{% elseif endpoint == 'edit-account' %}
+				<form class="woocommerce-EditAccountForm edit-account" method="post" accept-charset="UTF-8">
+					{{ csrfInput() }}
+					{{ actionInput('users/save-user') }}
+					{{ redirectInput('account/edit-account') }}
+					<input type="hidden" name="userId" value="{{ currentUser.id }}">
+					<p class="woocommerce-form-row woocommerce-form-row--first form-row form-row-first">
+						<label for="account_first_name">First name&nbsp;<span class="required">*</span></label>
+						<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="firstName" id="account_first_name" value="{{ currentUser.firstName }}" autocomplete="given-name">
+					</p>
+					<p class="woocommerce-form-row woocommerce-form-row--last form-row form-row-last">
+						<label for="account_last_name">Last name&nbsp;<span class="required">*</span></label>
+						<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="lastName" id="account_last_name" value="{{ currentUser.lastName }}" autocomplete="family-name">
+					</p>
+					<div class="clear"></div>
+					<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+						<label for="account_display_name">Display name&nbsp;<span class="required">*</span></label>
+						<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="account_display_name" value="{{ currentUser.username }}" autocomplete="username">
+					</p>
+					<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+						<label for="account_email">Email address&nbsp;<span class="required">*</span></label>
+						<input type="email" class="woocommerce-Input woocommerce-Input--text input-text" name="email" id="account_email" value="{{ currentUser.email }}" autocomplete="email">
+					</p>
+					<fieldset>
+						<legend>Password change</legend>
+						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+							<label for="password">New password (leave blank to leave unchanged)</label>
+							<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="newPassword" id="password" autocomplete="new-password">
+						</p>
+					</fieldset>
+					<p>
+						<button type="submit" class="woocommerce-Button button" name="save_account_details" value="Save changes">Save changes</button>
+					</p>
+				</form>
+				{% endif %}
+
+			</div>
+		</div>
+	</div>
+</div>

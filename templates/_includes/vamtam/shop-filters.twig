@@ -1,6 +1,6 @@
 {% import '_includes/vamtam/shop-filter-type-tree.twig' as typeTree %}
 {# BeRocket-compatible shop filters — markup matches reference shop #}
-<form id="localroots-shop-filters" class="localroots-shop-filters" method="get" action="{{ url('shop') }}">
+<form id="localroots-shop-filters" class="localroots-shop-filters" method="get" action="{{ formAction ?? url('shop') }}">
 <div class="berocket_single_filter_widget berocket_single_filter_widget_5132 bapf_wid_5131" data-wid="5131" data-id="5132">
 	<div class="bapf_sfilter"><div class="bapf_body"><button type="button" class="bapf_button bapf_reset localroots-clear-filters">Clear All</button></div></div>
 </div>

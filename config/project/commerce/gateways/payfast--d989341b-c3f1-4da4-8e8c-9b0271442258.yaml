@@ -3,7 +3,7 @@ billingAddressCondition:
   elementType: null
   fieldContext: global
 handle: payfast
-isFrontendEnabled: false
+isFrontendEnabled: '0'
 name: PayFast
 orderCondition:
   class: craft\commerce\elements\conditions\orders\GatewayOrderCondition

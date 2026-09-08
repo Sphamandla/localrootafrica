@@ -1,0 +1,44 @@
+columnSuffix: null
+handle: reviewStatus
+instructions: null
+name: 'Review Status'
+searchable: false
+settings:
+  customOptions: false
+  options:
+    -
+      __assoc__:
+        -
+          - label
+          - Pending
+        -
+          - value
+          - pending
+        -
+          - default
+          - ''
+    -
+      __assoc__:
+        -
+          - label
+          - Approved
+        -
+          - value
+          - approved
+        -
+          - default
+          - '1'
+    -
+      __assoc__:
+        -
+          - label
+          - Rejected
+        -
+          - value
+          - rejected
+        -
+          - default
+          - ''
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Dropdown

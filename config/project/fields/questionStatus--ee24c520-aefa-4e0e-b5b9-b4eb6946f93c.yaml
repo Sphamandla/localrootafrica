@@ -1,0 +1,44 @@
+columnSuffix: null
+handle: questionStatus
+instructions: null
+name: 'Question Status'
+searchable: false
+settings:
+  customOptions: false
+  options:
+    -
+      __assoc__:
+        -
+          - label
+          - Pending
+        -
+          - value
+          - pending
+        -
+          - default
+          - '1'
+    -
+      __assoc__:
+        -
+          - label
+          - Answered
+        -
+          - value
+          - answered
+        -
+          - default
+          - ''
+    -
+      __assoc__:
+        -
+          - label
+          - Rejected
+        -
+          - value
+          - rejected
+        -
+          - default
+          - ''
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Dropdown

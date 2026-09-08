@@ -45,6 +45,7 @@
 	"sort": {{ params.sort|json_encode|raw }},
 	"sortLabel": {{ sortLabel|json_encode|raw }},
 	"shopUrl": {{ url('shop')|json_encode|raw }},
+	"loadMoreUrl": {{ url('localroots/shop/load-more')|json_encode|raw }},
 	"priceMin": {{ facets.minPrice|round }},
 	"priceMax": {{ facets.maxPrice|round }},
 	"sortUrls": {

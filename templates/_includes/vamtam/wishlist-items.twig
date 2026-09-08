@@ -1,0 +1,6 @@
+{% for item in items %}
+	{% set product = item.element %}
+	{% if product %}
+		{% include '_includes/vamtam/wishlist-item-row.twig' with { item: item, product: product } %}
+	{% endif %}
+{% endfor %}

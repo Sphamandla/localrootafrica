@@ -1,7 +1,19 @@
 {% extends '_layouts/vamtam-alt' %}
 
+{% set entry = craft.entries().section('sustainability').one() %}
+
+{% block head %}{% include '_includes/vamtam/head-sustainability.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-sustainability.twig' %}{% endblock %}
 
 {% block content %}
+{% if entry %}
+<div id="localroots-sustainability-source" hidden>
+	<div data-sustainability-body>{{ entry.pageBody|raw }}</div>
+</div>
+{% endif %}
 {% include '_static/content-sustainability.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/sustainability.js"></script>
 {% endblock %}

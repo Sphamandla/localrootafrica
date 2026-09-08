@@ -1,0 +1,10 @@
+columnSuffix: null
+handle: questionAuthorEmail
+instructions: null
+name: 'Author Email'
+searchable: false
+settings:
+  placeholder: null
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Email

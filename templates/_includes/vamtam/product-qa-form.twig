@@ -1,0 +1,25 @@
+{# Q&A submission form #}
+<div id="localroots-qa-form-wrapper" class="localroots-qa-form">
+	<form action="/localroots/questions/submit" method="post" id="ets-qus-form" name="form" class="localroots-qa-submit">
+		{{ csrfInput() }}
+		<input type="hidden" name="productId" value="{{ product.id }}">
+		<input type="hidden" name="redirect" value="{{ product.url }}#tab-ask">
+		<p class="comment-form-comment">
+			<label for="localroots-question">Your question <span class="required">*</span></label>
+			<textarea id="localroots-question" name="question" cols="45" rows="4" required placeholder="Ask a question about this product"></textarea>
+		</p>
+		{% if not currentUser %}
+		<p class="comment-form-author">
+			<label for="localroots-qa-name">Name <span class="required">*</span></label>
+			<input id="localroots-qa-name" name="authorName" type="text" required>
+		</p>
+		<p class="comment-form-email">
+			<label for="localroots-qa-email">Email <span class="required">*</span></label>
+			<input id="localroots-qa-email" name="authorEmail" type="email" required>
+		</p>
+		{% endif %}
+		<p class="form-submit">
+			<input type="submit" class="submit button" value="Submit question">
+		</p>
+	</form>
+</div>

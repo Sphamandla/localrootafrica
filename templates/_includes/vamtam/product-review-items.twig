@@ -1,0 +1,29 @@
+{# Renders WooCommerce-style review list #}
+{% if reviews|length %}
+<ol class="commentlist">
+	{% for review in reviews %}
+	{% set rating = review.reviewRating|default(5) %}
+	{% set width = (rating / 5 * 100)|round %}
+	{% set author = review.reviewAuthorName|default('Customer') %}
+	{% set verified = review.reviewVerifiedPurchase ?? false %}
+	<li class="review{% if loop.index is even %} even{% endif %} thread-{% if loop.index is even %}even{% else %}odd{% endif %} depth-1" id="li-comment-{{ review.id }}">
+		<div id="comment-{{ review.id }}" class="comment_container">
+			<div class="comment-text">
+				<div class="star-rating" role="img" aria-label="Rated {{ rating }} out of 5"><span style="width:{{ width }}%">Rated <strong class="rating">{{ rating }}</strong> out of 5</span></div>
+				<p class="meta">
+					<strong class="woocommerce-review__author">{{ author }}</strong>
+					{% if verified %}
+					<em class="woocommerce-review__verified verified">(verified owner)</em>
+					{% endif %}
+					<span class="woocommerce-review__dash">&ndash;</span>
+					<time class="woocommerce-review__published-date" datetime="{{ review.dateCreated|date('c') }}">{{ review.dateCreated|date('F j, Y') }}</time>
+				</p>
+				<div class="description"><p>{{ review.reviewBody|nl2br }}</p></div>
+			</div>
+		</div>
+	</li>
+	{% endfor %}
+</ol>
+{% else %}
+<p class="woocommerce-noreviews">There are no reviews yet.</p>
+{% endif %}

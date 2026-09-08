@@ -1,0 +1,72 @@
+{# Guest login/register — matches Vamtam my-account tabbed layout #}
+<div class="e-my-account-tab e-my-account-tab__dashboard">
+	<div class="woocommerce">
+		<div class="woocommerce-notices-wrapper"></div>
+		<div class="vamtam-tabbed">
+			<input type="radio" id="login-tab" name="login-tabs" checked>
+			<input type="radio" id="register-tab" name="login-tabs">
+
+			<ul class="vamtam-tabs">
+				<li class="vamtam-tab"><label for="login-tab">Sign In</label></li>
+				<li class="vamtam-tab"><label for="register-tab">Register</label></li>
+			</ul>
+			<div class="vamtam-tab-content u-columns col2-set" id="customer_login">
+
+				<div class="u-column1 col-1">
+					<h5>Welcome Back</h5>
+					<h6>Please sign in to access your full account</h6>
+
+					<form class="woocommerce-form woocommerce-form-login login" method="post" accept-charset="UTF-8" novalidate>
+						{{ csrfInput() }}
+						{{ actionInput('users/login') }}
+						{{ redirectInput('/account') }}
+						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+							<label for="username">Username or email address&nbsp;<span class="required" aria-hidden="true">*</span></label>
+							<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="loginName" id="username" autocomplete="username" required aria-required="true">
+						</p>
+						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+							<label for="password">Password&nbsp;<span class="required" aria-hidden="true">*</span></label>
+							<input class="woocommerce-Input woocommerce-Input--text input-text" type="password" name="password" id="password" autocomplete="current-password" required aria-required="true">
+						</p>
+						<p class="form-row">
+							<label class="woocommerce-form__label woocommerce-form__label-for-checkbox woocommerce-form-login__rememberme">
+								<input class="woocommerce-form__input woocommerce-form__input-checkbox" name="rememberMe" type="checkbox" id="rememberme" value="1"> <span>Remember me</span>
+							</label>
+							<button type="submit" class="woocommerce-button button woocommerce-form-login__submit">Sign In</button>
+						</p>
+						<p class="woocommerce-LostPassword lost_password">
+							<a href="/account/lost-password">Lost your password?</a>
+						</p>
+					</form>
+				</div>
+
+				<div class="u-column2 col-2">
+					<h5>Create Account</h5>
+
+					<form method="post" class="woocommerce-form woocommerce-form-register register" accept-charset="UTF-8">
+						{{ csrfInput() }}
+						{{ actionInput('users/save-user') }}
+						{{ redirectInput('/account') }}
+						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+							<label for="reg_username">Username&nbsp;<span class="required" aria-hidden="true">*</span></label>
+							<input type="text" class="woocommerce-Input woocommerce-Input--text input-text" name="username" id="reg_username" autocomplete="username" required aria-required="true">
+						</p>
+						<p class="vamtam-reg-email woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+							<label for="reg_email">Email address&nbsp;<span class="required" aria-hidden="true">*</span></label>
+							<input type="email" class="woocommerce-Input woocommerce-Input--text input-text" name="email" id="reg_email" autocomplete="email" required aria-required="true">
+						</p>
+						<p class="woocommerce-form-row woocommerce-form-row--wide form-row form-row-wide">
+							<label for="reg_password">Password&nbsp;<span class="required" aria-hidden="true">*</span></label>
+							<input type="password" class="woocommerce-Input woocommerce-Input--text input-text" name="password" id="reg_password" autocomplete="new-password" required aria-required="true" minlength="6">
+						</p>
+						<div class="woocommerce-privacy-policy-text"><p>Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our <a href="/about" class="woocommerce-privacy-policy-link" target="_blank">privacy policy</a>.</p></div>
+						<p class="vamtam-submit woocommerce-form-row form-row">
+							<button type="submit" class="woocommerce-Button woocommerce-button button woocommerce-form-register__submit">Create Account</button>
+						</p>
+					</form>
+				</div>
+
+			</div>
+		</div>
+	</div>
+</div>

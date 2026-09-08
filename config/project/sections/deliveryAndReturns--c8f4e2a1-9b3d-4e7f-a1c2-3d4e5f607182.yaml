@@ -1,0 +1,21 @@
+defaultPlacement: end
+enableVersioning: true
+entryTypes:
+  -
+    uid: 1e53ff99-0003-49e4-ba74-958649cfd00f # Delivery and Returns
+handle: deliveryAndReturns
+maxAuthors: 1
+minAuthors: 1
+name: 'Delivery and Returns'
+previewTargets:
+  -
+    label: 'Primary entry page'
+    urlFormat: '{url}'
+propagationMethod: all
+siteSettings:
+  e510b8b9-def2-4e3c-b643-8da4bc86bdc1: # Local Roots Africa
+    enabledByDefault: true
+    hasUrls: true
+    template: _pages/delivery-and-returns
+    uriFormat: delivery-and-returns
+type: single

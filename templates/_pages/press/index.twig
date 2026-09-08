@@ -1,7 +1,27 @@
 {% extends '_layouts/vamtam-alt' %}
 
+{% set pressEntries = craft.entries().section('press').orderBy('postDate desc').all() %}
+
+{% block head %}{% include '_includes/vamtam/head-press.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-press.twig' %}{% endblock %}
 
 {% block content %}
+<div id="localroots-press-grid-source" hidden>
+	{% for entry in pressEntries %}
+		{% include '_includes/vamtam/press-loop-item.twig' with { entry: entry } %}
+	{% endfor %}
+</div>
+
+<script type="application/json" id="localroots-press-config">
+{
+	"totalEntries": {{ pressEntries|length }},
+	"showLoadMore": false
+}
+</script>
+
 {% include '_static/content-press.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/press.js"></script>
 {% endblock %}

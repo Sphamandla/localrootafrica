@@ -1,0 +1,19 @@
+{% extends '_layouts/vamtam-alt' %}
+
+{% set entry = craft.entries().section('deliveryAndReturns').one() %}
+
+{% block head %}{% include '_includes/vamtam/head-delivery-and-returns.twig' %}{% endblock %}
+{% block bodyClass %}{% include '_static/body-class-delivery-and-returns.twig' %}{% endblock %}
+
+{% block content %}
+{% if entry %}
+<div id="localroots-delivery-source" hidden>
+	<div data-delivery-body>{{ entry.pageBody|raw }}</div>
+</div>
+{% endif %}
+{% include '_static/content-delivery-and-returns.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/delivery-and-returns.js"></script>
+{% endblock %}

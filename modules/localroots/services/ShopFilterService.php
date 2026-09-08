@@ -96,7 +96,6 @@ class ShopFilterService extends Component
     public function getParams(): array
     {
         $request = Craft::$app->getRequest();
-        $page = max(1, (int)($request->getParam('page') ?? 1));
 
         return [
             'categories' => $this->normalizeArray($request->getQueryParam('categories')),
@@ -108,9 +107,86 @@ class ShopFilterService extends Component
             'maxPrice' => (float)($request->getQueryParam('maxPrice') ?? 0),
             'inStock' => (bool)$request->getQueryParam('inStock'),
             'sort' => (string)($request->getQueryParam('sort') ?? 'date-desc'),
-            'page' => $page,
+            'page' => $this->resolvePage($request),
             'limit' => max(1, min(48, (int)($request->getQueryParam('limit') ?? 12))),
+            '_categoryTypes' => [],
         ];
+    }
+
+    private function resolvePage(\craft\web\Request $request): int
+    {
+        $page = (int)($request->getQueryParam('page') ?? 0);
+        if ($page > 0) {
+            return $page;
+        }
+
+        $path = trim($request->getPathInfo(), '/');
+        if (preg_match('#/page/(\d+)$#', $path, $matches)) {
+            return max(1, (int)$matches[1]);
+        }
+
+        return 1;
+    }
+
+    public function resolveCategoryPath(?string $path): ?array
+    {
+        $segments = array_values(array_filter(explode('/', trim((string)$path, '/'))));
+        if ($segments === []) {
+            return null;
+        }
+
+        $labels = [
+            'women' => 'Women',
+            'men' => 'Men',
+            'clothing' => 'Clothing',
+            'collections' => 'Collections',
+            'accessories' => 'Accessories',
+        ];
+
+        $breadcrumb = [['title' => 'Home', 'url' => '/']];
+        $accum = [];
+        foreach ($segments as $segment) {
+            $accum[] = $segment;
+            $title = $labels[$segment] ?? ucwords(str_replace('-', ' ', $segment));
+            $isLast = $segment === $segments[array_key_last($segments)];
+            $breadcrumb[] = [
+                'title' => $title,
+                'url' => $isLast ? null : '/product-category/' . implode('/', $accum),
+            ];
+        }
+
+        $last = $segments[array_key_last($segments)];
+
+        return [
+            'path' => implode('/', $segments),
+            'title' => $labels[$last] ?? ucwords(str_replace('-', ' ', $last)),
+            'basePath' => 'product-category/' . implode('/', $segments),
+            'breadcrumb' => $breadcrumb,
+            'types' => $this->typesForCategoryPath($segments),
+        ];
+    }
+
+    public function applyCategoryScope(array $params, ?array $categoryContext): array
+    {
+        if (!$categoryContext || empty($categoryContext['types'])) {
+            return $params;
+        }
+
+        if ($params['types'] === []) {
+            $params['_categoryTypes'] = $categoryContext['types'];
+        }
+
+        return $params;
+    }
+
+    public function getCategoryUrl(?array $categoryContext): string
+    {
+        $base = rtrim(Craft::$app->getSites()->getCurrentSite()->getBaseUrl(), '/');
+        if (!$categoryContext) {
+            return $base . '/shop';
+        }
+
+        return $base . '/' . $categoryContext['basePath'];
     }
 
     public function getProducts(array $params): array
@@ -140,9 +216,16 @@ class ShopFilterService extends Component
         ];
     }
 
-    public function getFacets(): array
+    public function getFacets(?array $categoryContext = null): array
     {
+        $scopeTypes = $categoryContext['types'] ?? [];
         $products = Product::find()->type('default')->status(null)->all();
+        if ($scopeTypes !== []) {
+            $products = array_values(array_filter(
+                $products,
+                fn(Product $product) => ($type = $this->extractProductType($product->title)) && in_array($type, $scopeTypes, true)
+            ));
+        }
         $categories = [];
         $sizes = [];
         $colors = [];
@@ -305,7 +388,7 @@ class ShopFilterService extends Component
         return null;
     }
 
-    public function buildFilterUrl(array $params, array $overrides = []): string
+    public function buildFilterUrl(array $params, array $overrides = [], ?string $basePath = null): string
     {
         $merged = array_merge($params, $overrides);
         $query = [];
@@ -328,12 +411,17 @@ class ShopFilterService extends Component
         if (($merged['sort'] ?? 'date-desc') !== 'date-desc') {
             $query[] = 'sort=' . rawurlencode((string)$merged['sort']);
         }
-        if (($merged['page'] ?? 1) > 1) {
-            $query[] = 'page=' . (int)$merged['page'];
+
+        $page = (int)($merged['page'] ?? 1);
+        $base = rtrim(Craft::$app->getSites()->getCurrentSite()->getBaseUrl(), '/');
+        $path = $basePath ?? 'shop';
+        $url = $path === 'shop' ? $base . '/shop' : $base . '/' . trim($path, '/');
+
+        if ($page > 1) {
+            $query[] = 'page=' . $page;
         }
 
-        $base = Craft::$app->getSites()->getCurrentSite()->getBaseUrl() . 'shop';
-        return $query ? $base . '?' . implode('&', $query) : $base;
+        return $query ? $url . '?' . implode('&', $query) : $url;
     }
 
     private function matchesFilters(Product $product, array $params): bool
@@ -362,6 +450,11 @@ class ShopFilterService extends Component
         if ($params['types']) {
             $type = $this->extractProductType($product->title);
             if (!$type || !in_array($type, $params['types'], true)) {
+                return false;
+            }
+        } elseif ($params['_categoryTypes'] ?? []) {
+            $type = $this->extractProductType($product->title);
+            if (!$type || !in_array($type, $params['_categoryTypes'], true)) {
                 return false;
             }
         }
@@ -417,6 +510,56 @@ class ShopFilterService extends Component
         }
 
         return array_values(array_filter((array)$value, fn($v) => $v !== '' && $v !== null));
+    }
+
+    private function typesForCategoryPath(array $segments): array
+    {
+        $labels = [
+            'women' => 'Women',
+            'men' => 'Men',
+            'clothing' => 'Clothing',
+            'accessories' => 'Accessories',
+        ];
+
+        $node = self::TYPE_TREE;
+        foreach ($segments as $segment) {
+            $title = $labels[$segment] ?? null;
+            if (!$title) {
+                return [];
+            }
+
+            $found = null;
+            foreach ($node as $entry) {
+                if ($entry['title'] === $title) {
+                    $found = $entry;
+                    break;
+                }
+            }
+
+            if (!$found) {
+                return [];
+            }
+
+            $node = $found['children'] ?? [];
+        }
+
+        return $this->collectTypeFilters($node);
+    }
+
+    private function collectTypeFilters(array $nodes): array
+    {
+        $filters = [];
+
+        foreach ($nodes as $node) {
+            if (isset($node['filter'])) {
+                $filters[] = $node['filter'];
+            }
+            if (!empty($node['children'])) {
+                $filters = array_merge($filters, $this->collectTypeFilters($node['children']));
+            }
+        }
+
+        return array_values(array_unique($filters));
     }
 
     private function sortFacet(array &$facets, string $key): void

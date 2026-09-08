@@ -34,6 +34,27 @@
 	.all() %}
 {% set productSku = variant.sku ?? product.defaultSku ?? '' %}
 
+{% set reviewService = craft.app.getModule('localroots').productReviews %}
+{% set currentUser = currentUser ?? null %}
+{% set reviewTokenParam = craft.app.request.getQueryParam('review') %}
+{% set tokenData = reviewTokenParam ? reviewService.validateToken(reviewTokenParam, product.id) : null %}
+{% set hasPurchased = tokenData ? true : (currentUser ? reviewService.hasPurchased(product.id, currentUser.id) : false) %}
+{% set alreadyReviewed = (currentUser and reviewService.hasExistingReview(product.id, currentUser.id)) or (tokenData and reviewService.hasExistingReview(product.id, null, tokenData.email)) %}
+{% set canReview = hasPurchased and not alreadyReviewed %}
+{% set reviewStats = reviewService.getReviewStats(product.id) %}
+{% set reviews = craft.entries()
+	.section('productReviews')
+	.reviewProduct(product)
+	.reviewStatus('approved')
+	.orderBy('dateCreated desc')
+	.all() %}
+{% set questions = craft.entries()
+	.section('productQuestions')
+	.questionProduct(product)
+	.questionStatus('answered')
+	.orderBy('dateCreated desc')
+	.all() %}
+
 {% block head %}
 {% include '_includes/vamtam/head-product.twig' %}
 {% endblock %}
@@ -41,6 +62,12 @@
 {% block bodyClass %}{% include bodyClassTemplate %}{% endblock %}
 
 {% block content %}
+{% if craft.app.session.hasFlash('notice') %}
+<div class="localroots-flash localroots-flash--notice" role="status" style="max-width:1200px;margin:0 auto 1rem;padding:0.75rem 1rem;background:#eef6ee;color:#1e4620;border:1px solid #c8e6c9;">{{ craft.app.session.getFlash('notice') }}</div>
+{% endif %}
+{% if craft.app.session.hasFlash('error') %}
+<div class="localroots-flash localroots-flash--error" role="alert" style="max-width:1200px;margin:0 auto 1rem;padding:0.75rem 1rem;background:#fdecea;color:#611a15;border:1px solid #f5c6cb;">{{ craft.app.session.getFlash('error') }}</div>
+{% endif %}
 <div id="localroots-product-sources" hidden>
 	<div id="localroots-product-price-source">
 		{% include '_includes/vamtam/product-page-price.twig' with { product: product, variants: variants, variant: variant } %}
@@ -56,6 +83,27 @@
 		{% for related in relatedProducts %}
 			{% include '_includes/vamtam/product-related-item-13500.twig' with { product: related } %}
 		{% endfor %}
+	</div>
+	<div id="localroots-product-reviews-source">
+		<div id="localroots-review-list">
+			{% include '_includes/vamtam/product-review-items.twig' with { reviews: reviews } %}
+		</div>
+		<div id="localroots-review-form">
+			{% include '_includes/vamtam/product-review-form.twig' with {
+				product: product,
+				canReview: canReview,
+				currentUser: currentUser,
+				reviewToken: reviewTokenParam
+			} %}
+		</div>
+	</div>
+	<div id="localroots-product-qa-source">
+		<div id="localroots-qa-form">
+			{% include '_includes/vamtam/product-qa-form.twig' with { product: product, currentUser: currentUser } %}
+		</div>
+		<div id="localroots-qa-list">
+			{% include '_includes/vamtam/product-qa-items.twig' with { questions: questions } %}
+		</div>
 	</div>
 </div>
 
@@ -91,6 +139,12 @@
 	"imageThumb": {{ imageThumb|json_encode|raw }},
 	"thumb150": {{ thumb150|json_encode|raw }},
 	"url": {{ product.url|json_encode|raw }},
+	"reviewCount": {{ reviewStats.count }},
+	"reviewAverage": {{ reviewStats.average }},
+	"reviewWidth": {{ reviewStats.width }},
+	"canReview": {{ canReview ? 'true' : 'false' }},
+	"hasPurchased": {{ hasPurchased ? 'true' : 'false' }},
+	"reviewToken": {{ reviewTokenParam|json_encode|raw }},
 	"images": [
 		{% for image in images %}
 		{

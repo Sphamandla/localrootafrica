@@ -1,0 +1,31 @@
+{% set hero = entry.pageHeroImage.one() %}
+{% set imageUrl = hero ? hero.getUrl({ width: 834, height: 1024 }) : '/wp-content/uploads/2024/02/duane-mendes-k49kD3YXOsc-unsplash-834x1024.jpg' %}
+<div data-elementor-type="loop-item" data-elementor-id="9764" class="elementor elementor-9764{% if carousel|default %} swiper-slide{% endif %} e-loop-item e-loop-item-{{ entry.id }} post-{{ entry.id }} post type-post status-publish format-standard has-post-thumbnail hentry" data-elementor-post-type="elementor_library" data-custom-edit-handle="1"{% if carousel|default %} role="group" aria-roledescription="slide"{% endif %}>
+	<div class="elementor-element elementor-element-657e6b6 e-flex e-con-boxed e-con e-parent" data-id="657e6b6" data-element_type="container" data-e-type="container">
+		<div class="e-con-inner">
+			<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-2411efb elementor-widget elementor-widget-theme-post-featured-image elementor-widget-image" data-id="2411efb" data-element_type="widget" data-e-type="widget" data-widget_type="theme-post-featured-image.default">
+				<div class="elementor-widget-container">
+					<a href="{{ entry.url }}">
+						<img decoding="async" width="834" height="1024" src="{{ imageUrl }}" class="attachment-large size-large" alt="{{ entry.title }}" />
+					</a>
+				</div>
+			</div>
+			<div class="elementor-element elementor-element-8e4d2b0 elementor-widget elementor-widget-theme-post-title elementor-page-title elementor-widget-heading" data-id="8e4d2b0" data-element_type="widget" data-e-type="widget" data-widget_type="theme-post-title.default">
+				<div class="elementor-widget-container">
+					<h5 class="elementor-heading-title elementor-size-default"><a href="{{ entry.url }}">{{ entry.title }}</a></h5>
+				</div>
+			</div>
+			<div class="vamtam-has-theme-widget-styles elementor-element elementor-element-9bdfc03 vamtam-has-underline-anim elementor-widget elementor-widget-button" data-id="9bdfc03" data-element_type="widget" data-e-type="widget" data-widget_type="button.default">
+				<div class="elementor-widget-container">
+					<div class="elementor-button-wrapper">
+						<a class="elementor-button elementor-button-link elementor-size-sm" href="{{ entry.url }}">
+							<span class="elementor-button-content-wrapper">
+								<span class="elementor-button-text">Read more</span>
+							</span>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

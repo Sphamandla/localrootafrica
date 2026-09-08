@@ -1,40 +1,79 @@
 {% extends '_layouts/vamtam' %}
 
-{% set categorySlug = craft.app.request.getParam('category') ?? slug ?? null %}
-{% set category = categorySlug ? craft.categories.group('productCategories').slug(categorySlug).one() : null %}
-{% set query = craft.products.type('default') %}
-{% if category %}
-    {% set query = query.relatedTo(category) %}
-{% endif %}
-{% paginate query.limit(12) as pageInfo, products %}
+{% set shopFilter = craft.app.getModule('localroots').shopFilter %}
+{% set categoryPath = craft.app.request.getParam('path') ?? slug ?? null %}
+{% set categoryContext = categoryPath ? shopFilter.resolveCategoryPath(categoryPath) : null %}
+{% set params = shopFilter.applyCategoryScope(shopFilter.getParams(), categoryContext) %}
+{% set facets = shopFilter.getFacets(categoryContext) %}
+{% set result = shopFilter.getProducts(params) %}
+{% set products = result.products %}
+{% set totalProducts = result.total %}
+{% set currentPage = result.page %}
+{% set totalPages = result.totalPages %}
+{% set limit = result.limit %}
+{% set basePath = categoryContext ? categoryContext.basePath : 'shop' %}
+{% set shopUrl = shopFilter.getCategoryUrl(categoryContext) %}
+{% set sortLabels = {
+	'date-desc': 'Newest',
+	'price-asc': 'Price (low to high)',
+	'price-desc': 'Price (high to low)',
+	'title-asc': 'Name: A to Z',
+	'title-desc': 'Name: Z to A'
+} %}
+{% set sortLabel = sortLabels[params.sort] ?? 'Default' %}
+{% set rangeStart = totalProducts ? ((currentPage - 1) * limit + 1) : 0 %}
+{% set rangeEnd = totalProducts ? min(currentPage * limit, totalProducts) : 0 %}
 
+{% block head %}{% include '_includes/vamtam/head-shop.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-collection.twig' %}{% endblock %}
 
 {% block content %}
-<div id="page" class="main-container">
-<div id="main-content">
-<div id="main" role="main" class="vamtam-main layout-full">
-<div class="page-wrapper">
-<div class="elementor elementor-shop">
-    <div class="elementor-loop-container">
-        {% for product in products %}
-            {% include '_includes/vamtam/product-loop-item.twig' with { product: product } %}
-        {% else %}
-            {% include '_static/content-collection.twig' %}
-        {% endfor %}
-    </div>
-    {% if pageInfo.totalPages > 1 %}
-    <nav class="woocommerce-pagination">
-        {% if pageInfo.prevUrl %}<a href="{{ pageInfo.prevUrl }}" class="prev">←</a>{% endif %}
-        {% for page in 1..pageInfo.totalPages %}
-            {% if page == pageInfo.currentPage %}<span class="current">{{ page }}</span>{% else %}<a href="{{ pageInfo.getPageUrl(page) }}">{{ page }}</a>{% endif %}
-        {% endfor %}
-        {% if pageInfo.nextUrl %}<a href="{{ pageInfo.nextUrl }}" class="next">→</a>{% endif %}
-    </nav>
-    {% endif %}
+<div id="localroots-shop-sources" hidden>
+	<div id="localroots-shop-filters-source">
+		{% include '_includes/vamtam/shop-filters.twig' with { facets: facets, params: params, formAction: shopUrl } %}
+	</div>
+	<div id="localroots-shop-grid-source">
+		{% for product in products %}
+			{% include '_includes/vamtam/product-loop-item.twig' with { product: product } %}
+		{% endfor %}
+	</div>
 </div>
-</div>
-</div>
-</div>
-</div>
+
+<script type="application/json" id="localroots-shop-config">
+{
+	"totalProducts": {{ totalProducts }},
+	"currentPage": {{ currentPage }},
+	"totalPages": {{ totalPages }},
+	"rangeStart": {{ rangeStart }},
+	"rangeEnd": {{ rangeEnd }},
+	"sort": {{ params.sort|json_encode|raw }},
+	"sortLabel": {{ sortLabel|json_encode|raw }},
+	"shopUrl": {{ shopUrl|json_encode|raw }},
+	"loadMoreUrl": {{ url('localroots/shop/load-more')|json_encode|raw }},
+	"categoryPath": {{ (categoryContext.path ?? '')|json_encode|raw }},
+	"categoryTitle": {{ (categoryContext.title ?? 'Shop')|json_encode|raw }},
+	"categoryBreadcrumb": {{ (categoryContext.breadcrumb ?? [])|json_encode|raw }},
+	"priceMin": {{ facets.minPrice|round }},
+	"priceMax": {{ facets.maxPrice|round }},
+	"sortUrls": {
+		"date-desc": {{ shopFilter.buildFilterUrl(params, { sort: 'date-desc', page: 1 }, basePath)|json_encode|raw }},
+		"price-asc": {{ shopFilter.buildFilterUrl(params, { sort: 'price-asc', page: 1 }, basePath)|json_encode|raw }},
+		"price-desc": {{ shopFilter.buildFilterUrl(params, { sort: 'price-desc', page: 1 }, basePath)|json_encode|raw }},
+		"title-asc": {{ shopFilter.buildFilterUrl(params, { sort: 'title-asc', page: 1 }, basePath)|json_encode|raw }},
+		"title-desc": {{ shopFilter.buildFilterUrl(params, { sort: 'title-desc', page: 1 }, basePath)|json_encode|raw }}
+	},
+	"pageUrls": [
+		{% for page in 1..totalPages %}
+		{{ shopFilter.buildFilterUrl(params, { page: page }, basePath)|json_encode|raw }}{% if not loop.last %},{% endif %}
+		{% endfor %}
+	]
+}
+</script>
+
+{% include '_static/content-collection.twig' %}
+{% endblock %}
+
+{% block scripts %}
+{% include '_includes/vamtam/scripts-shop.twig' %}
+<script src="{{ alias('@web') }}/js/shop.js"></script>
 {% endblock %}

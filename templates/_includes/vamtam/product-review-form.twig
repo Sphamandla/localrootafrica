@@ -1,0 +1,44 @@
+{# Review submission form for verified purchasers #}
+{% if canReview %}
+<div id="review_form_wrapper" class="localroots-review-form">
+	<div id="respond" class="comment-respond">
+		<span id="reply-title" class="comment-reply-title" role="heading" aria-level="3">Add a review</span>
+		<form action="/localroots/reviews/submit" method="post" class="comment-form localroots-review-submit">
+			{{ csrfInput() }}
+			<input type="hidden" name="productId" value="{{ product.id }}">
+			<input type="hidden" name="redirect" value="{{ product.url }}#tab-reviews">
+			{% if reviewToken %}
+			<input type="hidden" name="reviewToken" value="{{ reviewToken }}">
+			{% endif %}
+			{% if not currentUser %}
+			<p class="comment-form-author">
+				<label for="author">Name <span class="required">*</span></label>
+				<input id="author" name="authorName" type="text" value="" size="30" required>
+			</p>
+			{% endif %}
+			<p class="comment-form-rating">
+				<label for="rating">Your rating <span class="required">*</span></label>
+				<select name="rating" id="rating" required>
+					<option value="">Rate&hellip;</option>
+					<option value="5">Perfect</option>
+					<option value="4">Good</option>
+					<option value="3">Average</option>
+					<option value="2">Not that bad</option>
+					<option value="1">Very poor</option>
+				</select>
+			</p>
+			<p class="comment-form-comment">
+				<label for="comment">Your review <span class="required">*</span></label>
+				<textarea id="comment" name="body" cols="45" rows="8" required></textarea>
+			</p>
+			<p class="form-submit">
+				<input name="submit" type="submit" id="submit" class="submit" value="Submit">
+			</p>
+		</form>
+	</div>
+</div>
+{% elseif currentUser %}
+<p class="woocommerce-verification-required">Only customers who have purchased this product may leave a review.</p>
+{% else %}
+<p class="woocommerce-verification-required">Only logged in customers who have purchased this product may leave a review. <a href="/login?redirect={{ product.url|url_encode }}">Log in</a></p>
+{% endif %}

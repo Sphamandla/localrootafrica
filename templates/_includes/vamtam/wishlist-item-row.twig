@@ -1,0 +1,46 @@
+{# Single wishlist table row — matches woosw-list markup from index.html?p=10 #}
+{% set product = product ?? item.element %}
+{% if not product %}
+{% else %}
+{% set variants = product.variants.all() %}
+{% set isVariable = variants|length > 1 and not (product.simplePurchase ?? false) %}
+{% set variant = product.defaultVariant ?? variants|first %}
+{% set primaryImage = product.productImages.one() %}
+{% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 866, height: 1299 }) : '/wp-content/uploads/2024/02/4302405505_1_1_1-866x1299.jpg' %}
+{% set onSale = variant and variant.onPromotion and variant.price > variant.salePrice %}
+<tr class="woosw-item woosw-item-{{ product.id }}" data-id="{{ product.id }}" data-name="{{ product.title }}" data-note="">
+	<td class="woosw-item--image"><a href="{{ product.url }}"><img decoding="async" width="866" height="1299" src="{{ thumbUrl }}" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="{{ product.title }}" /></a></td>
+	<td class="woosw-item--info">
+		<div class="woosw-item--name"><a href="{{ product.url }}">{{ product.title }}</a></div>
+		<div class="woosw-item--price">
+			{% if onSale %}
+			<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ variant.price|number_format(0, '.', ',') }}</bdi></span></del>
+			<span class="screen-reader-text">Original price was: R{{ variant.price|number_format(0, '.', ',') }}.</span>
+			<ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ variant.salePrice|number_format(0, '.', ',') }}</bdi></span></ins>
+			<span class="screen-reader-text">Current price is: R{{ variant.salePrice|number_format(0, '.', ',') }}.</span>
+			{% else %}
+			<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol" translate="no">R</span>{{ (variant.salePrice ?? 0)|number_format(0, '.', ',') }}</bdi></span>
+			{% endif %}
+		</div>
+		<div class="woosw-item--time">{{ item.dateCreated|date('F j, Y') }}</div>
+	</td>
+	<td class="woosw-item--actions">
+		<div class="woosw-item--stock"></div>
+		<div class="woosw-item--atc">
+			<p class="product woocommerce add_to_cart_inline">
+				{% if isVariable %}
+				<a href="{{ product.url }}" data-quantity="1" class="button product_type_variable add_to_cart_button" aria-label="Select options for &ldquo;{{ product.title }}&rdquo;" rel="nofollow">Select options</a>
+				{% else %}
+				<form method="post" action="/actions/commerce/cart/update-cart" class="localroots-wishlist-atc-form" style="display:inline;">
+					{{ csrfInput() }}
+					{{ actionInput('commerce/cart/update-cart') }}
+					<input type="hidden" name="purchasableId" value="{{ variant.id }}" />
+					<input type="hidden" name="qty" value="1" />
+					<button type="submit" class="button product_type_simple add_to_cart_button" aria-label="Add to cart: &ldquo;{{ product.title }}&rdquo;" rel="nofollow">Add to cart</button>
+				</form>
+				{% endif %}
+			</p>
+		</div>
+	</td>
+</tr>
+{% endif %}

@@ -26,15 +26,16 @@ class TemplateExtractorService extends Component
         'product-variant' => 'product/generation-blazer/index.html',
         'about' => 'about/index.html',
         'contact' => 'contact/index.html',
-        'wishlist' => 'wishlist/index.html',
-        'sustainability' => 'sustainability/index.html',
-        'press' => 'press/index.html',
-        'press-detail' => '2024/02/08/innove-new-yorks-first-store-opening-in-soho-ny/index.html',
-        'collection' => 'product-category/women/collections/summer-24/index.html',
+        'wishlist' => 'index.html?p=10.html',
+        'sustainability' => 'index.html?p=4565.html',
+        'press' => 'index.html?p=726.html',
+        'press-detail' => 'index.html?p=9809.html',
+        'collection' => 'product-category/women/clothing/index.html',
+        'delivery-and-returns' => 'index.html?p=736.html',
     ];
 
     /** Pages that use the alternate header (elementor-150) */
-    private array $altLayoutPages = ['about', 'contact', 'faq', 'wishlist', 'sustainability', 'press', 'press-detail'];
+    private array $altLayoutPages = ['about', 'contact', 'faq', 'wishlist', 'sustainability', 'press', 'press-detail', 'delivery-and-returns'];
 
     public function init(): void
     {
@@ -165,11 +166,20 @@ class TemplateExtractorService extends Component
 
         if (preg_match('/<div[^>]*id="page"[^>]*class="main-container"[^>]*>\s*<div[^>]*id="main-content"[^>]*>(.*?)<\/div><!--\s*#main-content\s*-->/is', $html, $m)) {
             $inner = $this->rewritePaths($m[1]);
-            if ($handle === 'shop') {
+            if ($handle === 'shop' || $handle === 'collection') {
                 $inner = $this->sanitizeShopContent($inner);
             }
             if ($handle === 'checkout') {
                 $inner = $this->sanitizeCheckoutContent($inner);
+            }
+            if ($handle === 'press-detail') {
+                $inner = $this->sanitizePressDetailContent($inner);
+            }
+            if ($handle === 'press') {
+                $inner = $this->sanitizePressArchiveContent($inner);
+            }
+            if ($handle === 'wishlist') {
+                $inner = $this->sanitizeWishlistContent($inner);
             }
             $content = '<div id="page" class="main-container">' . "\n"
                 . '<div id="main-content">' . "\n"
@@ -181,11 +191,20 @@ class TemplateExtractorService extends Component
 
         if (preg_match('/<div[^>]*id="page"[^>]*>(.*?)<div[^>]*class="footer-wrapper"/is', $html, $m)) {
             $inner = $this->rewritePaths($m[1]);
-            if ($handle === 'shop') {
+            if ($handle === 'shop' || $handle === 'collection') {
                 $inner = $this->sanitizeShopContent($inner);
             }
             if ($handle === 'checkout') {
                 $inner = $this->sanitizeCheckoutContent($inner);
+            }
+            if ($handle === 'press-detail') {
+                $inner = $this->sanitizePressDetailContent($inner);
+            }
+            if ($handle === 'press') {
+                $inner = $this->sanitizePressArchiveContent($inner);
+            }
+            if ($handle === 'wishlist') {
+                $inner = $this->sanitizeWishlistContent($inner);
             }
             $content = '<div id="page" class="main-container">' . "\n"
                 . $inner;
@@ -201,8 +220,8 @@ class TemplateExtractorService extends Component
     private function sanitizeShopContent(string $html): string
     {
         $html = preg_replace(
-            '/(<div class="elementor-element elementor-element-51f15b5[^>]*>[\s\S]*?<div class="elementor-widget-container">\s*(?:<link[^>]+>\s*)?)([\s\S]*?)(<\/div>\s*<\/div>\s*<\/div>\s*<div class="elementor-element elementor-element-0667a97)/i',
-            '$1{# Filters injected by shop.js from localroots-shop-filters-source #}$3',
+            '/(<div class="elementor-element elementor-element-51f15b5[^>]*>[\s\S]*?<div class="elementor-widget-container">\s*(?:<link[^>]+>\s*)?)[\s\S]*?(<div class="elementor-element elementor-element-0667a97)/i',
+            '$1{# Filters injected by shop.js from localroots-shop-filters-source #}' . "\n\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t" . '$2',
             $html,
             1
         );
@@ -231,6 +250,44 @@ class TemplateExtractorService extends Component
 				$2',
             $html,
             1
+        ) ?: $html;
+    }
+
+    /**
+     * Strip static press archive cards — press.js hydrates from Craft sources.
+     */
+    private function sanitizePressArchiveContent(string $html): string
+    {
+        return preg_replace(
+            '/(<style id="loop-9764">[\s\S]*?<\/style>\s*)(?:\s*<div data-elementor-type="loop-item"[\s\S]*?<\/div>\s*<\/div>\s*<\/div>\s*)+(?=\s*<span class="e-load-more-spinner">)/',
+            '$1',
+            $html,
+            1
+        ) ?: $html;
+    }
+
+    /**
+     * Strip static related-press carousel slides — press.js hydrates from Craft sources.
+     */
+    private function sanitizePressDetailContent(string $html): string
+    {
+        return preg_replace(
+            '/(<div class="swiper-wrapper" aria-live="polite">\s*<style id="loop-9764">[\s\S]*?<\/style>\s*)[\s\S]*?(?=\s*<\/div>\s*<div class="swiper-pagination">)/',
+            '$1',
+            $html,
+            1
+        ) ?: $html;
+    }
+
+    /**
+     * Strip static demo wishlist rows — wishlist.js hydrates from Craft sources.
+     */
+    private function sanitizeWishlistContent(string $html): string
+    {
+        return preg_replace(
+            '/<tr class="woosw-item[^"]*"[\s\S]*?<\/tr>/i',
+            '',
+            $html
         ) ?: $html;
     }
 
@@ -270,6 +327,11 @@ class TemplateExtractorService extends Component
             '../about/' => '/about/',
             '../sustainability/' => '/sustainability/',
             '../press/' => '/press/',
+            '../delivery-and-returns/index.html' => '/delivery-and-returns',
+            '../delivery-and-returns/' => '/delivery-and-returns/',
+            '../delivery-and-returns.html' => '/delivery-and-returns',
+            '../../delivery-and-returns.html' => '/delivery-and-returns',
+            'delivery-and-returns.html' => '/delivery-and-returns',
             '../cdn-cgi/' => '/cdn-cgi/',
             '../contact/' => '/contact/',
             '../../product-category/' => '/product-category/',
@@ -287,11 +349,31 @@ class TemplateExtractorService extends Component
             '/%3Fp=12444.html' => '/shop',
             '/%3Fp=155.html' => '/shop',
             '/%3Fp=726.html' => '/press',
+            'index.html%3Fp=726.html' => '/press',
+            '/%3Fp=9809.html' => '/press/introducing-innove-fall-winter-2023',
+            'index.html%3Fp=9809.html' => '/press/introducing-innove-fall-winter-2023',
+            '/%3Fp=9807.html' => '/press/spring-art-fair-styles',
+            'index.html%3Fp=9807.html' => '/press/spring-art-fair-styles',
+            '/%3Fp=9805.html' => '/press/new-summer-in-store-exclusives',
+            'index.html%3Fp=9805.html' => '/press/new-summer-in-store-exclusives',
+            '/%3Fp=9803.html' => '/press/crafted-with-character',
+            'index.html%3Fp=9803.html' => '/press/crafted-with-character',
+            '/%3Fp=9801.html' => '/press/spotlight-on-hooded-belted-cape',
+            'index.html%3Fp=9801.html' => '/press/spotlight-on-hooded-belted-cape',
+            '/%3Fp=9799.html' => '/press/innove-new-yorks-first-store-opening-in-soho-ny',
+            'index.html%3Fp=9799.html' => '/press/innove-new-yorks-first-store-opening-in-soho-ny',
+            '/%3Fp=4565.html' => '/sustainability',
+            'index.html%3Fp=4565.html' => '/sustainability',
+            '/%3Fp=736.html' => '/delivery-and-returns',
+            'index.html%3Fp=736.html' => '/delivery-and-returns',
             '/%3Fp=1904.html' => '/shop?sale=1',
             '/%3Fp=3101.html' => '/shop',
+            '/%3Fp=736.html' => '/delivery-and-returns',
+            'index.html%3Fp=736.html' => '/delivery-and-returns',
+            '/%3Fp=4565.html' => '/sustainability',
+            'index.html%3Fp=4565.html' => '/sustainability',
             '/%3Fp=8.html' => '/account',
             '/%3Fp=732.html' => '/account',
-            '/%3Fp=736.html' => '/account',
             '/%3Fp=13838.html' => '/faq',
             '../faq/index.html' => '/faq',
             '../faq/' => '/faq/',
@@ -364,6 +446,23 @@ class TemplateExtractorService extends Component
             '/%3Fp=12444.html' => '/shop',
             '/%3Fp=155.html' => '/shop',
             '/%3Fp=726.html' => '/press',
+            'index.html%3Fp=726.html' => '/press',
+            '/%3Fp=9809.html' => '/press/introducing-innove-fall-winter-2023',
+            'index.html%3Fp=9809.html' => '/press/introducing-innove-fall-winter-2023',
+            '/%3Fp=9807.html' => '/press/spring-art-fair-styles',
+            'index.html%3Fp=9807.html' => '/press/spring-art-fair-styles',
+            '/%3Fp=9805.html' => '/press/new-summer-in-store-exclusives',
+            'index.html%3Fp=9805.html' => '/press/new-summer-in-store-exclusives',
+            '/%3Fp=9803.html' => '/press/crafted-with-character',
+            'index.html%3Fp=9803.html' => '/press/crafted-with-character',
+            '/%3Fp=9801.html' => '/press/spotlight-on-hooded-belted-cape',
+            'index.html%3Fp=9801.html' => '/press/spotlight-on-hooded-belted-cape',
+            '/%3Fp=9799.html' => '/press/innove-new-yorks-first-store-opening-in-soho-ny',
+            'index.html%3Fp=9799.html' => '/press/innove-new-yorks-first-store-opening-in-soho-ny',
+            '/%3Fp=4565.html' => '/sustainability',
+            'index.html%3Fp=4565.html' => '/sustainability',
+            '/%3Fp=736.html' => '/delivery-and-returns',
+            'index.html%3Fp=736.html' => '/delivery-and-returns',
             '/%3Fp=1904.html' => '/shop?sale=1',
             '/%3Fp=3101.html' => '/shop',
             '/product-category/women/index.html' => '/product-category/women',

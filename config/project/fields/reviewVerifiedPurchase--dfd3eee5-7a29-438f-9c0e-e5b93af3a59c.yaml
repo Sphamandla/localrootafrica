@@ -1,0 +1,13 @@
+columnSuffix: null
+handle: reviewVerifiedPurchase
+instructions: null
+name: 'Verified Purchase'
+searchable: false
+settings:
+  default: false
+  offLabel: null
+  onLabel: null
+  showLabelsInCards: false
+translationKeyFormat: null
+translationMethod: none
+type: craft\fields\Lightswitch

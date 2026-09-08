@@ -40,7 +40,28 @@
 		updateResultCount(config);
 		updateSortMenu(config);
 		updatePagination(config);
+		updateCategoryHeader(config);
 		initFilterCollapse();
+	}
+
+	function updateCategoryHeader(config) {
+		if (config.categoryTitle) {
+			const titleEl = document.querySelector('.elementor-element-68b581d .elementor-heading-title');
+			if (titleEl) titleEl.textContent = config.categoryTitle;
+		}
+
+		if (!config.categoryBreadcrumb?.length) return;
+
+		const breadcrumbEl = document.querySelector('.woocommerce-breadcrumb');
+		if (!breadcrumbEl) return;
+
+		breadcrumbEl.innerHTML = config.categoryBreadcrumb.map((item, index) => {
+			const prefix = index > 0 ? '&nbsp;&#47;&nbsp;' : '';
+			if (item.url) {
+				return prefix + '<a href="' + item.url + '">' + item.title + '</a>';
+			}
+			return prefix + item.title;
+		}).join('');
 	}
 
 	function initFilters(form, config) {
@@ -185,21 +206,98 @@
 			return;
 		}
 
+		const nextPage = config.currentPage + 1;
+		const nextUrl = config.pageUrls?.[nextPage - 1] || config.shopUrl;
+
 		if (loadMoreAnchor) {
 			loadMoreAnchor.dataset.page = String(config.currentPage);
 			loadMoreAnchor.dataset.maxPage = String(config.totalPages);
-			loadMoreAnchor.dataset.nextPage = config.pageUrls[config.currentPage] || config.shopUrl;
+			loadMoreAnchor.dataset.nextPage = nextUrl;
 		}
 
 		if (loadMoreWrap) {
 			loadMoreWrap.style.display = '';
 			const btn = loadMoreWrap.querySelector('a, .elementor-button');
 			if (btn) {
-				btn.href = config.pageUrls[config.currentPage] || config.shopUrl;
+				btn.href = nextUrl;
 				btn.onclick = (e) => {
 					e.preventDefault();
-					window.location.href = config.pageUrls[config.currentPage] || config.shopUrl;
+					loadMoreProducts(config);
 				};
+			}
+		}
+	}
+
+	function buildLoadMoreUrl(config, page) {
+		const url = new URL(config.loadMoreUrl || '/localroots/shop/load-more', window.location.origin);
+		url.searchParams.set('page', String(page));
+
+		if (config.categoryPath) {
+			url.searchParams.set('categoryPath', config.categoryPath);
+		}
+
+		const current = new URLSearchParams(window.location.search);
+		['sort', 'minPrice', 'maxPrice', 'inStock'].forEach(key => {
+			if (current.has(key)) url.searchParams.set(key, current.get(key));
+		});
+		['categories', 'sizes', 'colors', 'brands', 'types'].forEach(key => {
+			current.getAll(key + '[]').forEach(value => url.searchParams.append(key + '[]', value));
+		});
+
+		return url.toString();
+	}
+
+	async function loadMoreProducts(config) {
+		const nextPage = config.currentPage + 1;
+		if (nextPage > config.totalPages) return;
+
+		const loadMoreWrap = document.querySelector('.e-loop__load-more');
+		const spinner = document.querySelector('.e-load-more-spinner');
+		const btn = loadMoreWrap?.querySelector('a, .elementor-button');
+
+		if (btn) {
+			btn.style.pointerEvents = 'none';
+			btn.setAttribute('aria-busy', 'true');
+		}
+		if (spinner) spinner.style.display = '';
+
+		try {
+			const response = await fetch(buildLoadMoreUrl(config, nextPage), {
+				headers: { 'Accept': 'application/json' },
+				credentials: 'same-origin',
+			});
+			const data = await response.json();
+			if (!data.success || !data.html) return;
+
+			const grid = document.querySelector('.elementor-element-e0ad6a8 .elementor-loop-container');
+			const insertBefore = grid?.querySelector('.e-load-more-spinner');
+			if (!grid || !insertBefore) return;
+
+			const wrapper = document.createElement('div');
+			wrapper.innerHTML = data.html.trim();
+			Array.from(wrapper.children).forEach(item => {
+				grid.insertBefore(item, insertBefore);
+			});
+
+			initProductGalleries(grid);
+
+			const loopWidget = document.querySelector('.elementor-element-e0ad6a8');
+			if (loopWidget && typeof elementorFrontend !== 'undefined' && elementorFrontend.elementsHandler) {
+				elementorFrontend.elementsHandler.runReadyTrigger(loopWidget);
+			}
+
+			config.currentPage = data.currentPage;
+			config.rangeStart = 1;
+			config.rangeEnd = data.rangeEnd;
+			updateResultCount(config);
+			updatePagination(config);
+		} catch (err) {
+			console.error('Load more failed', err);
+		} finally {
+			if (spinner) spinner.style.display = 'none';
+			if (btn) {
+				btn.style.pointerEvents = '';
+				btn.removeAttribute('aria-busy');
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-dateModified: 1788888149
+dateModified: 1788890750
 email:
   fromEmail: admin@localroots.africa
   fromName: 'Local Roots Africa'
@@ -14,27 +14,37 @@ fs:
 meta:
   __names__:
     0e7959b4-7cec-4499-b2a1-f1ac3f4164a8: Favicon # Favicon
+    1e53ff99-0003-49e4-ba74-958649cfd00f: 'Delivery and Returns' # Delivery and Returns
     2b4bdf13-c848-4441-8cc7-b9b5addbac4c: 'Product Images' # Product Images
     3c4eb748-8fca-4aec-bd80-e25f9824a536: 'Footer Settings' # Footer Settings
+    5bbc5ad1-9817-4833-8b89-5dc5a2e8ca19: 'Product Reviews' # Product Reviews
+    5d16cef5-02fa-44d6-bd34-95cef356c020: 'Author Email' # Author Email
     6fb8bd1f-38e9-4db1-a9ab-7c27e3078b6d: Categories # Categories
     7d0ebec0-7962-437a-9f95-ea9ff801ea3d: 'Facebook URL' # Facebook URL
     07edf859-d076-48d9-b54d-d0ad7cff5ea1: 'Site Settings' # Site Settings
     8ad9482c-8b91-421f-986b-77924340147b: 'Promo Title' # Promo Title
+    8ced4d92-c820-4439-ad29-57206b41d01e: 'Review Status' # Review Status
     9b95f6ae-6ff0-4c04-99e6-50c0e8e1dc91: Orders # Orders
     10af4ecc-50e3-4d62-bdaa-3220592eb183: 'Total Price' # Total Price
     18e9718e-2fa1-4a5a-bd8c-71196c597976: 'Promo Subtitle' # Promo Subtitle
     21badc0e-de2c-4037-9bce-dc90cabd3814: Promotions # Promotions
+    31fe6892-e89d-47bf-9288-fa9d81bab7e4: Product # Product
     44fe9edb-8cbb-4f10-97fd-dd45abe6f97c: Promotions # Promotions
     68e72579-42b0-4808-9e4a-25a5c2e695f1: Primary # Primary
     68fc7f40-b380-4871-8249-609331fcf48e: Dummy # Dummy
+    76fe0ed1-d578-4cec-b1d5-f0679316eb18: 'Product Questions' # Product Questions
     96d99d2a-38e8-456f-a2e1-3487b0b05cab: Products # Products
     99c37949-cba9-4110-b5a3-fbd8834689dc: Content # Content
+    110b0bcf-f08d-4412-a6b5-d6d970d31124: Answer # Answer
+    151b329a-6e95-4671-98e9-726d8d122d10: 'Order Number' # Order Number
     426e2aba-140e-45cb-a3e1-6c8567ee2fc2: 'Simple purchase (no options)' # Simple purchase (no options)
     462ba2ec-8fa1-4f29-82ff-c740590fd07d: Body # Body
     542a0f2e-7f12-4af9-a4df-db6af3cc0456: 'Order Number' # Order Number
     912aabb1-fecb-4960-8bf0-e1c4b9a84052: Press # Press
     945a904f-bce5-4531-93c7-79698d606620: 'Product Tags' # Product Tags
     967a8209-4748-4bb6-a203-e910a44be72b: 'FAQ Items' # FAQ Items
+    4055e381-b1f4-4996-9d07-a9c7d2b5761c: 'Author Name' # Author Name
+    4424b754-8916-4b5d-8b1c-f1370d32c4ad: 'Author Email' # Author Email
     9060fbe5-87ae-4ffb-95b5-b6a7139b2e8d: 'Awaiting payment' # Awaiting payment
     11802c2b-3476-4997-bf59-3543084c0e64: Ozow # Ozow
     12673b94-3667-4415-9321-7c537ba9a185: 'Instagram URL' # Instagram URL
@@ -42,6 +52,9 @@ meta:
     17139417-d6f7-47d4-a3e8-fb0ed9d211f0: New # New
     32300246-7065-4e64-9e65-57e400c5735b: 'Line Items' # Line Items
     94376659-de21-437e-8203-9d5fd6fdf7c2: 'Cash on delivery' # Cash on delivery
+    a91b2c97-99db-4173-bd77-842cc5068000: Product # Product
+    a256d8f3-d589-4dca-934d-9ef523504b64: 'Public Schema' # Public Schema
+    a9b8c7d6-e5f4-4a3b-9c8d-7e6f5a4b3c2d: Sustainability # Sustainability
     ab291bd6-8e36-41d8-aecc-bf6ff45c20d1: Featured # Featured
     acdbb89a-7773-4771-8fe9-b8592136e71e: 'Site Logo' # Site Logo
     afae4c11-b33a-46ae-bc57-0de0a5c688fd: 'Direct bank transfer' # Direct bank transfer
@@ -50,25 +63,35 @@ meta:
     bc98ea82-68eb-48a3-9029-4005f46a5c7e: Press # Press
     be035570-dd96-4f29-af3d-40dd03989f7f: 'Hero Image' # Hero Image
     c4fe28e1-cb96-4682-8230-0c16ab5a4fad: 'Default SEO Title' # Default SEO Title
+    c8f4e2a1-9b3d-4e7f-a1c2-3d4e5f607182: 'Delivery and Returns' # Delivery and Returns
     c3149d0e-5554-441f-9d95-c4200e34c451: 'Copyright Text' # Copyright Text
+    cb09419f-b182-43cd-9e3b-e31a25f0edf8: 'Author Name' # Author Name
+    cbf2aa08-d837-46af-9b02-82aeef042a60: 'Product Questions' # Product Questions
     d2e366a6-2155-4586-833d-a5c2f8bdc16e: 'Customer Info' # Customer Info
     d7b5ffcb-3e16-4905-851d-cd0012b09014: 'Button Text' # Button Text
     d963b436-f9bc-42c7-b250-edd012934e52: Orders # Orders
+    d881687a-e90d-4501-9973-305b37fa648e: Rating # Rating
     d989341b-c3f1-4da4-8e8c-9b0271442258: PayFast # PayFast
     d9595865-606c-4fca-8bcb-3ce065b53183: 'Promo Image' # Promo Image
     db357a18-ce59-4fbe-a6b1-c29fc6815bac: Pages # Pages
     deb53530-739d-4fa8-817d-9b170d536d15: 'Promo Link' # Promo Link
     ded14fae-412e-48ff-9e5a-e3b785c8ad9f: Tags # Tags
+    dfd3eee5-7a29-438f-9c0e-e5b93af3a59c: 'Verified Purchase' # Verified Purchase
     e4f70ff6-8c3f-4c05-97f3-db1a4a698784: Yoco # Yoco
     e6be6d5d-170c-47f6-8df9-909f1a8a9aff: Pages # Pages
     e33b3b6a-ffb4-4f3d-803f-e4522d5938ee: 'SEO Settings' # SEO Settings
     e510b8b9-def2-4e3c-b643-8da4bc86bdc1: 'Local Roots Africa' # Local Roots Africa
     ebc26618-696b-4530-9ee1-3f64e6e70218: Default # Default
     ed76d2b1-5c15-4156-902c-f859980f0e22: 'Twitter URL' # Twitter URL
+    ee24c520-aefa-4e0e-b5b9-b4eb6946f93c: 'Question Status' # Question Status
+    f1a2b3c4-d5e6-4f78-9abc-def012345678: Sustainability # Sustainability
     f4a17b21-afdd-4e79-b839-10ae6eaac4bb: 'Local Roots Africa' # Local Roots Africa
     f9b62df4-06c7-47ad-b103-d631daf7db32: Wishlist # Wishlist
+    f10a395c-55d0-4395-a837-de7ef2b1a5e7: Question # Question
+    f65c0d35-5c38-4b8a-8ec4-b963affe1cb9: 'Review Body' # Review Body
     f5736581-910a-4423-95b6-324743c21a4e: 'Site Name' # Site Name
     fce2e58c-af0f-4dd1-bc98-79434a3eb8de: 'Pinterest URL' # Pinterest URL
+    fd5c3c99-dda4-42bb-aaa8-d5b15dbb74da: 'Product Reviews' # Product Reviews
     fdf0314e-8d94-47b2-a8a5-dc786343c002: 'Payment Status' # Payment Status
 plugins:
   blitz:
@@ -135,9 +158,9 @@ system:
   schemaVersion: 5.11.0.2
   timeZone: America/Los_Angeles
 users:
-  allowPublicRegistration: false
+  allowPublicRegistration: true
   defaultGroup: null
   photoSubpath: null
   photoVolumeUid: null
   require2fa: false
-  requireEmailVerification: true
+  requireEmailVerification: false

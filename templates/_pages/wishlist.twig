@@ -1,10 +1,25 @@
 {% extends '_layouts/vamtam-alt' %}
 
+{% set userList = craft.wishlist.getUserList() %}
+{% set wishlistItems = craft.wishlist.items().listId(userList.id).with(['element']).orderBy('dateCreated desc').all() %}
+
+{% block head %}{% include '_includes/vamtam/head-wishlist.twig' %}{% endblock %}
 {% block bodyClass %}{% include '_static/body-class-wishlist.twig' %}{% endblock %}
 
 {% block content %}
 {% if not currentUser %}
     {% redirect '/login' %}
 {% endif %}
+
+<div id="localroots-wishlist-source" hidden>
+	<table><tbody>
+		{% include '_includes/vamtam/wishlist-items.twig' with { items: wishlistItems } %}
+	</tbody></table>
+</div>
+
 {% include '_static/content-wishlist.twig' %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ alias('@web') }}/js/wishlist.js"></script>
 {% endblock %}

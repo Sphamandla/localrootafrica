@@ -15,6 +15,7 @@ use modules\localroots\gateways\YocoGateway;
 use modules\localroots\services\CashEftEmailService;
 use modules\localroots\services\OrderSyncService;
 use modules\localroots\services\PayfastService;
+use modules\localroots\services\ProductReviewService;
 use yii\base\Event;
 use yii\base\Module;
 
@@ -31,6 +32,7 @@ class LocalRootsModule extends Module
             'shopFilter' => services\ShopFilterService::class,
             'transactionTracker' => services\TransactionTracker::class,
             'envCoupons' => services\EnvCouponService::class,
+            'productReviews' => ProductReviewService::class,
         ]);
 
         if (Craft::$app->getRequest()->getIsConsoleRequest()) {
@@ -119,7 +121,9 @@ class LocalRootsModule extends Module
                 function (Event $event) {
                     /** @var Order $order */
                     $order = $event->sender;
-                    Craft::$app->getModule('localroots')->orderSync->syncOrder($order);
+                    $module = Craft::$app->getModule('localroots');
+                    $module->orderSync->syncOrder($order);
+                    $module->productReviews->sendReviewInvites($order);
                 }
             );
         }

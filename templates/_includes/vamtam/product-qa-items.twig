@@ -1,0 +1,19 @@
+{# Renders Vamtam-style Q&A accordion items #}
+{% if questions|length %}
+<div class="ets-qa-listing">
+	{% for item in questions %}
+	<div class="ets-accordion">
+		<span class="que-content"><b>Question:</b></span>
+		<span class="que-content-des">{{ item.questionBody }}</span>
+		<h6>{{ item.questionAuthorName|default('Customer') }}<br>{{ item.dateCreated|date('d-M-Y') }}</h6>
+	</div>
+	<div class="ets-panel">
+		<span class="ans-content"><b>Answer:</b></span>
+		<span class="ans-content-des">{{ item.answerBody|nl2br }}</span>
+	</div>
+	{% endfor %}
+	<div class="ets-accordion-response-add ets-accordion-list-qa"></div>
+</div>
+{% else %}
+<p class="localroots-no-questions">No questions yet. Be the first to ask!</p>
+{% endif %}

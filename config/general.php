@@ -21,8 +21,12 @@ return GeneralConfig::create()
     ->preloadSingles()
     // Prevent user enumeration attacks
     ->preventUserEnumeration()
-    // Allow front-end login at /login
+    // Allow front-end login at /login (redirects to /account)
     ->loginPath('login')
+    ->setPasswordPath('set-password')
+    ->setPasswordSuccessPath('account')
+    ->autoLoginAfterAccountActivation(true)
+    ->activateAccountSuccessPath('account')
     // Enable the Twig sandbox for system messages, etc.
     ->enableTwigSandbox()
     // Set the @webroot alias so the clear-caches command knows where to find CP resources
