@@ -1,5 +1,9 @@
 {% extends '_layouts/vamtam' %}
 
+{% if craft.app.session.hasFlash('error') %}
+	{% redirect url('checkout/failed') %}
+{% endif %}
+
 {% set cart = craft.commerce.carts.cart %}
 {% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.postalCode ?? null, cart.totalWeight) %}
 

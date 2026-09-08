@@ -1,0 +1,20 @@
+{% extends '_layouts/vamtam' %}
+
+{% set errorMessage = craft.app.session.getFlash('error') %}
+
+{% block head %}
+{% include '_includes/vamtam/head-checkout-result.twig' %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block bodyClass %}{% include '_static/body-class-checkout-result.twig' %}{% endblock %}
+
+{% block content %}
+{% include '_includes/vamtam/checkout-result-page.twig' with {
+	variant: 'failed',
+	breadcrumbLabel: 'Payment failed',
+	title: 'We could not complete your payment',
+	message: 'Something went wrong while processing your order. No charge was made — please review your details and try again.',
+	errorMessage: errorMessage,
+} %}
+{% endblock %}

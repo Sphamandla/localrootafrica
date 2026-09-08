@@ -78,8 +78,8 @@ class YocoGateway extends BaseOffsiteGateway
         $successUrl = UrlHelper::siteUrl('commerce/payments/complete-payment', [
             'commerceTransactionHash' => $transaction->hash,
         ]);
-        $cancelUrl = UrlHelper::siteUrl('checkout');
-        $failureUrl = UrlHelper::siteUrl('checkout');
+        $cancelUrl = UrlHelper::siteUrl('checkout/canceled');
+        $failureUrl = UrlHelper::siteUrl('checkout/failed');
 
         $apiUrl = $isSandbox
             ? 'https://payments.yoco.com/api/checkouts'

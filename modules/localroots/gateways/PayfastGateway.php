@@ -95,7 +95,7 @@ class PayfastGateway extends BaseOffsiteGateway
             'return_url' => UrlHelper::siteUrl('commerce/payments/complete-payment', [
                 'commerceTransactionHash' => $transaction->hash,
             ]),
-            'cancel_url' => UrlHelper::siteUrl('checkout'),
+            'cancel_url' => UrlHelper::siteUrl('checkout/canceled'),
             'notify_url' => UrlHelper::siteUrl('localroots/payfast/notify'),
             'name_first' => $order->billingAddress?->firstName ?? 'Customer',
             'name_last' => $order->billingAddress?->lastName ?? '',

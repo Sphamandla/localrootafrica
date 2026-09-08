@@ -79,8 +79,8 @@ class OzowGateway extends BaseOffsiteGateway
         $amount = number_format($transaction->paymentAmount, 2, '.', '');
         $transactionRef = $order->reference ?? (string)$order->id;
         $bankRef = 'LR-' . $transactionRef;
-        $cancelUrl = UrlHelper::siteUrl('checkout');
-        $errorUrl = UrlHelper::siteUrl('checkout');
+        $cancelUrl = UrlHelper::siteUrl('checkout/canceled');
+        $errorUrl = UrlHelper::siteUrl('checkout/failed');
         $successUrl = UrlHelper::siteUrl('commerce/payments/complete-payment', [
             'commerceTransactionHash' => $transaction->hash,
         ]);

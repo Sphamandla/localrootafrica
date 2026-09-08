@@ -1,0 +1,43 @@
+{% extends '_layouts/vamtam' %}
+
+{% set number = craft.app.request.getParam('number') %}
+{% set email = craft.app.request.getParam('email') %}
+{% set order = number ? craft.orders().number(number).one() : null %}
+
+{% if order %}
+	{% set emailMatch = email and order.email|lower == email|lower %}
+	{% set ownerMatch = currentUser and order.customerId == currentUser.id %}
+	{% if not emailMatch and not ownerMatch %}
+		{% set order = null %}
+	{% endif %}
+{% endif %}
+
+{% if not order or not order.isCompleted %}
+	{% redirect url('shop') %}
+{% endif %}
+
+{% set gatewayHandle = order.gateway.handle ?? null %}
+{% if gatewayHandle == 'cash-eft' %}
+	{% set successMessage = 'We have received your order. Please complete your EFT using the bank details below. We will ship once payment clears.' %}
+{% elseif gatewayHandle == 'cash-on-delivery' %}
+	{% set successMessage = 'Your order is confirmed. Please have payment ready when your delivery arrives.' %}
+{% else %}
+	{% set successMessage = 'Thank you — your payment was successful and we are preparing your order.' %}
+{% endif %}
+
+{% block head %}
+{% include '_includes/vamtam/head-checkout-result.twig' %}
+<meta name="robots" content="noindex">
+{% endblock %}
+
+{% block bodyClass %}{% include '_static/body-class-checkout-result.twig' %}{% endblock %}
+
+{% block content %}
+{% include '_includes/vamtam/checkout-result-page.twig' with {
+	variant: 'success',
+	breadcrumbLabel: 'Order complete',
+	title: 'Thank you for your order',
+	message: successMessage,
+	order: order,
+} %}
+{% endblock %}

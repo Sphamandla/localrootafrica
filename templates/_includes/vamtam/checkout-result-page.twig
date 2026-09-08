@@ -1,0 +1,270 @@
+{# Shared checkout result layout — success, failed, or canceled #}
+{% set variant = variant|default('success') %}
+{% set breadcrumbLabel = breadcrumbLabel|default('Order complete') %}
+{% set title = title|default('Thank you for your order') %}
+{% set message = message|default('') %}
+{% set order = order|default(null) %}
+{% set errorMessage = errorMessage|default('') %}
+{% set gatewayHandle = order ? (order.gateway.handle ?? null) : null %}
+{% set bank = gatewayHandle == 'cash-eft' ? craft.app.getModule('localroots').cashEftEmail.getBankDetails() : null %}
+
+<div id="page" class="main-container">
+<div id="main-content">
+<div id="main" role="main" class="vamtam-main layout-full">
+<div class="page-wrapper">
+<article class="full page type-page status-publish hentry">
+<div class="page-content clearfix the-content-parent">
+<div class="elementor elementor-7">
+
+<nav class="localroots-checkout-breadcrumb" aria-label="Checkout progress">
+	<a href="{{ url('cart') }}">Cart</a>
+	<span class="localroots-checkout-breadcrumb__sep" aria-hidden="true">→</span>
+	<a href="{{ url('checkout') }}">Checkout</a>
+	<span class="localroots-checkout-breadcrumb__sep" aria-hidden="true">→</span>
+	<span class="localroots-checkout-breadcrumb__current">{{ breadcrumbLabel }}</span>
+</nav>
+
+<div class="localroots-checkout-result localroots-checkout-result--{{ variant }}">
+	<div class="localroots-checkout-result__hero">
+		<div class="localroots-checkout-result__icon" aria-hidden="true">
+			{% if variant == 'success' %}
+				<svg viewBox="0 0 64 64" width="64" height="64" fill="none"><circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2"/><path d="M20 33l8 8 16-16" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+			{% elseif variant == 'failed' %}
+				<svg viewBox="0 0 64 64" width="64" height="64" fill="none"><circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2"/><path d="M24 24l16 16M40 24L24 40" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+			{% else %}
+				<svg viewBox="0 0 64 64" width="64" height="64" fill="none"><circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2"/><path d="M32 20v18M32 44h.01" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+			{% endif %}
+		</div>
+		<h1 class="localroots-checkout-result__title">{{ title }}</h1>
+		{% if message %}
+		<p class="localroots-checkout-result__message">{{ message|raw }}</p>
+		{% endif %}
+		{% if errorMessage %}
+		<div class="localroots-checkout-result__error" role="alert">{{ errorMessage }}</div>
+		{% endif %}
+	</div>
+
+	{% if order %}
+	<div class="localroots-checkout-result__details">
+		<div class="localroots-checkout-result__meta">
+			<div class="localroots-checkout-result__meta-item">
+				<span class="localroots-checkout-result__label">Order number</span>
+				<strong>#{{ order.reference ?? order.id }}</strong>
+			</div>
+			<div class="localroots-checkout-result__meta-item">
+				<span class="localroots-checkout-result__label">Date</span>
+				<strong>{{ order.dateOrdered|date('F j, Y') }}</strong>
+			</div>
+			<div class="localroots-checkout-result__meta-item">
+				<span class="localroots-checkout-result__label">Email</span>
+				<strong>{{ order.email }}</strong>
+			</div>
+			<div class="localroots-checkout-result__meta-item">
+				<span class="localroots-checkout-result__label">Status</span>
+				<strong>{{ order.orderStatus.name ?? (order.isPaid ? 'Paid' : 'Awaiting payment') }}</strong>
+			</div>
+			<div class="localroots-checkout-result__meta-item">
+				<span class="localroots-checkout-result__label">Total</span>
+				<strong>{% include '_includes/vamtam/price.twig' with { amount: order.totalPrice } %}</strong>
+			</div>
+		</div>
+
+		{% if order.lineItems|length %}
+		<table class="shop_table localroots-checkout-result__items">
+			<thead>
+				<tr>
+					<th>Product</th>
+					<th>Qty</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for item in order.lineItems %}
+				<tr>
+					<td>{{ item.description }}</td>
+					<td>{{ item.qty|number_format(0) }}</td>
+					<td>{% include '_includes/vamtam/price.twig' with { amount: item.total } %}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th colspan="2">Order total</th>
+					<td>{% include '_includes/vamtam/price.twig' with { amount: order.totalPrice } %}</td>
+				</tr>
+			</tfoot>
+		</table>
+		{% endif %}
+
+		{% if bank %}
+		<div class="localroots-checkout-result__bank">
+			<h2>Bank transfer details</h2>
+			<p>Use your order number <strong>#{{ order.reference ?? order.id }}</strong> as the payment reference. Your order will ship once payment clears.</p>
+			<ul>
+				<li><strong>Bank:</strong> {{ bank.bankName }}</li>
+				<li><strong>Account name:</strong> {{ bank.accountName }}</li>
+				<li><strong>Account number:</strong> {{ bank.accountNumber }}</li>
+				<li><strong>Branch code:</strong> {{ bank.branchCode }}</li>
+				<li><strong>Account type:</strong> {{ bank.accountType }}</li>
+			</ul>
+		</div>
+		{% endif %}
+	</div>
+	{% endif %}
+
+	<div class="localroots-checkout-result__actions">
+		{% if variant == 'success' %}
+			<a href="{{ url('shop') }}" class="button alt">Continue shopping</a>
+			<a href="{{ url('order-status') }}" class="button">Track your order</a>
+			{% if currentUser %}
+			<a href="{{ url('account/orders') }}" class="button">View my orders</a>
+			{% endif %}
+		{% elseif variant == 'failed' %}
+			<a href="{{ url('checkout') }}" class="button alt">Return to checkout</a>
+			<a href="{{ url('cart') }}" class="button">View cart</a>
+			<a href="{{ url('contact') }}" class="button">Contact support</a>
+		{% else %}
+			<a href="{{ url('checkout') }}" class="button alt">Return to checkout</a>
+			<a href="{{ url('cart') }}" class="button">View cart</a>
+			<a href="{{ url('shop') }}" class="button">Continue shopping</a>
+		{% endif %}
+	</div>
+</div>
+
+</div>
+</div>
+</article>
+</div>
+</div>
+</div>
+</div>
+
+<style>
+.localroots-checkout-breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	max-width: 960px;
+	margin: 0 auto 2.5rem;
+	padding: 0 1rem;
+	font-size: 0.9rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+.localroots-checkout-breadcrumb a {
+	color: inherit;
+	text-decoration: none;
+}
+.localroots-checkout-breadcrumb a:hover { text-decoration: underline; }
+.localroots-checkout-breadcrumb__current { opacity: 0.55; }
+.localroots-checkout-breadcrumb__sep { opacity: 0.35; font-size: 0.75rem; }
+
+.localroots-checkout-result {
+	max-width: 960px;
+	margin: 0 auto 4rem;
+	padding: 0 1rem 2rem;
+}
+.localroots-checkout-result__hero {
+	text-align: center;
+	padding: 2.5rem 1.5rem;
+	border: 1px solid #e8e8e8;
+	background: #fafafa;
+}
+.localroots-checkout-result--success .localroots-checkout-result__hero { border-color: #c8e6c9; background: #f3fbf4; }
+.localroots-checkout-result--failed .localroots-checkout-result__hero { border-color: #f5c6cb; background: #fff8f8; }
+.localroots-checkout-result--canceled .localroots-checkout-result__hero { border-color: #ffe082; background: #fffdf5; }
+
+.localroots-checkout-result--success .localroots-checkout-result__icon { color: #2e7d32; }
+.localroots-checkout-result--failed .localroots-checkout-result__icon { color: #c62828; }
+.localroots-checkout-result--canceled .localroots-checkout-result__icon { color: #ef6c00; }
+
+.localroots-checkout-result__icon { margin-bottom: 1rem; }
+.localroots-checkout-result__title {
+	margin: 0 0 0.75rem;
+	font-size: clamp(1.75rem, 4vw, 2.25rem);
+	font-weight: 500;
+	letter-spacing: 0.02em;
+}
+.localroots-checkout-result__message {
+	margin: 0 auto;
+	max-width: 42rem;
+	color: #444;
+	line-height: 1.6;
+}
+.localroots-checkout-result__error {
+	display: inline-block;
+	margin-top: 1rem;
+	padding: 0.75rem 1rem;
+	background: #fdecea;
+	color: #611a15;
+	border: 1px solid #f5c6cb;
+	text-align: left;
+	max-width: 36rem;
+}
+
+.localroots-checkout-result__details { margin-top: 2rem; }
+.localroots-checkout-result__meta {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+	gap: 1rem 1.5rem;
+	padding: 1.5rem 0;
+	border-bottom: 1px solid #e8e8e8;
+}
+.localroots-checkout-result__label {
+	display: block;
+	font-size: 0.75rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: #777;
+	margin-bottom: 0.25rem;
+}
+
+.localroots-checkout-result__items {
+	width: 100%;
+	margin-top: 1.5rem;
+	border-collapse: collapse;
+}
+.localroots-checkout-result__items th,
+.localroots-checkout-result__items td {
+	padding: 0.75rem 0;
+	border-bottom: 1px solid #e8e8e8;
+	text-align: left;
+}
+.localroots-checkout-result__items tfoot th,
+.localroots-checkout-result__items tfoot td {
+	border-bottom: none;
+	padding-top: 1rem;
+	font-weight: 600;
+}
+
+.localroots-checkout-result__bank {
+	margin-top: 2rem;
+	padding: 1.5rem;
+	border: 1px solid #e8e8e8;
+	background: #fff;
+}
+.localroots-checkout-result__bank h2 {
+	margin: 0 0 0.75rem;
+	font-size: 1rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+.localroots-checkout-result__bank ul {
+	margin: 0;
+	padding-left: 1.25rem;
+	line-height: 1.7;
+}
+
+.localroots-checkout-result__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	justify-content: center;
+	margin-top: 2.5rem;
+}
+.localroots-checkout-result__actions .button {
+	min-width: 11rem;
+	text-align: center;
+}
+</style>

@@ -18,7 +18,8 @@
 <form name="checkout" method="post" class="checkout woocommerce-checkout localroots-checkout-form" action="{{ url('checkout') }}" enctype="multipart/form-data" aria-label="Checkout">
 	{{ csrfInput() }}
 	{{ actionInput('commerce/payments/pay') }}
-	{{ redirectInput('account') }}
+	{{ redirectInput(url('checkout/success') ~ '?number={order.number}&email={order.email}') }}
+	{{ hiddenInput('cancelUrl', url('checkout/canceled')|hash) }}
 
 <div class="e-checkout__container">
 <div class="e-checkout__column e-checkout__column-start">
