@@ -1,7 +1,7 @@
 {# WooCommerce-compatible variable product add-to-cart — matches elementor-13806 markup #}
 {% set variants = variants ?? product.variants.all() %}
 {% set primaryImage = product.productImages.one() %}
-{% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : '/wp-content/uploads/2024/02/20231214_VB_600_2200x-150x150.jpg' %}
+{% set thumbUrl = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : '/wp-content/uploads/2024/02/2421320800_2_1_1-150x150.jpg' %}
 
 <div class="elementor-add-to-cart elementor-product-variable">
 <form class="variations_form cart localroots-commerce-form" method="post" action="{{ product.url }}">

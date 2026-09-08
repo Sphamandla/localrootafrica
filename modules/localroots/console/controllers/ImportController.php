@@ -20,7 +20,7 @@ use yii\helpers\Console;
 
 class ImportController extends Controller
 {
-    public $optionPath = null;
+    public ?string $path = null;
 
     public function options($actionID): array
     {
@@ -54,6 +54,81 @@ class ImportController extends Controller
         $this->stdout("  Imported {$promoCount} promotions\n");
 
         $this->stdout("Import complete!\n", Console::FG_GREEN);
+        return ExitCode::OK;
+    }
+
+    /**
+     * Ensure Commerce products have size variants and images (fixes incomplete imports).
+     */
+    public function actionRepairProducts(): int
+    {
+        $basePath = $this->path ?? App::env('TEMPLATE_HTML_PATH') ?: '/Users/test/www/localrootsafrica/innovecouture.vamtam.com';
+        $basePath = rtrim($basePath, '/');
+        $productsVolume = Craft::$app->getVolumes()->getVolumeByHandle('products');
+
+        /** @var array<string, array{price: float, image: string, sku: string}> */
+        $catalog = [
+            'cotton-grey-overshirt-with-stripes' => [
+                'price' => 1250,
+                'image' => 'wp-content/uploads/2024/02/2421320800_2_1_1.jpg',
+                'sku' => 'LR-12602',
+            ],
+            'feather-down-puffer-green-gilet' => [
+                'price' => 1450,
+                'image' => 'wp-content/uploads/2024/02/20231214_VB_600_2200x.jpg',
+                'sku' => 'LR-FEATHER',
+            ],
+        ];
+
+        $sizes = ['XS', 'S', 'M', 'L', 'XL'];
+        $repaired = 0;
+
+        foreach ($catalog as $slug => $config) {
+            $product = Product::find()->slug($slug)->one();
+            if (!$product) {
+                $this->stderr("  Product not found: {$slug}\n", Console::FG_YELLOW);
+                continue;
+            }
+
+            $changed = false;
+
+            if (empty($product->productImages->all())) {
+                $asset = $this->_importAsset($basePath . '/' . $config['image'], $productsVolume);
+                if (!$asset) {
+                    $local = Craft::getAlias('@webroot/uploads/products/' . basename($config['image']));
+                    $asset = $this->_importAsset($local, $productsVolume);
+                }
+                if ($asset) {
+                    $product->setFieldValue('productImages', [$asset->id]);
+                    Craft::$app->getElements()->saveElement($product);
+                    $changed = true;
+                    $this->stdout("  {$slug}: attached image\n");
+                }
+            }
+
+            if (count($product->variants) === 0) {
+                foreach ($sizes as $i => $size) {
+                    $variant = new Variant();
+                    $variant->productId = $product->id;
+                    $variant->title = $size;
+                    $variant->sku = $config['sku'] . '-' . strtolower($size);
+                    $variant->price = $config['price'];
+                    $variant->basePrice = $config['price'];
+                    $variant->hasUnlimitedStock = true;
+                    $variant->enabled = true;
+                    $variant->isDefault = $i === 0;
+                    Craft::$app->getElements()->saveElement($variant);
+                }
+                $changed = true;
+                $this->stdout("  {$slug}: created " . count($sizes) . " variants @ R{$config['price']}\n");
+            }
+
+            if ($changed) {
+                $repaired++;
+            }
+        }
+
+        $this->stdout("Repaired {$repaired} product(s).\n", Console::FG_GREEN);
         return ExitCode::OK;
     }
 

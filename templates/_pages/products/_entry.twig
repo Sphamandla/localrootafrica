@@ -4,7 +4,7 @@
 {% set variant = product.defaultVariant ?? variants|first %}
 {% set images = product.productImages.all() %}
 {% set primaryImage = images|first %}
-{% set fallbackImage = '/wp-content/uploads/2024/02/20231214_VB_600_2200x.jpg' %}
+{% set fallbackImage = '/wp-content/uploads/2024/02/2421320800_2_1_1.jpg' %}
 {% set imageUrl = primaryImage ? primaryImage.getUrl() : fallbackImage %}
 {% set imageThumb = primaryImage ? primaryImage.getUrl({ width: 866, height: 1299 }) : fallbackImage %}
 {% set thumb150 = primaryImage ? primaryImage.getUrl({ width: 150, height: 150, mode: 'crop' }) : fallbackImage %}
