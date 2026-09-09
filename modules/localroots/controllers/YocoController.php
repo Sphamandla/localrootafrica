@@ -112,6 +112,11 @@ class YocoController extends Controller
         }
 
         if ($yoco->isSuccessfulStatus($status)) {
+            $amount = (float)($payload['amount'] ?? $post['amount'] ?? 0) / 100;
+            if (!Craft::$app->getModule('localroots')->paymentVerification->verifyTransactionAmount($transaction, $amount, 'ZAR')) {
+                return $this->asJson(['success' => false, 'error' => 'amount_mismatch']);
+            }
+
             Commerce::getInstance()->getPayments()->completePayment($transaction);
         }
 

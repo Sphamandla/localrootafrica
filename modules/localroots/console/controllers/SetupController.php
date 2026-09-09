@@ -32,6 +32,10 @@ use modules\localroots\gateways\CashOnDeliveryGateway;
 use modules\localroots\gateways\OzowGateway;
 use modules\localroots\gateways\PayfastGateway;
 use modules\localroots\gateways\YocoGateway;
+use craft\commerce\collections\UpdateInventoryLevelCollection;
+use craft\commerce\elements\Variant;
+use craft\commerce\enums\InventoryUpdateQuantityType;
+use craft\commerce\models\inventory\UpdateInventoryLevel;
 use yii\console\Controller;
 use yii\console\ExitCode;
 use yii\helpers\Console;
@@ -48,6 +52,8 @@ class SetupController extends Controller
         $this->_createGlobals();
         $this->_createSections();
         $this->_setupCommerce();
+        $this->_configureTaxAndStock();
+        $this->_seedLegalContent();
         $this->_configureUsers();
 
         Craft::$app->getProjectConfig()->rebuild();
@@ -456,9 +462,9 @@ class SetupController extends Controller
         foreach ([
             ['name' => 'Direct bank transfer', 'handle' => 'cash-eft', 'class' => CashEftGateway::class, 'paymentType' => 'authorize', 'isFrontendEnabled' => true],
             ['name' => 'Cash on delivery', 'handle' => 'cash-on-delivery', 'class' => CashOnDeliveryGateway::class, 'paymentType' => 'authorize', 'isFrontendEnabled' => true],
-            ['name' => 'PayFast', 'handle' => 'payfast', 'class' => PayfastGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => false],
-            ['name' => 'Ozow', 'handle' => 'ozow', 'class' => OzowGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => false],
-            ['name' => 'Yoco', 'handle' => 'yoco', 'class' => YocoGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => false],
+            ['name' => 'PayFast', 'handle' => 'payfast', 'class' => PayfastGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => true],
+            ['name' => 'Ozow', 'handle' => 'ozow', 'class' => OzowGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => true],
+            ['name' => 'Yoco', 'handle' => 'yoco', 'class' => YocoGateway::class, 'paymentType' => 'purchase', 'isFrontendEnabled' => true],
         ] as $gw) {
             $existing = $gateways->getGatewayByHandle($gw['handle']);
             if ($existing) {
@@ -526,6 +532,131 @@ class SetupController extends Controller
 
         $fieldsService->saveLayout($layout);
         $this->stdout("  Added courierTrackingReference to order field layout\n");
+    }
+
+    private function _configureTaxAndStock(): void
+    {
+        if (!Craft::$app->plugins->isPluginInstalled('commerce')) {
+            return;
+        }
+
+        $commerce = Commerce::getInstance();
+        $store = $commerce->getStores()->getPrimaryStore();
+        if (!$store) {
+            return;
+        }
+
+        $taxCategories = $commerce->getTaxCategories();
+        $category = $taxCategories->getTaxCategoryByHandle('standard');
+        if (!$category) {
+            $category = new \craft\commerce\models\TaxCategory([
+                'name' => 'Standard',
+                'handle' => 'standard',
+                'default' => true,
+            ]);
+            $taxCategories->saveTaxCategory($category);
+            $this->stdout("  Created tax category: standard\n");
+        }
+
+        $taxZones = $commerce->getTaxZones();
+        $zone = collect($taxZones->getAllTaxZones($store->id))->firstWhere('name', 'South Africa');
+        if (!$zone) {
+            $zone = new \craft\commerce\models\TaxAddressZone([
+                'storeId' => $store->id,
+                'name' => 'South Africa',
+                'description' => 'South African VAT zone',
+                'default' => true,
+            ]);
+            $taxZones->saveTaxZone($zone);
+            $this->stdout("  Created tax zone: South Africa\n");
+        }
+
+        $taxRates = $commerce->getTaxRates();
+        $existingRate = collect($taxRates->getAllTaxRates($store->id))->firstWhere('code', 'za-vat');
+        if (!$existingRate && $category->id && $zone->id) {
+            $rate = new \craft\commerce\models\TaxRate([
+                'storeId' => $store->id,
+                'name' => 'VAT',
+                'code' => 'za-vat',
+                'rate' => 15.0,
+                'include' => false,
+                'taxable' => 'price',
+                'taxCategoryId' => $category->id,
+                'taxZoneId' => $zone->id,
+                'enabled' => true,
+            ]);
+            $taxRates->saveTaxRate($rate);
+            $this->stdout("  Created tax rate: VAT 15%\n");
+        }
+
+        $defaultStock = (int)(getenv('DEFAULT_PRODUCT_STOCK') ?: 10);
+        $inventory = $commerce->getInventory();
+        $locations = $commerce->getInventoryLocations()->getInventoryLocations($store->id);
+        $defaultLocation = $locations[0] ?? null;
+        if (!$defaultLocation) {
+            return;
+        }
+
+        $variants = Variant::find()->inventoryTracked(false)->limit(null)->all();
+        $updated = 0;
+        foreach ($variants as $variant) {
+            $variant->inventoryTracked = true;
+            if (!Craft::$app->getElements()->saveElement($variant)) {
+                continue;
+            }
+
+            $inventory->getInventoryItemByPurchasable($variant);
+            if (!$variant->inventoryItemId) {
+                continue;
+            }
+
+            $updates = UpdateInventoryLevelCollection::make();
+            $update = new UpdateInventoryLevel();
+            $update->type = 'onHand';
+            $update->updateAction = InventoryUpdateQuantityType::SET;
+            $update->inventoryItemId = $variant->inventoryItemId;
+            $update->inventoryLocationId = $defaultLocation->id;
+            $update->quantity = $defaultStock;
+            $update->note = 'Local Roots setup default stock';
+            $updates->push($update);
+
+            if ($inventory->executeUpdateInventoryLevels($updates)) {
+                $updated++;
+            }
+        }
+        if ($updated > 0) {
+            $this->stdout("  Updated stock on {$updated} variants (default {$defaultStock})\n");
+        }
+    }
+
+    private function _seedLegalContent(): void
+    {
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+
+        $delivery = \craft\elements\Entry::find()->section('deliveryAndReturns')->siteId($primarySite->id)->one();
+        if ($delivery && !trim(strip_tags((string)$delivery->getFieldValue('pageBody')))) {
+            $delivery->setFieldValue('pageBody', implode("\n\n", [
+                'We deliver throughout South Africa using The Courier Guy. Shipping is calculated at checkout based on your delivery postcode.',
+                'Local pickup is available in Cape Town by arrangement — select “Local pickup” at checkout.',
+                'Orders are typically dispatched within 1–2 business days after payment clears. You will receive tracking details by email once your parcel is collected.',
+                'Returns: unused items in original packaging may be returned within 14 days of delivery. Email hello@localroots.africa with your order number to start a return.',
+            ]));
+            Craft::$app->getElements()->saveElement($delivery);
+            $this->stdout("  Seeded delivery & returns content\n");
+        }
+
+        $faq = \craft\elements\Entry::find()->section('pages')->slug('faq')->siteId($primarySite->id)->one();
+        if ($faq && empty($faq->getFieldValue('faqItems'))) {
+            $faq->setFieldValue('faqItems', [
+                ['section' => 'Most common questions', 'question' => 'How do I track my order?', 'answer' => 'Visit our Order Status page with your order number and email address.'],
+                ['section' => 'Most common questions', 'question' => 'Do you deliver outside South Africa?', 'answer' => 'We currently ship within South Africa only.'],
+                ['section' => 'Delivery', 'question' => 'How long does delivery take?', 'answer' => 'Most metro deliveries arrive within 2–5 business days after dispatch. Rural areas may take longer.'],
+                ['section' => 'Payment', 'question' => 'Which payment methods do you accept?', 'answer' => 'EFT, cash on delivery (where available), PayFast, Ozow, and Yoco.'],
+                ['section' => 'Campaigns & offers', 'question' => 'How do I use a coupon code?', 'answer' => 'Enter your code at checkout and click Apply before placing your order.'],
+            ]);
+            Craft::$app->getElements()->saveElement($faq);
+            $this->stdout("  Seeded FAQ content\n");
+        }
     }
 
     private function _configureUsers(): void

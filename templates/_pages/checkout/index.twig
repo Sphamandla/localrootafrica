@@ -5,7 +5,10 @@
 {% endif %}
 
 {% set cart = craft.commerce.carts.cart %}
-{% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.postalCode ?? null, cart.totalWeight) %}
+{% do craft.app.getModule('localroots').shipping.ensureDefaultShipping(cart) %}
+{% set cart = craft.commerce.carts.cart %}
+{% set shippingData = craft.app.getModule('localroots').shipping.getForCart(cart) %}
+{% set shippingRate = shippingData.rate ?? 0 %}
 
 {% block head %}
 {% include '_includes/vamtam/head-checkout.twig' %}
@@ -32,7 +35,7 @@
 	"tax": {{ cart.totalTax }},
 	"discount": {{ cart.totalDiscount }},
 	"shippingRate": {{ shippingRate }},
-	"total": {{ cart.totalPrice + shippingRate }},
+	"total": {{ cart.totalPrice }},
 	"couponCode": {{ (cart.couponCode ?? '')|json_encode|raw }}
 }
 </script>

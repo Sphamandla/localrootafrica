@@ -10,6 +10,8 @@ orderCondition:
   elementType: craft\commerce\elements\Order
   fieldContext: global
 paymentType: authorize
+settings:
+  onlyAllowForZeroPriceOrders: false
 shippingAddressCondition:
   class: craft\commerce\elements\conditions\addresses\GatewayAddressCondition
   elementType: null

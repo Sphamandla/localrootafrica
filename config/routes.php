@@ -21,6 +21,8 @@ return [
     'localroots/newsletter/subscribe' => 'localroots/newsletter/subscribe',
     'newsletter/subscribe' => 'localroots/newsletter/subscribe',
     'localroots/contact/submit' => 'localroots/contact/submit',
+    'localroots/account/save-address' => 'localroots/account/save-address',
+    'localroots/health' => 'localroots/health/index',
     'localroots/order-status/track' => 'localroots/order-status/track',
     'localroots/shop/load-more' => 'localroots/shop/load-more',
     'localroots/reviews/submit' => 'localroots/review/submit',
@@ -53,4 +55,5 @@ return [
     'delivery-and-returns' => ['template' => '_pages/delivery-and-returns'],
     'order-status' => ['template' => '_pages/order-status'],
     'faq' => ['template' => '_pages/faq/index'],
+    'privacy' => ['template' => '_pages/privacy'],
 ];

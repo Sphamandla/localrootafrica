@@ -5,8 +5,10 @@ namespace modules\localroots;
 use Craft;
 use craft\commerce\elements\Order;
 use craft\commerce\records\Transaction as TransactionRecord;
+use craft\commerce\services\OrderAdjustments;
 use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
+use modules\localroots\adjusters\LocalRootsShippingAdjuster;
 use modules\localroots\gateways\CashEftGateway;
 use modules\localroots\gateways\CashOnDeliveryGateway;
 use modules\localroots\gateways\OzowGateway;
@@ -30,6 +32,9 @@ class LocalRootsModule extends Module
             'yoco' => services\YocoService::class,
             'orderSync' => OrderSyncService::class,
             'cashEftEmail' => CashEftEmailService::class,
+            'orderEmail' => services\OrderEmailService::class,
+            'shipping' => services\ShippingService::class,
+            'paymentVerification' => services\PaymentVerificationService::class,
             'courierGuy' => services\CourierGuyService::class,
             'shopFilter' => services\ShopFilterService::class,
             'transactionTracker' => services\TransactionTracker::class,
@@ -65,6 +70,14 @@ class LocalRootsModule extends Module
                     $event->types[] = YocoGateway::class;
                     $event->types[] = CashEftGateway::class;
                     $event->types[] = CashOnDeliveryGateway::class;
+                }
+            );
+
+            Event::on(
+                OrderAdjustments::class,
+                OrderAdjustments::EVENT_REGISTER_ORDER_ADJUSTERS,
+                function (RegisterComponentTypesEvent $event) {
+                    $event->types[] = LocalRootsShippingAdjuster::class;
                 }
             );
 
@@ -119,11 +132,20 @@ class LocalRootsModule extends Module
                         return;
                     }
 
+                    $module = Craft::$app->getModule('localroots');
+                    $gateway = $order->getGateway();
+                    $onlineHandles = ['payfast', 'ozow', 'yoco'];
+
+                    if ($gateway && in_array($gateway->handle, $onlineHandles, true)) {
+                        $module->orderEmail->sendOnlinePaymentConfirmation($order);
+                        $module->courierGuy->bookShipmentForOrder($order);
+                    }
+
                     $transactions = \craft\commerce\Plugin::getInstance()->getTransactions()->getAllTransactionsByOrderId($order->id);
                     foreach ($transactions as $transaction) {
-                        $gateway = $transaction->getGateway();
-                        if ($gateway && in_array($gateway->handle, ['cash-eft', 'cash-on-delivery'], true) && $transaction->type === TransactionRecord::TYPE_CAPTURE) {
-                            $this->cashEftEmail->sendPaymentConfirmed($order);
+                        $txGateway = $transaction->getGateway();
+                        if ($txGateway && in_array($txGateway->handle, ['cash-eft', 'cash-on-delivery'], true) && $transaction->type === TransactionRecord::TYPE_CAPTURE) {
+                            $module->cashEftEmail->sendPaymentConfirmed($order);
                             break;
                         }
                     }

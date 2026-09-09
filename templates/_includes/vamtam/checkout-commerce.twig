@@ -1,16 +1,16 @@
 {# Dynamic checkout — Vamtam Elementor markup matching content-checkout.twig #}
 {% set cart = craft.commerce.carts.cart %}
+{% do craft.app.getModule('localroots').shipping.ensureDefaultShipping(cart) %}
+{% set cart = craft.commerce.carts.cart %}
 {% set commerceGateways = craft.app.plugins.getPlugin('commerce').getGateways() %}
-{% set bankGateway = commerceGateways.getGatewayByHandle('cash-eft') %}
-{% set codGateway = commerceGateways.getGatewayByHandle('cash-on-delivery') %}
 {% set gateways = [] %}
-{% if bankGateway and bankGateway.isFrontendEnabled %}
-	{% set gateways = gateways|merge([bankGateway]) %}
-{% endif %}
-{% if codGateway and codGateway.isFrontendEnabled %}
-	{% set gateways = gateways|merge([codGateway]) %}
-{% endif %}
-{% set shippingRate = craft.app.getModule('localroots').courierGuy.getRateForPostalCode(cart.billingAddress.postalCode ?? null, cart.totalWeight) %}
+{% for gateway in commerceGateways.getAllGateways() %}
+	{% if gateway.isFrontendEnabled %}
+		{% set gateways = gateways|merge([gateway]) %}
+	{% endif %}
+{% endfor %}
+{% set shippingData = craft.app.getModule('localroots').shipping.getForCart(cart) %}
+{% set shippingRate = shippingData.rate ?? 0 %}
 {% set billing = cart.billingAddress %}
 {% set shipping = cart.shippingAddress %}
 {% set shipDifferent = shipping and shipping.addressLine1 and billing and shipping.addressLine1 != billing.addressLine1 %}
@@ -76,7 +76,7 @@
 		</p>
 		<p class="form-row form-row-wide validate-required validate-phone" id="billing_phone_field">
 			<label for="billing_phone" class="required_field">Phone&nbsp;<span class="required" aria-hidden="true">*</span></label>
-			<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="billingAddress[phone]" id="billing_phone" placeholder="Phone" value="" required autocomplete="tel" /></span>
+			<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="billingAddress[phone]" id="billing_phone" placeholder="Phone" value="{{ billing.phone ?? '' }}" required autocomplete="tel" /></span>
 		</p>
 		<p class="form-row form-row-wide validate-required validate-email" id="billing_email_field">
 			<label for="billing_email" class="required_field">Email Address&nbsp;<span class="required" aria-hidden="true">*</span></label>
@@ -144,7 +144,7 @@
 			</p>
 			<p class="form-row form-row-wide validate-required validate-phone validate-tel" id="shipping_phone_field">
 				<label for="shipping_phone" class="required_field">Phone&nbsp;<span class="required" aria-hidden="true">*</span></label>
-				<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="shippingAddress[phone]" id="shipping_phone" value="" autocomplete="tel" /></span>
+				<span class="woocommerce-input-wrapper"><input type="tel" class="input-text" name="shippingAddress[phone]" id="shipping_phone" value="{{ shipping.phone ?? billing.phone ?? '' }}" autocomplete="tel" /></span>
 			</p>
 		</div>
 	</div>
@@ -216,7 +216,7 @@
 				{% endif %}
 				<tr class="order-total">
 					<th>Total</th>
-					<td><strong id="localroots-order-total">{% include '_includes/vamtam/price.twig' with { amount: cart.totalPrice + shippingRate } %}</strong></td>
+					<td><strong id="localroots-order-total">{% include '_includes/vamtam/price.twig' with { amount: cart.totalPrice } %}</strong></td>
 				</tr>
 			</tfoot>
 		</table>
@@ -263,7 +263,7 @@
 				<p class="form-row validate-required">
 					<label class="woocommerce-form__label woocommerce-form__label-for-checkbox checkbox">
 						<input type="checkbox" class="woocommerce-form__input woocommerce-form__input-checkbox input-checkbox" name="terms" id="terms" required />
-						<span class="woocommerce-terms-and-conditions-checkbox-text">I have read and agree to the website <a href="/terms-and-conditions" class="woocommerce-terms-and-conditions-link" target="_blank">terms and conditions</a></span>&nbsp;<abbr class="required" title="required">*</abbr>
+						<span class="woocommerce-terms-and-conditions-checkbox-text">I have read and agree to the website <a href="/terms-and-conditions" class="woocommerce-terms-and-conditions-link" target="_blank">terms and conditions</a> and <a href="/privacy" target="_blank">privacy policy</a></span>&nbsp;<abbr class="required" title="required">*</abbr>
 					</label>
 				</p>
 			</div>

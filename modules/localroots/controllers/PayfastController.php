@@ -12,6 +12,8 @@ class PayfastController extends Controller
 {
     protected array|int|bool $allowAnonymous = ['notify'];
 
+    public $enableCsrfValidation = false;
+
     public function actionNotify(): Response
     {
         $this->requirePostRequest();
@@ -19,6 +21,7 @@ class PayfastController extends Controller
 
         /** @var PayfastService $payfast */
         $payfast = Craft::$app->getModule('localroots')->payfast;
+        $verification = Craft::$app->getModule('localroots')->paymentVerification;
 
         if (!$payfast->validateItn($post)) {
             return $this->asRaw('INVALID');
@@ -28,13 +31,18 @@ class PayfastController extends Controller
         $transaction = Commerce::getInstance()->getTransactions()->getTransactionByHash($hash);
 
         if ($transaction && strtoupper((string)($post['payment_status'] ?? '')) === 'COMPLETE') {
+            $amount = (float)($post['amount_gross'] ?? 0);
+            if (!$verification->verifyTransactionAmount($transaction, $amount, 'ZAR')) {
+                return $this->asRaw('AMOUNT_MISMATCH');
+            }
+
             $order = $transaction->getOrder();
             if ($order) {
                 Craft::$app->getModule('localroots')->transactionTracker->log(
                     $order,
                     'payfast',
                     'webhook',
-                    (float)($post['amount_gross'] ?? $transaction->paymentAmount),
+                    $amount,
                     'ZAR',
                     'success',
                     (string)($post['pf_payment_id'] ?? ''),

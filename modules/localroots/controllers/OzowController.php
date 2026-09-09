@@ -55,6 +55,12 @@ class OzowController extends Controller
         }
 
         if ($ozow->isSuccessStatus($status)) {
+            $amount = (float)($post['Amount'] ?? 0);
+            $currency = (string)($post['CurrencyCode'] ?? 'ZAR');
+            if (!Craft::$app->getModule('localroots')->paymentVerification->verifyTransactionAmount($transaction, $amount, $currency)) {
+                return $this->asRaw('AMOUNT_MISMATCH');
+            }
+
             Commerce::getInstance()->getPayments()->completePayment($transaction);
         }
 

@@ -136,35 +136,93 @@
 				<div class="woocommerce-message woocommerce-message--info woocommerce-Info">No downloads available yet.</div>
 
 				{% elseif endpoint == 'edit-address' %}
+				{% set billing = currentUser.primaryBillingAddress ?? null %}
+				{% set shipping = currentUser.primaryShippingAddress ?? null %}
 				<p>The following addresses will be used on the checkout page by default.</p>
 				<div class="u-columns woocommerce-Addresses col2-set addresses">
 					<div class="woocommerce-Address u-column1 col-1 address">
 						<header class="woocommerce-Address-title title"><h3>Billing address</h3></header>
-						<address>
-							{% set billing = currentUser.primaryBillingAddress ?? null %}
-							{% if billing %}
-								{{ billing.fullName }}<br>
-								{{ billing.addressLine1 }}{% if billing.addressLine2 %}, {{ billing.addressLine2 }}{% endif %}<br>
-								{{ billing.locality }}{% if billing.administrativeArea %} {{ billing.administrativeArea }}{% endif %} {{ billing.postalCode }}<br>
-								{{ billing.countryCode }}
-							{% else %}
-								You have not set up this type of address yet.
-							{% endif %}
-						</address>
+						<form class="woocommerce-EditAddressForm edit-address" method="post">
+							{{ csrfInput() }}
+							{{ actionInput('localroots/account/save-address') }}
+							{{ redirectInput('account/edit-address') }}
+							<input type="hidden" name="addressType" value="billing">
+							{% if billing %}<input type="hidden" name="addressId" value="{{ billing.id }}">{% endif %}
+							<p class="form-row form-row-first">
+								<label for="billing_first_name">First name</label>
+								<input type="text" name="billingAddress[firstName]" id="billing_first_name" value="{{ billing.firstName ?? currentUser.firstName ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-last">
+								<label for="billing_last_name">Last name</label>
+								<input type="text" name="billingAddress[lastName]" id="billing_last_name" value="{{ billing.lastName ?? currentUser.lastName ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="billing_company">Company (optional)</label>
+								<input type="text" name="billingAddress[organization]" id="billing_company" value="{{ billing.organization ?? '' }}">
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="billing_address_1">Street address</label>
+								<input type="text" name="billingAddress[addressLine1]" id="billing_address_1" value="{{ billing.addressLine1 ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="billing_address_2">Apartment, suite, etc. (optional)</label>
+								<input type="text" name="billingAddress[addressLine2]" id="billing_address_2" value="{{ billing.addressLine2 ?? '' }}">
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="billing_city">City</label>
+								<input type="text" name="billingAddress[locality]" id="billing_city" value="{{ billing.locality ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="billing_postcode">Postcode</label>
+								<input type="text" name="billingAddress[postalCode]" id="billing_postcode" value="{{ billing.postalCode ?? '' }}" required>
+							</p>
+							<input type="hidden" name="billingAddress[countryCode]" value="ZA">
+							<p class="form-row form-row-wide">
+								<label for="billing_phone">Phone</label>
+								<input type="tel" name="billingAddress[phone]" id="billing_phone" value="{{ billing.phone ?? '' }}" required>
+							</p>
+							<p><button type="submit" class="button">Save billing address</button></p>
+						</form>
 					</div>
 					<div class="woocommerce-Address u-column2 col-2 address">
 						<header class="woocommerce-Address-title title"><h3>Shipping address</h3></header>
-						<address>
-							{% set shipping = currentUser.primaryShippingAddress ?? null %}
-							{% if shipping %}
-								{{ shipping.fullName }}<br>
-								{{ shipping.addressLine1 }}{% if shipping.addressLine2 %}, {{ shipping.addressLine2 }}{% endif %}<br>
-								{{ shipping.locality }}{% if shipping.administrativeArea %} {{ shipping.administrativeArea }}{% endif %} {{ shipping.postalCode }}<br>
-								{{ shipping.countryCode }}
-							{% else %}
-								You have not set up this type of address yet.
-							{% endif %}
-						</address>
+						<form class="woocommerce-EditAddressForm edit-address" method="post">
+							{{ csrfInput() }}
+							{{ actionInput('localroots/account/save-address') }}
+							{{ redirectInput('account/edit-address') }}
+							<input type="hidden" name="addressType" value="shipping">
+							{% if shipping %}<input type="hidden" name="addressId" value="{{ shipping.id }}">{% endif %}
+							<p class="form-row form-row-first">
+								<label for="shipping_first_name">First name</label>
+								<input type="text" name="shippingAddress[firstName]" id="shipping_first_name" value="{{ shipping.firstName ?? billing.firstName ?? currentUser.firstName ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-last">
+								<label for="shipping_last_name">Last name</label>
+								<input type="text" name="shippingAddress[lastName]" id="shipping_last_name" value="{{ shipping.lastName ?? billing.lastName ?? currentUser.lastName ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="shipping_address_1">Street address</label>
+								<input type="text" name="shippingAddress[addressLine1]" id="shipping_address_1" value="{{ shipping.addressLine1 ?? billing.addressLine1 ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="shipping_address_2">Apartment, suite, etc. (optional)</label>
+								<input type="text" name="shippingAddress[addressLine2]" id="shipping_address_2" value="{{ shipping.addressLine2 ?? billing.addressLine2 ?? '' }}">
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="shipping_city">City</label>
+								<input type="text" name="shippingAddress[locality]" id="shipping_city" value="{{ shipping.locality ?? billing.locality ?? '' }}" required>
+							</p>
+							<p class="form-row form-row-wide">
+								<label for="shipping_postcode">Postcode</label>
+								<input type="text" name="shippingAddress[postalCode]" id="shipping_postcode" value="{{ shipping.postalCode ?? billing.postalCode ?? '' }}" required>
+							</p>
+							<input type="hidden" name="shippingAddress[countryCode]" value="ZA">
+							<p class="form-row form-row-wide">
+								<label for="shipping_phone">Phone</label>
+								<input type="tel" name="shippingAddress[phone]" id="shipping_phone" value="{{ shipping.phone ?? billing.phone ?? '' }}" required>
+							</p>
+							<p><button type="submit" class="button">Save shipping address</button></p>
+						</form>
 					</div>
 				</div>
 

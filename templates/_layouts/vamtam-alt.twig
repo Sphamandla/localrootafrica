@@ -17,11 +17,13 @@
 {% block content %}{% endblock %}
 
 {% include '_static/footer-alt.twig' %}
+{% include '_includes/vamtam/cookie-consent.twig' %}
 
 {% include '_static/popups-alt.twig' %}
 {% include '_includes/vamtam/hamburger-popup-1556.twig' %}
 
 {% include '_static/scripts.twig' %}
+<script src="{{ alias('@web') }}/js/cookie-consent.js" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

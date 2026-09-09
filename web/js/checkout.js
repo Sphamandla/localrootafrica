@@ -93,10 +93,54 @@
 		document.querySelectorAll('.localroots-shipping-method').forEach(radio => {
 			radio.addEventListener('change', () => {
 				if (!radio.checked) return;
-				config.shippingRate = radio.value === 'local_pickup' ? 0 : config.courierRate;
-				updateOrderTotal(config.subtotal + config.tax - (config.discount || 0) + config.shippingRate);
+				syncShippingMethod(config, radio.value);
 			});
 		});
+	}
+
+	function activePostalCode() {
+		const shipDifferent = document.getElementById('ship-to-different-address-checkbox')?.checked;
+		if (shipDifferent) {
+			return document.getElementById('shipping_postcode')?.value
+				|| document.getElementById('billing_postcode')?.value
+				|| '';
+		}
+		return document.getElementById('billing_postcode')?.value || '';
+	}
+
+	function syncShippingMethod(config, method) {
+		const body = new FormData();
+		body.append(config.csrfName, config.csrfToken);
+		body.append('shippingMethod', method);
+		body.append('postalCode', activePostalCode());
+		body.append('country', 'ZA');
+		body.append('zipCode', activePostalCode());
+
+		fetch(config.calculateShippingUrl, { method: 'POST', body, credentials: 'same-origin' })
+			.then(r => r.json())
+			.then(data => {
+				if (!data.success) return;
+				applyServerTotals(config, data);
+			});
+	}
+
+	function applyServerTotals(config, data) {
+		if (typeof data.shipping === 'number' || typeof data.cost === 'number') {
+			const shipping = typeof data.shipping === 'number' ? data.shipping : data.cost;
+			config.shippingRate = shipping;
+			config.courierRate = shipping;
+			const costEl = document.getElementById('localroots-shipping-cost');
+			if (costEl && data.formatted) costEl.textContent = data.formatted;
+		}
+		if (typeof data.total === 'number') {
+			config.total = data.total;
+			updateOrderTotal(data.total);
+		} else if (data.totalFormatted) {
+			const totalEl = document.getElementById('localroots-order-total');
+			if (totalEl) totalEl.textContent = data.totalFormatted.replace(/^R\s?/, 'R');
+		}
+		if (typeof data.tax === 'number') config.tax = data.tax;
+		if (typeof data.discount === 'number') config.discount = data.discount;
 	}
 
 	function initShippingCalculator(config) {
@@ -141,6 +185,7 @@
 		const body = new FormData();
 		body.append(config.csrfName, config.csrfToken);
 		body.append('couponCode', code.trim());
+		body.append('shippingMethod', document.querySelector('.localroots-shipping-method:checked')?.value || 'courier_guy');
 
 		applyCouponRequest(config, body, messageEl);
 	}
@@ -159,9 +204,8 @@
 
 				if (data.success) {
 					config.discount = data.totalDiscount;
-					config.total = data.total + config.shippingRate;
 					updateDiscountRow(data.totalDiscount, data.couponCode, data.totalDiscountFormatted);
-					updateOrderTotal(config.total);
+					applyServerTotals(config, data);
 				} else {
 					updateDiscountRow(0, '', '');
 				}
@@ -195,8 +239,7 @@
 	}
 
 	function recalculateShipping(config) {
-		const zipCode = document.getElementById('billing_postcode')?.value || '';
-		const city = document.getElementById('billing_city')?.value || '';
+		const zipCode = activePostalCode();
 		const country = document.getElementById('billing_country')?.value || 'ZA';
 		if (country !== 'ZA' || !zipCode) return;
 
@@ -204,19 +247,14 @@
 		body.append(config.csrfName, config.csrfToken);
 		body.append('country', country);
 		body.append('zipCode', zipCode);
-		body.append('city', city);
+		body.append('postalCode', zipCode);
+		body.append('shippingMethod', document.querySelector('.localroots-shipping-method:checked')?.value || 'courier_guy');
 
-		fetch(config.calculateShippingUrl, { method: 'POST', body })
+		fetch(config.calculateShippingUrl, { method: 'POST', body, credentials: 'same-origin' })
 			.then(r => r.json())
 			.then(data => {
 				if (!data.success) return;
-				const costEl = document.getElementById('localroots-shipping-cost');
-				if (costEl) costEl.textContent = data.formatted;
-				config.courierRate = data.cost;
-				if (document.getElementById('shipping_method_0_courier_guy')?.checked) {
-					config.shippingRate = data.cost;
-					updateOrderTotal(config.subtotal + config.tax - (config.discount || 0) + data.cost);
-				}
+				applyServerTotals(config, data);
 			});
 	}
 
@@ -270,7 +308,7 @@
 
 			const shipDifferent = document.getElementById('ship-to-different-address-checkbox')?.checked;
 			if (!shipDifferent) {
-				['firstName', 'lastName', 'addressLine1', 'addressLine2', 'locality', 'postalCode', 'countryCode'].forEach(field => {
+				['firstName', 'lastName', 'addressLine1', 'addressLine2', 'locality', 'postalCode', 'countryCode', 'phone'].forEach(field => {
 					const billingVal = updateBody.get('billingAddress[' + field + ']');
 					if (billingVal !== null) updateBody.set('shippingAddress[' + field + ']', billingVal);
 				});
@@ -299,6 +337,7 @@
 				metaBody.append('message', document.getElementById('order_comments')?.value || '');
 				const shippingMethod = document.querySelector('.localroots-shipping-method:checked')?.value || 'courier_guy';
 				metaBody.append('shippingMethod', shippingMethod);
+				metaBody.append('postalCode', activePostalCode());
 				await fetch(config.saveCartMetaUrl, { method: 'POST', body: metaBody, credentials: 'same-origin' });
 
 				if (createAccount && !createAccount.checked) {

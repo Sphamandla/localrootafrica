@@ -130,7 +130,7 @@ class ImportController extends Controller
                     $variant->sku = $skuBase . '-' . strtolower($size);
                     $variant->price = $config['price'];
                     $variant->basePrice = $config['price'];
-                    $variant->hasUnlimitedStock = true;
+                    $variant->inventoryTracked = true;
                     $variant->enabled = true;
                     $variant->isDefault = $i === 0;
                     Craft::$app->getElements()->saveElement($variant);
@@ -290,7 +290,7 @@ class ImportController extends Controller
             $variant->sku = $sku;
             $variant->price = $price;
             $variant->basePrice = $price;
-            $variant->hasUnlimitedStock = true;
+            $variant->inventoryTracked = true;
             $variant->enabled = true;
             Craft::$app->getElements()->saveElement($variant);
 
@@ -353,7 +353,7 @@ class ImportController extends Controller
             $variant->sku = 'LR-' . ($i + 1000);
             $variant->price = $price;
             $variant->basePrice = $price;
-            $variant->hasUnlimitedStock = true;
+            $variant->inventoryTracked = true;
             $variant->enabled = true;
             Craft::$app->getElements()->saveElement($variant);
 

@@ -45,6 +45,8 @@ check GET "/order-status" "200"
 check GET "/contact" "200"
 check GET "/brands" "200"
 check GET "/llms.txt" "200"
+check GET "/privacy" "200"
+check GET "/localroots/health" "200"
 
 echo "--- Checkout API routes (POST without CSRF expects 400, not 404) ---"
 check POST "/localroots/checkout/apply-coupon" "400"

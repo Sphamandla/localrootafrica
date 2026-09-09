@@ -57,6 +57,7 @@ class CheckoutController extends Controller
     {
         $this->requirePostRequest();
         $request = Craft::$app->getRequest();
+        $module = Craft::$app->getModule('localroots');
         $cart = Commerce::getInstance()->getCarts()->getCart();
 
         $country = (string)$request->getBodyParam('country', 'ZA');
@@ -65,15 +66,18 @@ class CheckoutController extends Controller
         }
 
         $postalCode = (string)$request->getBodyParam('zipCode', '');
-        $rate = Craft::$app->getModule('localroots')->courierGuy->getRateForPostalCode(
-            $postalCode ?: null,
-            $cart->totalWeight
-        );
+        $method = (string)$request->getBodyParam('shippingMethod', 'courier_guy');
+        $cart = $module->shipping->applyToCart($cart, $method, $postalCode ?: null);
+        $totals = $module->shipping->cartTotals($cart);
 
         return $this->asJson([
             'success' => true,
-            'cost' => $rate,
-            'formatted' => 'R ' . number_format($rate, 0, '.', ','),
+            'cost' => $totals['shipping'],
+            'formatted' => 'R ' . number_format($totals['shipping'], 0, '.', ','),
+            'total' => $totals['total'],
+            'totalFormatted' => 'R ' . number_format($totals['total'], 0, '.', ','),
+            'tax' => $totals['tax'],
+            'discount' => $totals['discount'],
         ]);
     }
 
@@ -83,6 +87,7 @@ class CheckoutController extends Controller
         Craft::$app->getModule('localroots')->envCoupons->syncIfChanged();
 
         $request = Craft::$app->getRequest();
+        $module = Craft::$app->getModule('localroots');
         $cart = Commerce::getInstance()->getCarts()->getCart();
         $couponCode = strtoupper(trim((string)$request->getBodyParam('couponCode', '')));
 
@@ -110,42 +115,64 @@ class CheckoutController extends Controller
             }
         }
 
+        $method = (string)$request->getBodyParam('shippingMethod', 'courier_guy');
+        $cart = $module->shipping->applyToCart($cart, $method);
+        $totals = $module->shipping->cartTotals($cart);
+
         return $this->asJson([
             'success' => $error === null,
             'message' => $error,
             'couponCode' => $cart->couponCode,
-            'totalDiscount' => $cart->totalDiscount,
-            'totalDiscountFormatted' => 'R ' . number_format($cart->totalDiscount, 0, '.', ','),
-            'total' => $cart->totalPrice,
-            'totalFormatted' => 'R ' . number_format($cart->totalPrice, 0, '.', ','),
+            'totalDiscount' => $totals['discount'],
+            'totalDiscountFormatted' => 'R ' . number_format($totals['discount'], 0, '.', ','),
+            'total' => $totals['total'],
+            'totalFormatted' => 'R ' . number_format($totals['total'], 0, '.', ','),
         ]);
     }
 
     public function actionSaveCartMeta(): Response
     {
         $this->requirePostRequest();
+        $module = Craft::$app->getModule('localroots');
         $cart = Commerce::getInstance()->getCarts()->getCart(false);
         if (!$cart) {
             return $this->asJson(['success' => false]);
         }
 
-        $message = Craft::$app->getRequest()->getBodyParam('message');
+        $request = Craft::$app->getRequest();
+        $message = $request->getBodyParam('message');
         if ($message !== null) {
             $cart->message = trim((string)$message) ?: null;
         }
 
-        $shippingMethod = Craft::$app->getRequest()->getBodyParam('shippingMethod');
+        $shippingMethod = $request->getBodyParam('shippingMethod');
         if ($shippingMethod !== null) {
-            $note = trim((string)$cart->message);
+            $postalCode = (string)$request->getBodyParam('postalCode', '');
+            $cart = $module->shipping->applyToCart(
+                $cart,
+                (string)$shippingMethod,
+                $postalCode !== '' ? $postalCode : null
+            );
+
+            $note = trim((string)($message ?? $cart->message ?? ''));
             $shippingLabel = $shippingMethod === 'local_pickup' ? 'Local pickup' : 'The Courier Guy';
             $shippingNote = 'Shipping method: ' . $shippingLabel;
             $cart->message = $note !== '' ? $note . "\n\n" . $shippingNote : $shippingNote;
-        }
-
-        if ($message !== null || $shippingMethod !== null) {
             Craft::$app->getElements()->saveElement($cart);
+            $cart = Commerce::getInstance()->getCarts()->getCart();
+        } elseif ($message !== null) {
+            Craft::$app->getElements()->saveElement($cart);
+            $cart = Commerce::getInstance()->getCarts()->getCart();
         }
 
-        return $this->asJson(['success' => true]);
+        $totals = $module->shipping->cartTotals($cart);
+
+        return $this->asJson([
+            'success' => true,
+            'total' => $totals['total'],
+            'totalFormatted' => 'R ' . number_format($totals['total'], 0, '.', ','),
+            'shipping' => $totals['shipping'],
+            'shippingFormatted' => 'R ' . number_format($totals['shipping'], 0, '.', ','),
+        ]);
     }
 }

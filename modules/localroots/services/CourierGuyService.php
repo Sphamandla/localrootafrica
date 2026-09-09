@@ -2,6 +2,7 @@
 
 namespace modules\localroots\services;
 
+use Craft;
 use craft\commerce\elements\Order;
 use craft\helpers\App;
 use craft\helpers\Json;
@@ -208,5 +209,119 @@ class CourierGuyService extends Component
         }
 
         return $fallback;
+    }
+
+    public function bookShipmentForOrder(Order $order): ?string
+    {
+        if (Craft::$app->getModule('localroots')->shipping->getShippingMethodForOrder($order) === 'local_pickup') {
+            return null;
+        }
+
+        if ($this->getTrackingReferenceForOrder($order)) {
+            return $this->getTrackingReferenceForOrder($order);
+        }
+
+        $reference = $this->createShipment($order);
+        if ($reference === null) {
+            return null;
+        }
+
+        $layout = $order->getFieldLayout();
+        if ($layout && $layout->getFieldByHandle('courierTrackingReference')) {
+            $order->setFieldValue('courierTrackingReference', $reference);
+            Craft::$app->getElements()->saveElement($order, false);
+        }
+
+        return $reference;
+    }
+
+    public function createShipment(Order $order): ?string
+    {
+        $shipping = $order->shippingAddress ?: $order->billingAddress;
+        if (!$shipping) {
+            return null;
+        }
+
+        $apiKey = App::env('COURIER_GUY_API_KEY');
+        $testMode = App::env('COURIER_GUY_TEST_MODE') !== 'false';
+
+        if ($testMode || !$apiKey || str_contains($apiKey, 'your_')) {
+            $mockRef = 'TCG' . strtoupper(substr(md5((string)($order->reference ?? $order->id)), 0, 8));
+            Craft::info('Courier Guy test mode: mock waybill ' . $mockRef . ' for order ' . ($order->reference ?? $order->id), __METHOD__);
+
+            return $mockRef;
+        }
+
+        $apiUrl = rtrim(App::env('COURIER_GUY_API_URL') ?: 'https://api.thecourierguy.co.za', '/');
+        $originPostcode = App::env('COURIER_GUY_ORIGIN_POSTCODE') ?: '8001';
+        $serviceLevel = App::env('COURIER_GUY_SERVICE_LEVEL') ?: 'ECO';
+
+        $payload = [
+            'collection_address' => [
+                'postal_code' => $originPostcode,
+                'city' => App::env('COURIER_GUY_ORIGIN_CITY') ?: 'Cape Town',
+                'country' => 'South Africa',
+            ],
+            'collection_contact' => [
+                'name' => App::env('COURIER_GUY_ORIGIN_CONTACT_NAME') ?: 'Local Roots Africa',
+                'email' => App::env('CONTACT_TO_EMAIL') ?: 'hello@localroots.africa',
+                'mobile_number' => App::env('COURIER_GUY_ORIGIN_PHONE') ?: '+27800000000',
+            ],
+            'delivery_address' => [
+                'street_address' => $shipping->addressLine1,
+                'local_area' => $shipping->locality,
+                'city' => $shipping->locality,
+                'code' => $shipping->postalCode,
+                'country' => 'South Africa',
+            ],
+            'delivery_contact' => [
+                'name' => trim($shipping->firstName . ' ' . $shipping->lastName),
+                'email' => (string)$order->email,
+                'mobile_number' => (string)($shipping->phone ?: $order->billingAddress?->phone ?: ''),
+            ],
+            'parcels' => [[
+                'submitted_length_cm' => '30',
+                'submitted_width_cm' => '20',
+                'submitted_height_cm' => '10',
+                'submitted_weight_kg' => (string)max(0.5, $order->totalWeight ?: 1),
+                'parcel_description' => 'Order ' . ($order->reference ?? $order->id),
+            ]],
+            'service_level_code' => $serviceLevel,
+            'customer_reference' => (string)($order->reference ?? $order->id),
+        ];
+
+        try {
+            $ch = curl_init($apiUrl . '/shipments');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $apiKey,
+                    'Content-Type: application/json',
+                    'Accept: application/json',
+                ],
+                CURLOPT_POSTFIELDS => Json::encode($payload),
+                CURLOPT_TIMEOUT => 15,
+            ]);
+            $response = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($code >= 200 && $code < 300 && $response) {
+                $data = Json::decode($response);
+                if (is_array($data)) {
+                    $ref = (string)($data['custom_tracking_reference'] ?? $data['short_tracking_reference'] ?? $data['waybill'] ?? '');
+                    if ($ref !== '') {
+                        return $ref;
+                    }
+                }
+            }
+
+            Craft::warning('Courier Guy shipment booking failed (HTTP ' . $code . '): ' . substr((string)$response, 0, 500), __METHOD__);
+        } catch (\Throwable $e) {
+            Craft::error('Courier Guy shipment booking error: ' . $e->getMessage(), __METHOD__);
+        }
+
+        return null;
     }
 }

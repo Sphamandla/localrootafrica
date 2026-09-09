@@ -3,7 +3,7 @@ billingAddressCondition:
   elementType: null
   fieldContext: global
 handle: ozow
-isFrontendEnabled: '0'
+isFrontendEnabled: '1'
 name: Ozow
 orderCondition:
   class: craft\commerce\elements\conditions\orders\GatewayOrderCondition

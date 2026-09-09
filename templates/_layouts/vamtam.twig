@@ -33,10 +33,12 @@
 {% block content %}{% endblock %}
 
 {% include '_static/footer.twig' %}
+{% include '_includes/vamtam/cookie-consent.twig' %}
 
 {% include '_static/scripts.twig' %}
 <script src="{{ alias('@web') }}/js/commerce-cart.js" defer></script>
 <script src="{{ alias('@web') }}/js/wishlist-toggle.js" defer></script>
+<script src="{{ alias('@web') }}/js/cookie-consent.js" defer></script>
 {% block scripts %}{% endblock %}
 </body>
 </html>

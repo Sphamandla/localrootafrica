@@ -1,0 +1,19 @@
+{% extends '_layouts/vamtam-alt' %}
+
+{% block bodyClass %}error500 page{% endblock %}
+
+{% block content %}
+<div id="page" class="main-container">
+	<div id="main-content">
+		<div id="main" role="main" class="vamtam-main layout-full">
+			<div class="page-wrapper limit-width">
+				<div class="page-content the-content entry-content" style="text-align:center;padding:4rem 1rem;">
+					<h1>Something went wrong</h1>
+					<p>We’re having trouble loading this page. Please try again in a moment.</p>
+					<p><a class="button" href="{{ url('/') }}">Return home</a></p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
